@@ -9,7 +9,7 @@
 //        Created by: Administrator
 //              Version: NX 10
 //              Date: 03-18-2019  (Format: mm-dd-yyyy)
-//              Time: 10:23 (Format: hh-mm)
+//              Time: 20:19 (Format: hh-mm)
 //
 //==============================================================================
 
@@ -150,23 +150,23 @@ void Bom::initialize_cb()
     try
     {
         group = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group"));
-        toggle011 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle011"));
-        enum0 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum0"));
-        bodySelect0 = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("bodySelect0"));
+        toggleOutAll = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleOutAll"));
+        enumType = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enumType"));
+        bodySelect = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("bodySelect"));
         group0 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group0"));
-        toggle0 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle0"));
-        toggle01 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle01"));
-        toggle02 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle02"));
-        toggle04 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle04"));
-        toggle03 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle03"));
-        toggle05 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle05"));
-        toggle012 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle012"));
-        toggle06 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle06"));
-        toggle07 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle07"));
-        toggle08 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle08"));
-        toggle09 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle09"));
-        toggle010 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle010"));
-        toggle013 = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggle013"));
+        matName = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("matName"));
+        MatNO = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("MatNO"));
+        matSize = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("matSize"));
+        material = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("material"));
+        desnity = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("desnity"));
+        length = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("length"));
+        togglearea = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("togglearea"));
+        togglequantity = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("togglequantity"));
+        toggleWeight = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleWeight"));
+        unitPrice = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("unitPrice"));
+        totalPrice = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("totalPrice"));
+        supplier = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("supplier"));
+        toggleRemark = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleRemark"));
     }
     catch(exception& ex)
     {
@@ -219,67 +219,67 @@ int Bom::update_cb(NXOpen::BlockStyler::UIBlock* block)
 {
     try
     {
-        if(block == toggle011)
+        if(block == toggleOutAll)
         {
         //---------Enter your code here-----------
         }
-        else if(block == enum0)
+        else if(block == enumType)
         {
         //---------Enter your code here-----------
         }
-        else if(block == bodySelect0)
+        else if(block == bodySelect)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle0)
+        else if(block == matName)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle01)
+        else if(block == MatNO)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle02)
+        else if(block == matSize)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle04)
+        else if(block == material)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle03)
+        else if(block == desnity)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle05)
+        else if(block == length)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle012)
+        else if(block == togglearea)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle06)
+        else if(block == togglequantity)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle07)
+        else if(block == toggleWeight)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle08)
+        else if(block == unitPrice)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle09)
+        else if(block == totalPrice)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle010)
+        else if(block == supplier)
         {
         //---------Enter your code here-----------
         }
-        else if(block == toggle013)
+        else if(block == toggleRemark)
         {
         //---------Enter your code here-----------
         }

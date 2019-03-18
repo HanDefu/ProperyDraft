@@ -9,7 +9,7 @@
 //        Created by: Administrator
 //              Version: NX 10
 //              Date: 03-18-2019  (Format: mm-dd-yyyy)
-//              Time: 10:23
+//              Time: 20:19
 //
 //==============================================================================
 
@@ -79,23 +79,23 @@ private:
     const char* theDlxFileName;
     NXOpen::BlockStyler::BlockDialog* theDialog;
     NXOpen::BlockStyler::Group* group;// Block type: Group
-    NXOpen::BlockStyler::Toggle* toggle011;// Block type: Toggle
-    NXOpen::BlockStyler::Enumeration* enum0;// Block type: Enumeration
-    NXOpen::BlockStyler::BodyCollector* bodySelect0;// Block type: Body Collector
+    NXOpen::BlockStyler::Toggle* toggleOutAll;// Block type: Toggle
+    NXOpen::BlockStyler::Enumeration* enumType;// Block type: Enumeration
+    NXOpen::BlockStyler::BodyCollector* bodySelect;// Block type: Body Collector
     NXOpen::BlockStyler::Group* group0;// Block type: Group
-    NXOpen::BlockStyler::Toggle* toggle0;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle01;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle02;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle04;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle03;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle05;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle012;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle06;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle07;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle08;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle09;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle010;// Block type: Toggle
-    NXOpen::BlockStyler::Toggle* toggle013;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* matName;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* MatNO;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* matSize;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* material;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* desnity;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* length;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* togglearea;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* togglequantity;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* toggleWeight;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* unitPrice;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* totalPrice;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* supplier;// Block type: Toggle
+    NXOpen::BlockStyler::Toggle* toggleRemark;// Block type: Toggle
     
 };
 void GZ_PART_BOM_Main();

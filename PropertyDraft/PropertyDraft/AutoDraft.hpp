@@ -95,5 +95,5 @@ private:
     NXOpen::BlockStyler::FolderSelection* nativeFolderBrowser0;// Block type: NativeFolderBrowser
     
 };
-void GZ_PART_DRAFT_Main();
+void GZ_PART_DRAFT_Main1();
 #endif //AUTODRAFT_H_INCLUDED

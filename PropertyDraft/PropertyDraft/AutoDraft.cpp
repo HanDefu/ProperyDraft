@@ -103,7 +103,7 @@ AutoDraft::~AutoDraft()
 //        2) Invoke the Shared Library through File->Execute->NX Open menu.
 //
 //------------------------------------------------------------------------------
-void GZ_PART_DRAFT_Main()
+void GZ_PART_DRAFT_Main1()
 {
     AutoDraft *theAutoDraft = NULL;
     try

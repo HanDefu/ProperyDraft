@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AutoDraft.cpp" />
+    <ClCompile Include="autodrafting.cpp" />
     <ClCompile Include="Bom.cpp" />
     <ClCompile Include="Common_Function.cpp" />
     <ClCompile Include="Common_Function_UG.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AutoDraft.hpp" />
+    <ClInclude Include="autodrafting.hpp" />
     <ClInclude Include="Bom.hpp" />
     <ClInclude Include="Common_Function.h" />
     <ClInclude Include="Common_Function_UG.h" />

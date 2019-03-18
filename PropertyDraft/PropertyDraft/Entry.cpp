@@ -42,7 +42,7 @@
 #include "Property.hpp"
 #include "Bom.hpp"
 #include "AutoDraft.hpp"
-
+#include "autodrafting.hpp"
 //#include "UpdateFile.h"
 
 using namespace NXOpen;
@@ -140,6 +140,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		else if(strcmp(param, "CUSTOM_GZ_PART_BOM") == 0)
 		{
 			GZ_PART_BOM_Main();
+			//GZ_PART_DRAFT_Main1();
 		}
 		else if(strcmp(param, "CUSTOM_GZ_PART_DRAFT") == 0)
 		{
