@@ -219,6 +219,42 @@ int Property::apply_cb()
     try
     {
         //---- Enter your callback code here -----
+		std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+		if(objects.size()>0)
+		{
+			tag_t body = objects[0]->Tag();
+			NXString name = matName->GetProperties()->GetEnumAsString("Value");
+			NXString maNO = matNO->GetProperties()->GetEnumAsString("Value");
+			NXString size = matSize->GetProperties()->GetEnumAsString("Value");
+			NXString mate = material->GetProperties()->GetEnumAsString("Value");
+			NXString dens = matDensity->GetProperties()->GetEnumAsString("Value");
+			NXString unpr = unitPrice->GetProperties()->GetEnumAsString("Value");
+			NXString supp = supplier->GetProperties()->GetEnumAsString("Value");
+			NXString rema = remark->GetProperties()->GetEnumAsString("Value");
+
+			double topr = totalPrice->GetProperties()->GetDouble("Value");
+			double weig = weight->GetProperties()->GetDouble("Value");
+			char toprStr[133]="";
+			char weigStr[133]="";
+			sprintf(toprStr,"%f",topr);
+			sprintf(weigStr,"%f",weig);
+			Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
+			Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
+			Royal_set_obj_attr(body,"规格",size.GetLocaleText());
+			Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
+			Royal_set_obj_attr(body,"密度",dens.GetLocaleText());
+			Royal_set_obj_attr(body,"单价",unpr.GetLocaleText());
+			Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
+			Royal_set_obj_attr(body,"重量",weigStr);
+			Royal_set_obj_attr(body,"总价",toprStr);
+			Royal_set_obj_attr(body,"备注",rema.GetLocaleText());
+			Royal_set_obj_attr(body,"已设零件标记","1");
+			logical is = toggleoutNO->GetProperties()->GetLogical("Value");
+			if(is)
+				Royal_set_obj_attr(body,"输出材料编号","1");
+			else
+				Royal_set_obj_attr(body,"输出材料编号","0");
+		}
     }
     catch(exception& ex)
     {
@@ -263,6 +299,7 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == buttonCalculate)
         {
         //---------Enter your code here-----------
+			SetBodyBoundingBoxSize();
         }
         else if(block == bodyLen)
         {
@@ -355,6 +392,29 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
     return 0;
 }
 
+int Property::SetBodyBoundingBoxSize( )
+{
+	int irc = 0;
+	std::vector<NXOpen::TaggedObject* > csysObjects = coord_system0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+	std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+	if( objects.size() > 0 )
+	{
+		tag_t csys_tag = NULL_TAG;
+		tag_t body = objects[0]->Tag();
+		if(csysObjects.size() > 0 )
+		{
+			csys_tag = csysObjects[0]->Tag();
+		}
+		double min_corner[3]={0.0},directions[3][3]={0.0},distances[3] = {0.0};  
+		double box[6] = {0.0};
+		UF_MODL_ask_bounding_box_exact( body, csys_tag, min_corner, directions, distances );
+		//UF_MODL_ask_bounding_box(objects.at(idx)->GetTag(), box );
+		bodyLen->GetProperties()->SetDouble("Value",distances[0]);
+		bodyWidth->GetProperties()->SetDouble("Value",distances[1]);
+		bodyarea->GetProperties()->SetDouble("Value",distances[2]);
+	}
+	return irc;
+}
 //------------------------------------------------------------------------------
 //Callback Name: ok_cb
 //------------------------------------------------------------------------------

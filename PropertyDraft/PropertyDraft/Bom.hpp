@@ -96,7 +96,6 @@ private:
     NXOpen::BlockStyler::Toggle* totalPrice;// Block type: Toggle
     NXOpen::BlockStyler::Toggle* supplier;// Block type: Toggle
     NXOpen::BlockStyler::Toggle* toggleRemark;// Block type: Toggle
-    
 };
 void GZ_PART_BOM_Main();
 #endif //BOM_H_INCLUDED
