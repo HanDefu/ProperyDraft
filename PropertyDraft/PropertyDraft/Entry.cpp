@@ -39,6 +39,9 @@
 #include <exception>
 #include "Excel\BasicExcel.hpp"
 #include <NXOpen\Session.hxx>
+#include "Property.hpp"
+#include "Bom.hpp"
+#include "AutoDraft.hpp"
 
 //#include "UpdateFile.h"
 
@@ -130,10 +133,18 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 
 		UF_initialize();
 
-		/*if(strcmp(param, "CUSTOM_ROYAL_PART_IMPORT") == 0)
+		if(strcmp(param, "CUSTOM_GZ_PART_ATTR") == 0)
 		{
-			RY_PartImport_Main();
-		}*/
+			GZ_PART_ATTR_Main();
+		}
+		else if(strcmp(param, "CUSTOM_GZ_PART_BOM") == 0)
+		{
+			GZ_PART_BOM_Main();
+		}
+		else if(strcmp(param, "CUSTOM_GZ_PART_DRAFT") == 0)
+		{
+			GZ_PART_DRAFT_Main();
+		}
 	}
 	catch(std::exception& ex)
 	{

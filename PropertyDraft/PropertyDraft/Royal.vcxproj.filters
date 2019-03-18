@@ -45,6 +45,15 @@
     <ClCompile Include="Excel\BasicExcel.cpp">
       <Filter>Excel</Filter>
     </ClCompile>
+    <ClCompile Include="AutoDraft.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
+    <ClCompile Include="Property.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
+    <ClCompile Include="Bom.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entry.hpp">
@@ -61,6 +70,15 @@
     </ClInclude>
     <ClInclude Include="Excel\BasicExcel.hpp">
       <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoDraft.hpp">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="Property.hpp">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="Bom.hpp">
+      <Filter>Command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

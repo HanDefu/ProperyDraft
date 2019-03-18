@@ -1,0 +1,39 @@
+! Royal UG TOOLs
+! 隐藏某个按钮 BUTTON/HIDE CUSTOM_ROYAL_BASE_PLATE
+
+VERSION 120
+EDIT UG_GATEWAY_MAIN_MENUBAR
+
+TOP_MENU
+    CASCADE_BUTTON CUSTOM2
+    LABEL NX定制
+END_OF_TOP_MENU
+
+MENU CUSTOM2
+
+	BUTTON CUSTOM_GZ_PART_ATTR
+    LABEL 客户属性
+    BITMAP drafting_automation_preferences
+    ACTIONS Property.dll
+	
+	BUTTON CUSTOM_GZ_PART_BOM
+    LABEL BOM
+    BITMAP bom_lc
+    ACTIONS Property.dll
+	
+	BUTTON CUSTOM_GZ_PART_DRAFT
+    LABEL 自动出图
+    BITMAP edit_drafting_object_associativity
+    ACTIONS Property.dll
+	
+END_OF_MENU
+
+
+
+    
+
+    
+
+    
+
+    
