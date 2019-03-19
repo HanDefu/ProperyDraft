@@ -41,7 +41,10 @@
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_FolderSelection.hxx>
 #include <NXOpen/NXObjectManager.hxx>
+#include "Common_Function.h"
 #include "Common_Function_UG.h"
+#include "Excel/BasicExcel.hpp"
+using namespace YExcel;
 //------------------------------------------------------------------------------
 // Namespaces needed for following template
 //------------------------------------------------------------------------------
@@ -81,7 +84,7 @@ public:
     //void OnInsertNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnDeleteNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnPreSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int ID, bool selected);
-    //void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
+    void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
     //void OnStateChangeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int state);
     //NXString ToolTipTextCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //int ColumnSortCallback(NXOpen::BlockStyler::Tree *tree, int columnID, NXOpen::BlockStyler::Node *node1, NXOpen::BlockStyler::Node *node2);
@@ -112,6 +115,8 @@ private:
     NXOpen::BlockStyler::DoubleBlock* doubleDwgScale;// Block type: Double
     NXOpen::BlockStyler::FolderSelection* nativeFolderBrowser01;// Block type: NativeFolderBrowser
     int CreateUITree( StlTagVector& boies,logical insertCol );
+    void ReadExcelConfigData( );
+    StlNXStringVector sheetNames;
 };
 void GZ_PART_DRAFT_Main();
 #endif //AUTODRAFTING_H_INCLUDED

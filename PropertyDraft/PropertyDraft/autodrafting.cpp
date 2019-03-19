@@ -190,7 +190,7 @@ void autodrafting::initialize_cb()
         
         //tree_control0->SetOnPreSelectHandler(make_callback(this, &autodrafting::OnPreSelectCallback));
         
-        //tree_control0->SetOnSelectHandler(make_callback(this, &autodrafting::OnSelectCallback));
+        tree_control0->SetOnSelectHandler(make_callback(this, &autodrafting::OnSelectCallback));
         
         //tree_control0->SetOnStateChangeHandler(make_callback(this, &autodrafting::OnStateChangeCallback));
         
@@ -230,7 +230,25 @@ void autodrafting::initialize_cb()
         autodrafting::theUI->NXMessageBox()->Show("Block Styler", NXOpen::NXMessageBox::DialogTypeError, ex.what());
     }
 }
-
+void autodrafting::ReadExcelConfigData( )
+{
+	BasicExcel excel;
+    char regfile[256]="";
+    sheetNames.clear();
+    sheetNames.push_back("全部");
+    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+	bool isOk = excel.Load(regfile);
+	if( isOk )
+	{
+        int num = excel.GetTotalWorkSheets();
+        for( int idx = 0; idx < num; ++idx )
+        {
+            const wchar_t* sheetName = excel.GetUnicodeSheetName(idx);
+			sheetNames.push_back(WCHARTOCHAR(sheetName));
+        }
+	}
+	return;
+}
 //------------------------------------------------------------------------------
 //Callback Name: dialogShown_cb
 //This callback is executed just before the dialog launch. Thus any value set 
@@ -242,6 +260,8 @@ void autodrafting::dialogShown_cb()
     {
         //---- Enter your callback code here -----
 		StlTagVector solidboies;
+        ReadExcelConfigData();
+        enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
 		CF_GetCurrentPartSolidBodies(solidboies);
 		CreateUITree(solidboies,true);
     }
@@ -263,14 +283,12 @@ int autodrafting::CreateUITree( StlTagVector& bodies, logical insertCol )
     {
         for( int idx = 0; idx < ColumnNames.size(); ++idx )
         {
-            tree_control0->InsertColumn( idx, ColumnNames[idx], 80 );
+            tree_control0->InsertColumn( idx, ColumnNames[idx], 106 );
             tree_control0->SetColumnSortable( idx, false );
             //treeID->SetColumnResizePolicy(idx,Tree::ColumnResizePolicyResizeWithContents);
         }
-        tree_control0->SetColumnResizePolicy(0,Tree::ColumnResizePolicyResizeWithContents);
+        //tree_control0->SetColumnResizePolicy(0,Tree::ColumnResizePolicyResizeWithContents);
     }
-	//BlockStyler::Node* node = tree_control0->CreateNode("零件");
-	//tree_control0->InsertNode(node, NULL, NULL, Tree::NodeInsertOptionLast);
     for( int idx = 0; idx < bodies.size(); ++idx )
     {
         // 名称
@@ -280,14 +298,6 @@ int autodrafting::CreateUITree( StlTagVector& bodies, logical insertCol )
         std::vector<NXOpen::TaggedObject *>objects;
         BlockStyler::Node* node = tree_control0->CreateNode(temStr);
         nodeCount++;
-        /*for( int jdx = 0; jdx < components[idx].partOccs.size(); ++jdx )
-        {
-            objects.push_back( ( NXOpen::TaggedObject *)NXOpen::NXObjectManager::Get(components[idx].partOccs[jdx]) );
-        }
-        if( 0 ==components[idx].partOccs.size() )
-        {
-            objects.push_back( ( NXOpen::TaggedObject *)NXOpen::NXObjectManager::Get(components[idx].proto) );
-        }*/
 		objects.push_back( ( NXOpen::TaggedObject *)NXOpen::NXObjectManager::Get(bodies[idx]) );
         NXOpen::DataContainer *nodeData = node->GetNodeData();
         nodeData->AddTaggedObjectVector("Data",objects);
@@ -303,7 +313,6 @@ int autodrafting::CreateUITree( StlTagVector& bodies, logical insertCol )
                 node->SetColumnDisplayText( kdx, NXString("1.0", NXString::Locale) );
             }
         }
-        //node->SetForegroundColor(186);
     }
     return 0;
 }
@@ -352,10 +361,24 @@ int autodrafting::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == enumFrameType)
         {
         //---------Enter your code here-----------
+            std::vector<Node*> nodes = tree_control0->GetSelectedNodes();
+            NXString frame = enumFrameType->GetProperties()->GetEnumAsString("Value");
+            for(int idx = 0; idx < nodes.size();++idx )
+            {
+                nodes[idx]->SetColumnDisplayText(1,frame);
+            }
         }
         else if(block == doubleDwgScale)
         {
         //---------Enter your code here-----------
+            std::vector<Node*> nodes = tree_control0->GetSelectedNodes();
+            double scale = doubleDwgScale->GetProperties()->GetDouble("Value");
+            char str[133]="";
+            sprintf(str,"%.01f",scale);
+            for(int idx = 0; idx < nodes.size();++idx )
+            {
+                nodes[idx]->SetColumnDisplayText(2,str);
+            }
         }
         else if(block == nativeFolderBrowser01)
         {
@@ -397,6 +420,16 @@ int autodrafting::cancel_cb()
     try
     {
         //---- Enter your callback code here -----
+        std::vector<Node*> nodes = tree_control0->GetSelectedNodes();
+        for( int idx = 0; idx < nodes.size(); ++idx )
+        {
+            NXOpen::DataContainer *nodeData = nodes[idx]->GetNodeData();
+            std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+            if( objects.size() > 0 )
+            {
+                UF_DISP_set_highlight(objects[0]->Tag(),0);
+            }
+        }
     }
     catch(exception& ex)
     {
@@ -428,9 +461,22 @@ int autodrafting::cancel_cb()
 //{
 //}
 
-//void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected)
-//{
-//}
+void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID, bool selected)
+{
+    NXOpen::DataContainer *nodeData = node->GetNodeData();
+    std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+    if( objects.size() > 0 )
+    {
+        if( selected )
+        {
+            UF_DISP_set_highlight(objects[0]->Tag(),1);//
+            NXString type = node->GetColumnDisplayText(0);
+            //enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetUTF8Text());
+        }
+        else
+            UF_DISP_set_highlight(objects[0]->Tag(),0);
+    }
+}
 
 //void autodrafting::OnStateChangeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int state)
 //{

@@ -286,6 +286,7 @@ int Property::apply_cb()
 		if(objects.size()>0)
 		{
 			tag_t body = objects[0]->Tag();
+			NXString type = enumType->GetProperties()->GetEnumAsString("Value");
 			NXString name = matName->GetProperties()->GetEnumAsString("Value");
 			NXString maNO = matNO->GetProperties()->GetEnumAsString("Value");
 			NXString size = matSize->GetProperties()->GetEnumAsString("Value");
@@ -301,6 +302,7 @@ int Property::apply_cb()
 			char weigStr[133]="";
 			sprintf(toprStr,"%f",topr);
 			sprintf(weigStr,"%f",weig);
+			Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 			Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
 			Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
 			Royal_set_obj_attr(body,"规格",size.GetLocaleText());
