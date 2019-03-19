@@ -190,6 +190,64 @@ void Property::initialize_cb()
     }
 }
 
+void Property::ReadExcelConfigData( )
+{
+	BasicExcel excel;
+    char regfile[256]="";
+    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+	bool isOk = excel.Load(regfile);
+	if( isOk )
+	{
+        int num = excel.GetTotalWorkSheets();
+        for( int idx = 0; idx < num; ++idx )
+        {
+            const wchar_t* sheetName = excel.GetUnicodeSheetName(idx);
+			sheetNames.push_back(WCHARTOCHAR(sheetName));
+            BasicExcelWorksheet* sheet1 = excel.GetWorksheet(sheetName);
+            if (sheet1)
+            {
+                size_t maxRows = sheet1->GetTotalRows();
+                size_t maxCols = sheet1->GetTotalCols();
+                {
+                    VecNXStringVector sheetData;
+                    for(int i = 0; i < maxCols; i++)
+                    {
+                        StlNXStringVector matNameEtc;
+                        for(int j = 1; j < maxRows; ++j)
+                        {
+                            BasicExcelCell *cel = sheet1->Cell(j,i);
+                            matNameEtc.push_back(cel->Get());
+                        }
+                        sheetData.push_back(matNameEtc);
+                    }
+                    configData.push_back(sheetData);
+                }
+            }
+        }
+	}
+	return;
+}
+
+void Property::SetUIConfigData( )
+{
+    int type = enumType->GetProperties()->GetEnum("Value");
+    if( configData.size()-1 < type )
+    {
+        type = 0;
+    }
+    if( configData.size() > 0 )
+    {
+        VecNXStringVector temp = configData[type];
+        matName->GetProperties()->SetEnumMembers("Value",temp[0]);
+        matNO->GetProperties()->SetEnumMembers("Value",temp[1]);
+        matSize->GetProperties()->SetEnumMembers("Value",temp[2]);
+        material->GetProperties()->SetEnumMembers("Value",temp[3]);
+        matDensity->GetProperties()->SetEnumMembers("Value",temp[4]);
+        unitPrice->GetProperties()->SetEnumMembers("Value",temp[5]);
+        supplier->GetProperties()->SetEnumMembers("Value",temp[6]);
+        remark->GetProperties()->SetEnumMembers("Value",temp[7]);
+    }
+}
 //------------------------------------------------------------------------------
 //Callback Name: dialogShown_cb
 //This callback is executed just before the dialog launch. Thus any value set 
@@ -200,8 +258,13 @@ void Property::dialogShown_cb()
     try
     {
         //---- Enter your callback code here -----
-		logical inheritBody = inheriteFrombody->GetProperties()->GetLogical("Value");
-		selectFrombody->GetProperties()->SetLogical("Show",inheritBody);
+        ReadExcelConfigData();
+        logical inheritBody = inheriteFrombody->GetProperties()->GetLogical("Value");
+        selectFrombody->GetProperties()->SetLogical("Show",inheritBody);
+        logical out  = toggleoutNO->GetProperties()->GetLogical("Value");
+        coord_system01->GetProperties()->SetLogical("Show",out);
+        enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
+        SetUIConfigData();
     }
     catch(exception& ex)
     {
@@ -254,6 +317,9 @@ int Property::apply_cb()
 				Royal_set_obj_attr(body,"输出材料编号","1");
 			else
 				Royal_set_obj_attr(body,"输出材料编号","0");
+            logical blank = hideBody->GetProperties()->GetLogical("Value");
+            if(blank)
+                UF_OBJ_set_blank_status( body,UF_OBJ_BLANKED);
 		}
     }
     catch(exception& ex)
@@ -279,6 +345,7 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == enumType)
         {
         //---------Enter your code here-----------
+            SetUIConfigData();
         }
         else if(block == bodySelect0)
         {
@@ -356,6 +423,8 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == toggleoutNO)
         {
         //---------Enter your code here-----------
+            logical out  = toggleoutNO->GetProperties()->GetLogical("Value");
+            coord_system01->GetProperties()->SetLogical("Show",out);
         }
         else if(block == coord_system01)
         {
@@ -382,6 +451,13 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == buttonHideBody)
         {
         //---------Enter your code here-----------
+            StlTagVector solidboies;
+            CF_GetCurrentPartSolidBodies(solidboies);
+            for(int idx = 0; idx < solidboies.size(); ++idx )
+            {
+                if(USER_ask_obj_has_attr(solidboies[idx],"已设零件标记"))
+                    UF_OBJ_set_blank_status( solidboies[idx],UF_OBJ_BLANKED);
+            }
         }
     }
     catch(exception& ex)

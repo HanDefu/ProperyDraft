@@ -22,6 +22,7 @@
 #include <uf_defs.h>
 #include <uf_ui_types.h>
 #include <uf_modl.h>
+#include <uf_obj.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>
 #include <NXOpen/UI.hxx>
@@ -40,6 +41,14 @@
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_Toggle.hxx>
 #include "Common_Function.h"
+#include "Common_Function_UG.h"
+#include "Excel/BasicExcel.hpp"
+using namespace YExcel;
+
+typedef std::vector<tag_t> StlTagVector;
+typedef std::vector<NXString> StlNXStringVector;
+typedef std::vector<StlNXStringVector> VecNXStringVector;
+typedef std::vector<VecNXStringVector> VVecNXStringVector;
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------
@@ -119,6 +128,11 @@ private:
     NXOpen::BlockStyler::BodyCollector* selectFrombody;// Block type: Body Collector
     NXOpen::BlockStyler::Button* buttonHideBody;// Block type: Button
     int SetBodyBoundingBoxSize( );
+    void SetUIConfigData( );
+    void ReadExcelConfigData();
+    StlNXStringVector sheetNames;
+    VVecNXStringVector configData;
 };
+
 void GZ_PART_ATTR_Main();
 #endif //PROPERTY_H_INCLUDED
