@@ -23,6 +23,7 @@
 #include <uf_ui_types.h>
 #include <uf_part.h>
 #include <uf_draw.h>
+#include <uf_view.h>
 #include <uf_assem.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>

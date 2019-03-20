@@ -459,137 +459,226 @@ static tag_t CreateBaseView(tag_t partTag, NXString viewType, Point3d& viewRefPo
     return viewTag;
 }
 
-//static int CreateBaseAndProjectViews( tag_t partTag, double stdscale, tag_t &symbolView, double viewxbound[4])//6,75, x-6, y-36 v // 6,75, x-59, y-6 h
-//{
-//	Session *theSession = Session::GetSession();
-//    Part *workPart(theSession->Parts()->Work());
-//	NXOpen::Point3d point1(0, 0, 0.0);
-//	tag_t baseView = CreateBaseView(partTag,"Top", point1,stdscale);
-//	char tempStr[UF_ATTR_MAX_STRING_BUFSIZE+1]="";
-//	int irc = Roy_ask_obj_string_attr(partTag,ATTR_ROYAL_MIRROR_OBJ,tempStr);
-//    if(irc!=0)
-//        irc = Roy_ask_obj_string_attr(partTag,ATTR_ROYAL_SAME_OBJ,tempStr);
-//	if( 0 == irc )
-//	{
-//		tag_t proto = partTag;
-//		tag_t currentDrawing = NULL_TAG;
-//		tag_t *comps = NULL;
-//		tag_t disp = UF_PART_ask_display_part();
-//		if(UF_ASSEM_is_occurrence(partTag))
-//			proto = UF_ASSEM_ask_prototype_of_occ(partTag);
-//		tag_t rootocc = UF_ASSEM_ask_root_part_occ(disp);
-//		int n = UF_ASSEM_ask_part_occ_children(rootocc, &comps);
-//		for( int idx = 0; idx < n; ++idx )
-//		{
-//			tag_t compPro = UF_ASSEM_ask_prototype_of_occ(comps[idx]);
-//			if( compPro == proto )
-//			{
-//				int err = 0;
-//				UF_CALL(UF_ASSEM_replace_refset(1,&comps[idx],ATTR_ROYAL_DRAWING_REFERENCE_SET));
-//				tag_t baseView2 = CreateBaseView(partTag,"Top", point1,stdscale);
-//				UF_VIEW_delete(baseView,&err);
-//				baseView = baseView2;
-//			}
-//		}
-//		UF_CALL(UF_DRAW_ask_current_drawing(&currentDrawing));
-//		UF_DRAW_upd_out_of_date_views(currentDrawing);
-//		UF_free(comps);
-//	}
-//    double sheetLen = point1.X*2;
-//    double sheetHei = point1.Y*2;
-//	tag_t projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
-//    tag_t projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
-//	double xy_boud1[4] = {0,0,0,0};
-//	double xy_boud2[4] = {0,0,0,0};
-//	double xy_boud3[4] = {0,0,0,0};
-//	double xy_boud4[4] = {0,0,0,0};
-//	ROY_UF_VIEW_ask_xy_clip(baseView,stdscale,xy_boud1);
-//	ROY_UF_VIEW_ask_xy_clip(projectViewl,stdscale,xy_boud2);
-//    ROY_UF_VIEW_ask_xy_clip(projectViewr,stdscale,xy_boud3);
-//    double viewHei = xy_boud1[3]-xy_boud1[2] + xy_boud2[3]-xy_boud2[2];
-//    double viewLen = xy_boud1[1]-xy_boud1[0] + xy_boud3[1]-xy_boud3[0];
-//    double drawingareaHei = 0;
-//    double drawingareaLen = 0;
-//    if(sheetLen > sheetHei) //h
-//    {
-//        drawingareaLen = sheetLen-65-20;
-//        drawingareaHei = sheetHei-81-20;
-//    }
-//    else //v 
-//    {
-//        drawingareaLen = sheetLen-12-20;
-//        drawingareaHei = sheetHei-111-20;
-//    }
-//	if( (viewHei >= drawingareaHei || viewLen >= drawingareaLen) &&  stdscale < 19.9 ) //adjust scale
-//    {
-//		int err = 0;//-->A3 UF_DRAW_set_drawing_info
-//		UF_VIEW_delete(projectViewl,&err);
-//		UF_VIEW_delete(projectViewr,&err);
-//		UF_VIEW_delete(baseView,&err);
-//        return 1;
-//    }
-//    else
-//    {
-//        Drawings::DrawingSheet *drawingSheet1= workPart->DrawingSheets()->CurrentDrawingSheet();
-//        Drawings::DrawingSheetBuilder *drawingSheetBuilder1;
-//        drawingSheetBuilder1 = workPart->DrawingSheets()->DrawingSheetBuilder(drawingSheet1);
-//        drawingSheetBuilder1->SetStandardMetricScale(NXOpen::Drawings::DrawingSheetBuilder::SheetStandardMetricScaleCustom);
-//        drawingSheetBuilder1->SetScaleNumerator(1.0);
-//        drawingSheetBuilder1->SetScaleDenominator(stdscale);
-//        NXOpen::NXObject *nXObject1;
-//        nXObject1 = drawingSheetBuilder1->Commit();
-//        drawingSheetBuilder1->Destroy();
-//    }
-//	if( drawingareaHei > viewHei && drawingareaLen > viewLen )
-//	{
-//		double gaph = (drawingareaHei - viewHei)/3;
-//		double gapl = (drawingareaLen - viewLen)/3;
-//		double baseview_x = 6+gapl+(xy_boud1[1]-xy_boud1[0])/2;
-//		double baseview_y = 75+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud2[3]-xy_boud2[2];
-//		double projeclview_x = baseview_x;
-//		double projeclview_y = 75+gaph+(xy_boud2[3]-xy_boud2[2])/2;
-//		double projecRview_x = 6+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud3[1]-xy_boud3[0])/2;
-//		double projecRview_y = baseview_y;
-//		MoveBaseView(baseView,baseview_x,baseview_y );
-//        viewxbound[0] = baseview_x-(xy_boud1[1]-xy_boud1[0])/2;
-//        viewxbound[1] = baseview_y-(xy_boud1[3]-xy_boud1[2])/2;
-//		viewxbound[2] = baseview_x+(xy_boud1[1]-xy_boud1[0])/2;
-//        viewxbound[3] = baseview_y+(xy_boud1[3]-xy_boud1[2])/2;
-//		MoveProjectView(projectViewl,projeclview_x,projeclview_y);
-//		MoveProjectView(projectViewr,projecRview_x,projecRview_y);
-//
-//		NXOpen::Point3d point2(projecRview_x, projeclview_y, 0.0);
-//		tag_t IsometricView = CreateBaseView(partTag,"Isometric", point2,stdscale*2);
-//		/*UF_VIEW_ask_xy_clip(IsometricView,xy_boud4);
-//		ModifyBaseViewScale(IsometricView, xy_boud2[3]-xy_boud2[2]-12.5,xy_boud4[3]-xy_boud4[2]-12.5);*/
-//		NXOpen::Session *theSession = NXOpen::Session::GetSession();
-//		NXOpen::Part *workPart(theSession->Parts()->Work());
-//		std::vector<NXOpen::Drawings::DraftingView *> views1(2);
-//		NXOpen::Drawings::ProjectedView *projectedView1(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewl)));
-//		NXOpen::Drawings::ProjectedView *projectedView2(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewr)));
-//		views1[0] = projectedView1;
-//		views1[1] = projectedView2;
-//		workPart->DraftingViews()->UpdateViews(views1);
-//		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale*2,xy_boud1);
-//		if(stdscale<20)
-//		{
-//			if(projecRview_x+xy_boud1[1]>sheetLen || projecRview_x-xy_boud1[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
-//			{
-//				int err = 0;
-//				UF_VIEW_delete(projectViewl,&err);
-//				UF_VIEW_delete(projectViewr,&err);
-//				UF_VIEW_delete(baseView,&err);
-//				UF_VIEW_delete(IsometricView,&err);
-//				return 1;
-//			}
-//		}
-//		/*char msg[133]="";
-//		sprintf(msg,"%f",xy_boud1[1]);
-//		uc1601(msg,1);*/
-//	}
-//    symbolView = baseView;
-//	return 0;
-//}
+static int ROY_UF_VIEW_ask_xy_clip(tag_t view_tag ,double scale, double xy_clip_bounds[4] )
+{
+	double xy_boud[4] = {0,0,0,0};
+	int irc = UF_VIEW_ask_xy_clip(view_tag,xy_boud);
+	for( int idx = 0; idx < 4; idx++ )
+	{
+		xy_clip_bounds[idx] = xy_boud[idx]/scale;
+	}
+	return irc;
+}
+
+static tag_t CreateProjectView( tag_t topView, const double x, const double y)
+{
+    Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+    Part *displayPart(theSession->Parts()->Display());
+    Drawings::ProjectedView *nullDrawings_ProjectedView(NULL);
+    Drawings::ProjectedViewBuilder *projectedViewBuilder1;
+    projectedViewBuilder1 = workPart->DraftingViews()->CreateProjectedViewBuilder(nullDrawings_ProjectedView);
+    
+    //Drawings::BaseView *baseView1(dynamic_cast<Drawings::BaseView *>(workPart->DraftingViews()->FindObject("TOP@1")));
+	Drawings::BaseView *baseView1(dynamic_cast<Drawings::BaseView *>(NXOpen::NXObjectManager::Get(topView)));
+
+    projectedViewBuilder1->Parent()->View()->SetValue(baseView1);
+    
+    projectedViewBuilder1->Style()->ViewStyleDetail()->SetViewBoundaryWidth(Preferences::WidthOriginal);
+    
+    //projectedViewBuilder1->Style()->ViewStyleBase()->SetPartName("E:\\xingtai\\RYF140628-UG\\RYF140628-UG\\RYF140628-GAUGE\\RYF-test_dwg.prt");
+    
+    projectedViewBuilder1->Style()->ViewStyleDetail()->SetViewBoundaryWidth(Preferences::WidthNormal);
+    
+    projectedViewBuilder1->Style()->ViewStyleGeneral()->SetToleranceValue(0.213614);    
+    
+    projectedViewBuilder1->Placement()->AlignmentView()->SetValue(baseView1);
+    
+    Point3d point2(x, y, 0.0);
+    projectedViewBuilder1->Placement()->Placement()->SetValue(NULL, workPart->Views()->WorkView(), point2);
+    
+    projectedViewBuilder1->Placement()->AlignmentView()->SetValue(baseView1);
+    
+    NXObject *nXObject3;
+    nXObject3 = projectedViewBuilder1->Commit();
+	tag_t viewTag = nXObject3->Tag();
+
+    projectedViewBuilder1->Destroy();
+	return viewTag;
+}
+
+static void MoveBaseView( tag_t viewTag ,double x, double y)
+{
+	Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+
+    NXOpen::Drawings::BaseViewBuilder *baseViewBuilder1;
+    Drawings::BaseView *baseView1(dynamic_cast<Drawings::BaseView *>(NXOpen::NXObjectManager::Get(viewTag)));
+    baseViewBuilder1 = workPart->DraftingViews()->CreateBaseViewBuilder(baseView1);
+
+    Point3d point2(x, y, 0.0);
+    baseViewBuilder1->Placement()->Placement()->SetValue(NULL, workPart->Views()->WorkView(), point2);
+    
+    NXObject *nXObject3;
+    nXObject3 = baseViewBuilder1->Commit();
+    baseViewBuilder1->Destroy();
+}
+
+static void MoveProjectView( tag_t projectview ,double x, double y)
+{
+	Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+    Drawings::ProjectedView *nullDrawings_ProjectedView(NULL);
+    Drawings::ProjectedViewBuilder *projectedViewBuilder1;
+    
+	//Drawings::BaseView *baseView1(dynamic_cast<Drawings::BaseView *>(NXOpen::NXObjectManager::Get(topView)));
+	Drawings::ProjectedView *projectView1(dynamic_cast<Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectview)));
+
+	projectedViewBuilder1 = workPart->DraftingViews()->CreateProjectedViewBuilder(projectView1);
+
+   /* projectedViewBuilder1->Parent()->View()->SetValue(baseView1);
+
+	projectedViewBuilder1->Placement()->AlignmentView()->SetValue(baseView1);*/
+    
+    Point3d point2(x, y, 0.0);
+    projectedViewBuilder1->Placement()->Placement()->SetValue(NULL, workPart->Views()->WorkView(), point2);
+    
+    //projectedViewBuilder1->Placement()->AlignmentView()->SetValue(baseView1);
+    
+    NXObject *nXObject3;
+    nXObject3 = projectedViewBuilder1->Commit();
+	//tag_t viewTag = nXObject3->Tag();
+
+    projectedViewBuilder1->Destroy();
+}
+
+static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double stdscale, tag_t &symbolView, double viewxbound[4],double& sug)//6,75, x-6, y-36 v // 6,75, x-59, y-6 h
+{
+	Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+	NXOpen::Point3d point1(0, 0, 0.0);
+	tag_t baseView = CreateBaseView(partTag,"Top", point1,stdscale);
+
+    tag_t proto = partTag;
+    tag_t currentDrawing = NULL_TAG;
+    tag_t *comps = NULL;
+    tag_t disp = UF_PART_ask_display_part();
+    if(UF_ASSEM_is_occurrence(partTag))
+        proto = UF_ASSEM_ask_prototype_of_occ(partTag);
+    tag_t rootocc = UF_ASSEM_ask_root_part_occ(disp);
+    int n = UF_ASSEM_ask_part_occ_children(rootocc, &comps);
+    for( int idx = 0; idx < n; ++idx )
+    {
+        tag_t compPro = UF_ASSEM_ask_prototype_of_occ(comps[idx]);
+        if( compPro == proto )
+        {
+            int err = 0;
+            UF_ASSEM_replace_refset(1,&comps[idx],refset.GetLocaleText());
+            tag_t baseView2 = CreateBaseView(partTag,"Top", point1,stdscale);
+            UF_VIEW_delete(baseView,&err);
+            baseView = baseView2;
+        }
+    }
+    UF_DRAW_ask_current_drawing(&currentDrawing);
+    UF_DRAW_upd_out_of_date_views(currentDrawing);
+    UF_free(comps);
+
+    double sheetLen = point1.X*2;
+    double sheetHei = point1.Y*2;
+	tag_t projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
+    tag_t projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
+	double xy_boud1[4] = {0,0,0,0};
+	double xy_boud2[4] = {0,0,0,0};
+	double xy_boud3[4] = {0,0,0,0};
+	double xy_boud4[4] = {0,0,0,0};
+	ROY_UF_VIEW_ask_xy_clip(baseView,stdscale,xy_boud1);
+	ROY_UF_VIEW_ask_xy_clip(projectViewl,stdscale,xy_boud2);
+    ROY_UF_VIEW_ask_xy_clip(projectViewr,stdscale,xy_boud3);
+    double viewHei = xy_boud1[3]-xy_boud1[2] + xy_boud2[3]-xy_boud2[2];
+    double viewLen = xy_boud1[1]-xy_boud1[0] + xy_boud3[1]-xy_boud3[0];
+    double drawingareaHei = 0;
+    double drawingareaLen = 0;
+    if(sheetLen > sheetHei) //h
+    {
+        drawingareaLen = sheetLen-65-20;
+        drawingareaHei = sheetHei-81-20;
+    }
+    else //v 
+    {
+        drawingareaLen = sheetLen-12-20;
+        drawingareaHei = sheetHei-111-20;
+    }
+	if( (viewHei >= drawingareaHei || viewLen >= drawingareaLen) &&  stdscale < 19.9 ) //adjust scale
+    {
+		int err = 0;//-->A3 UF_DRAW_set_drawing_info
+        double sug1 = (viewLen-25.4)/(drawingareaLen-25.4);
+        double sug2 = (viewHei-25.4)/(drawingareaHei-25.4);
+        if( sug1 > sug2 )
+            sug = sug1;
+        else
+            sug = sug2;
+		UF_VIEW_delete(projectViewl,&err);
+		UF_VIEW_delete(projectViewr,&err);
+		UF_VIEW_delete(baseView,&err);
+        return 1;
+    }
+    else
+    {
+        Drawings::DrawingSheet *drawingSheet1= workPart->DrawingSheets()->CurrentDrawingSheet();
+        Drawings::DrawingSheetBuilder *drawingSheetBuilder1;
+        drawingSheetBuilder1 = workPart->DrawingSheets()->DrawingSheetBuilder(drawingSheet1);
+        drawingSheetBuilder1->SetStandardMetricScale(NXOpen::Drawings::DrawingSheetBuilder::SheetStandardMetricScaleCustom);
+        drawingSheetBuilder1->SetScaleNumerator(1.0);
+        drawingSheetBuilder1->SetScaleDenominator(stdscale);
+        NXOpen::NXObject *nXObject1;
+        nXObject1 = drawingSheetBuilder1->Commit();
+        drawingSheetBuilder1->Destroy();
+    }
+	if( drawingareaHei > viewHei && drawingareaLen > viewLen )
+	{
+		double gaph = (drawingareaHei - viewHei)/3;
+		double gapl = (drawingareaLen - viewLen)/3;
+		double baseview_x = 6+gapl+(xy_boud1[1]-xy_boud1[0])/2;
+		double baseview_y = 75+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud2[3]-xy_boud2[2];
+		double projeclview_x = baseview_x;
+		double projeclview_y = 75+gaph+(xy_boud2[3]-xy_boud2[2])/2;
+		double projecRview_x = 6+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud3[1]-xy_boud3[0])/2;
+		double projecRview_y = baseview_y;
+		MoveBaseView(baseView,baseview_x,baseview_y );
+        viewxbound[0] = baseview_x-(xy_boud1[1]-xy_boud1[0])/2;
+        viewxbound[1] = baseview_y-(xy_boud1[3]-xy_boud1[2])/2;
+		viewxbound[2] = baseview_x+(xy_boud1[1]-xy_boud1[0])/2;
+        viewxbound[3] = baseview_y+(xy_boud1[3]-xy_boud1[2])/2;
+		MoveProjectView(projectViewl,projeclview_x,projeclview_y);
+		MoveProjectView(projectViewr,projecRview_x,projecRview_y);
+
+		NXOpen::Point3d point2(projecRview_x, projeclview_y, 0.0);
+		/*tag_t IsometricView = CreateBaseView(partTag,"Isometric", point2,stdscale*2);
+		NXOpen::Session *theSession = NXOpen::Session::GetSession();
+		NXOpen::Part *workPart(theSession->Parts()->Work());
+		std::vector<NXOpen::Drawings::DraftingView *> views1(2);
+		NXOpen::Drawings::ProjectedView *projectedView1(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewl)));
+		NXOpen::Drawings::ProjectedView *projectedView2(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewr)));
+		views1[0] = projectedView1;
+		views1[1] = projectedView2;
+		workPart->DraftingViews()->UpdateViews(views1);
+		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale*2,xy_boud1);
+		if(stdscale<20)
+		{
+			if(projecRview_x+xy_boud1[1]>sheetLen || projecRview_x-xy_boud1[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
+			{
+				int err = 0;
+				UF_VIEW_delete(projectViewl,&err);
+				UF_VIEW_delete(projectViewr,&err);
+				UF_VIEW_delete(baseView,&err);
+				UF_VIEW_delete(IsometricView,&err);
+				return 1;
+			}
+		}*/
+	}
+    symbolView = baseView;
+	return 0;
+}
 
 static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXString& scale)
 {
@@ -635,9 +724,25 @@ static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXSt
 	UF_DRAW_create_drawing( name.getLocaleText(), &drawing_info,&new_drawing_tag);
 	UF_DRAW_open_drawing( new_drawing_tag );
 	UF_PART_import(titleblock,&modes,dest_csys,dest_point,1.0,&group);
-	Point3d pt;
-	tag_t view = CreateBaseView(part,"Top",pt,1.0);
-	int i = 0;
+	//Point3d pt;
+	tag_t view = NULL_TAG;//CreateBaseView(part,"Top",pt,1.0);
+    double sug = 0,stdscale = 1;
+    double viewbound[4]={0,0,0,0};
+    int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);
+    //double stdscale[] = {1.5,2,2.5,3,5,10};
+    while( 0 != irc && stdscale < 20.5)
+    {
+        stdscale+=0.5; 
+        while(stdscale<sug-0.1)
+        {
+            if(stdscale < 10.0)
+                stdscale+=0.5;
+            else
+                stdscale+=1.0;
+        }
+        irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);
+    }
+
 }
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
