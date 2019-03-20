@@ -56,7 +56,7 @@ autodrafting::autodrafting()
         theDlxFileName = "autodrafting.dlx";
         theDialog = autodrafting::theUI->CreateDialog(theDlxFileName);
         // Registration of callback functions
-        theDialog->AddApplyHandler(make_callback(this, &autodrafting::apply_cb));
+        //theDialog->AddApplyHandler(make_callback(this, &autodrafting::apply_cb));
         theDialog->AddOkHandler(make_callback(this, &autodrafting::ok_cb));
         theDialog->AddUpdateHandler(make_callback(this, &autodrafting::update_cb));
         theDialog->AddCancelHandler(make_callback(this, &autodrafting::cancel_cb));
@@ -316,15 +316,379 @@ int autodrafting::CreateUITree( StlTagVector& bodies, logical insertCol )
     }
     return 0;
 }
+
+static tag_t  CreateDWGPart( )
+{
+	tag_t partTag = NULL_TAG;
+	char sFilePath[UF_CFI_MAX_PATH_NAME_SIZE]="";
+	char file_name[UF_CFI_MAX_PATH_NAME_SIZE]="";
+	char fname[_MAX_FNAME];
+
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+
+	/*UF_DRAW_info_t drawing_info;
+	drawing_info.drawing_scale = 1.0;
+	drawing_info.units = UF_PART_METRIC;
+	drawing_info.projection_angle = UF_DRAW_FIRST_ANGLE_PROJECTION;
+	drawing_info.size_state = UF_DRAW_METRIC_SIZE;
+
+	UF_import_part_modes_t modes;
+	tag_t group = NULL_TAG;
+	char titleblock[MAX_FSPEC_SIZE] = "";
+	double dest_csys[6]={1,0,0,0,1,0};
+	double dest_point[3]={0,0,0};
+	modes.layer_mode=1;
+	modes.group_mode=1;
+	modes.csys_mode=0;
+	modes.plist_mode=0;
+	modes.view_mode=0;
+	modes.cam_mode=false;
+	modes.use_search_dirs=false;*/
+
+	tag_t disPart = UF_PART_ask_display_part();
+	tag_t rootocc = UF_ASSEM_ask_root_part_occ(disPart);
+	UF_PART_ask_part_name (disPart, file_name );
+	char *p = strstr(file_name,".prt");
+	if( p != NULL )
+	{
+		*p='\0';
+	}
+	char *p_env = getenv("UGII_USER_DIR");
+	char srcspc[MAX_FSPEC_SIZE]="";
+	char desspc[MAX_FSPEC_SIZE]="";
+	sprintf(srcspc,"%s\\templates\\gz_dwg.prt",p_env);
+	sprintf(desspc,"%s_dwg.prt",file_name);
+	int status = uc4567( srcspc,desspc,UF_CFI_COPY_ALWAYS_REPLACE,0,2);
+	UF_CFI_ask_file_exist(desspc,&status);
+	if(0  == status )
+	{
+		UF_PART_load_status_t error_status;
+		tag_t new_drawing_tag = NULL_TAG;
+		UF_PART_open(desspc,&partTag, &error_status);
+		//UF_ASSEM_set_work_part_quietly(partTag,&disPart);
+		UF_PART_free_load_status(&error_status);
+		if(partTag != NULL_TAG)
+		{
+			theSession->ApplicationSwitchImmediate("UG_APP_DRAFTING");
+		}
+	}
+	return partTag;
+}
+
+static tag_t CreateBaseView(tag_t partTag, NXString viewType, Point3d& viewRefPoint, double stdscale )
+{
+	tag_t viewTag = NULL_TAG;
+
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+    NXOpen::Part *workPart(theSession->Parts()->Work());
+
+    NXOpen::Drawings::BaseView *nullNXOpen_Drawings_BaseView(NULL);
+    NXOpen::Drawings::BaseViewBuilder *baseViewBuilder1;
+    baseViewBuilder1 = workPart->DraftingViews()->CreateBaseViewBuilder(nullNXOpen_Drawings_BaseView);
+    
+    baseViewBuilder1->Placement()->SetAssociative(true);
+    
+    char part_fspec[MAX_FSPEC_SIZE+1] = "";
+	tag_t part = partTag;
+	if(UF_ASSEM_is_occurrence(partTag))
+	{
+		part = UF_ASSEM_ask_prototype_of_occ(partTag);
+	}
+    UF_PART_ask_part_name(part,part_fspec);
+
+	Part *part1(dynamic_cast<Part *>(NXOpen::NXObjectManager::Get(part)));
+    bool loadStatus1;
+    loadStatus1 = part1->IsFullyLoaded();
+	if( !loadStatus1 )
+		part1->LoadFully();
+    
+    NXOpen::ModelingView *modelingView2(dynamic_cast<NXOpen::ModelingView *>(part1->ModelingViews()->FindObject(viewType)));
+    baseViewBuilder1->SelectModelView()->SetSelectedView(modelingView2);
+    
+    NXOpen::Assemblies::Arrangement *nullNXOpen_Assemblies_Arrangement(NULL);
+    baseViewBuilder1->Style()->ViewStyleBase()->Arrangement()->SetSelectedArrangement(nullNXOpen_Assemblies_Arrangement);
+    
+    baseViewBuilder1->Style()->ViewStyleBase()->SetPart(part1);
+    
+    baseViewBuilder1->Style()->ViewStyleBase()->SetPartName(NXString(part_fspec));
+    
+	NXOpen::NXObject *nXObject2;
+	logical adjust = false;
+	NXOpen::Vector3d vec1(0.0, 0.0, 1.0);
+	NXOpen::Vector3d vec2(1.0, 0.0, 0.0);
+	if( 0 == strcmp("Top",viewType.GetText()) )
+	{
+		workPart->DrawingSheets()->CurrentDrawingSheet();
+		Drawings::DrawingSheet *drawingSheet1= workPart->DrawingSheets()->CurrentDrawingSheet();
+		Drawings::DrawingSheetBuilder *drawingSheetBuilder1;
+		drawingSheetBuilder1 = workPart->DrawingSheets()->DrawingSheetBuilder(drawingSheet1);
+		double sheetlen = drawingSheetBuilder1->Length();
+		double sheethei = drawingSheetBuilder1->Height();
+		drawingSheetBuilder1->Destroy();
+
+		NXOpen::Direction *direction1;
+		NXOpen::Point3d origin1(0.0, 0.0, 0.0);
+		NXOpen::Vector3d vector1(0.0, 0.0, 1.0);
+		NXOpen::Vector3d vector2(1.0, 0.0, 0.0);
+		
+		direction1 = workPart->Directions()->CreateDirection(origin1, vector1, NXOpen::SmartObject::UpdateOptionAfterModeling);
+		baseViewBuilder1->Style()->ViewStyleOrientation()->Ovt()->SetNormalDirection(direction1);
+
+		NXOpen::Direction *direction2;
+		direction2 = workPart->Directions()->CreateDirection(origin1, vector2, NXOpen::SmartObject::UpdateOptionAfterModeling);
+		baseViewBuilder1->Style()->ViewStyleOrientation()->Ovt()->SetXDirection(direction2);
+
+        viewRefPoint.X = sheetlen/2;
+		viewRefPoint.Y = sheethei/2;
+		viewRefPoint.Z = 0;
+	}
+	else
+	{
+		//baseViewBuilder1->Scale()->SetDenominator(1.0);
+	}
+	baseViewBuilder1->Scale()->SetDenominator(stdscale);
+    baseViewBuilder1->Placement()->Placement()->SetValue(NULL, workPart->Views()->WorkView(), viewRefPoint);
+	
+	nXObject2 = baseViewBuilder1->Commit();
+    viewTag = nXObject2->Tag();
+
+	baseViewBuilder1->Destroy();
+
+	/*if(adjust)
+		AdjustViewDirection(viewTag,vec1,vec2);*/
+    return viewTag;
+}
+
+//static int CreateBaseAndProjectViews( tag_t partTag, double stdscale, tag_t &symbolView, double viewxbound[4])//6,75, x-6, y-36 v // 6,75, x-59, y-6 h
+//{
+//	Session *theSession = Session::GetSession();
+//    Part *workPart(theSession->Parts()->Work());
+//	NXOpen::Point3d point1(0, 0, 0.0);
+//	tag_t baseView = CreateBaseView(partTag,"Top", point1,stdscale);
+//	char tempStr[UF_ATTR_MAX_STRING_BUFSIZE+1]="";
+//	int irc = Roy_ask_obj_string_attr(partTag,ATTR_ROYAL_MIRROR_OBJ,tempStr);
+//    if(irc!=0)
+//        irc = Roy_ask_obj_string_attr(partTag,ATTR_ROYAL_SAME_OBJ,tempStr);
+//	if( 0 == irc )
+//	{
+//		tag_t proto = partTag;
+//		tag_t currentDrawing = NULL_TAG;
+//		tag_t *comps = NULL;
+//		tag_t disp = UF_PART_ask_display_part();
+//		if(UF_ASSEM_is_occurrence(partTag))
+//			proto = UF_ASSEM_ask_prototype_of_occ(partTag);
+//		tag_t rootocc = UF_ASSEM_ask_root_part_occ(disp);
+//		int n = UF_ASSEM_ask_part_occ_children(rootocc, &comps);
+//		for( int idx = 0; idx < n; ++idx )
+//		{
+//			tag_t compPro = UF_ASSEM_ask_prototype_of_occ(comps[idx]);
+//			if( compPro == proto )
+//			{
+//				int err = 0;
+//				UF_CALL(UF_ASSEM_replace_refset(1,&comps[idx],ATTR_ROYAL_DRAWING_REFERENCE_SET));
+//				tag_t baseView2 = CreateBaseView(partTag,"Top", point1,stdscale);
+//				UF_VIEW_delete(baseView,&err);
+//				baseView = baseView2;
+//			}
+//		}
+//		UF_CALL(UF_DRAW_ask_current_drawing(&currentDrawing));
+//		UF_DRAW_upd_out_of_date_views(currentDrawing);
+//		UF_free(comps);
+//	}
+//    double sheetLen = point1.X*2;
+//    double sheetHei = point1.Y*2;
+//	tag_t projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
+//    tag_t projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
+//	double xy_boud1[4] = {0,0,0,0};
+//	double xy_boud2[4] = {0,0,0,0};
+//	double xy_boud3[4] = {0,0,0,0};
+//	double xy_boud4[4] = {0,0,0,0};
+//	ROY_UF_VIEW_ask_xy_clip(baseView,stdscale,xy_boud1);
+//	ROY_UF_VIEW_ask_xy_clip(projectViewl,stdscale,xy_boud2);
+//    ROY_UF_VIEW_ask_xy_clip(projectViewr,stdscale,xy_boud3);
+//    double viewHei = xy_boud1[3]-xy_boud1[2] + xy_boud2[3]-xy_boud2[2];
+//    double viewLen = xy_boud1[1]-xy_boud1[0] + xy_boud3[1]-xy_boud3[0];
+//    double drawingareaHei = 0;
+//    double drawingareaLen = 0;
+//    if(sheetLen > sheetHei) //h
+//    {
+//        drawingareaLen = sheetLen-65-20;
+//        drawingareaHei = sheetHei-81-20;
+//    }
+//    else //v 
+//    {
+//        drawingareaLen = sheetLen-12-20;
+//        drawingareaHei = sheetHei-111-20;
+//    }
+//	if( (viewHei >= drawingareaHei || viewLen >= drawingareaLen) &&  stdscale < 19.9 ) //adjust scale
+//    {
+//		int err = 0;//-->A3 UF_DRAW_set_drawing_info
+//		UF_VIEW_delete(projectViewl,&err);
+//		UF_VIEW_delete(projectViewr,&err);
+//		UF_VIEW_delete(baseView,&err);
+//        return 1;
+//    }
+//    else
+//    {
+//        Drawings::DrawingSheet *drawingSheet1= workPart->DrawingSheets()->CurrentDrawingSheet();
+//        Drawings::DrawingSheetBuilder *drawingSheetBuilder1;
+//        drawingSheetBuilder1 = workPart->DrawingSheets()->DrawingSheetBuilder(drawingSheet1);
+//        drawingSheetBuilder1->SetStandardMetricScale(NXOpen::Drawings::DrawingSheetBuilder::SheetStandardMetricScaleCustom);
+//        drawingSheetBuilder1->SetScaleNumerator(1.0);
+//        drawingSheetBuilder1->SetScaleDenominator(stdscale);
+//        NXOpen::NXObject *nXObject1;
+//        nXObject1 = drawingSheetBuilder1->Commit();
+//        drawingSheetBuilder1->Destroy();
+//    }
+//	if( drawingareaHei > viewHei && drawingareaLen > viewLen )
+//	{
+//		double gaph = (drawingareaHei - viewHei)/3;
+//		double gapl = (drawingareaLen - viewLen)/3;
+//		double baseview_x = 6+gapl+(xy_boud1[1]-xy_boud1[0])/2;
+//		double baseview_y = 75+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud2[3]-xy_boud2[2];
+//		double projeclview_x = baseview_x;
+//		double projeclview_y = 75+gaph+(xy_boud2[3]-xy_boud2[2])/2;
+//		double projecRview_x = 6+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud3[1]-xy_boud3[0])/2;
+//		double projecRview_y = baseview_y;
+//		MoveBaseView(baseView,baseview_x,baseview_y );
+//        viewxbound[0] = baseview_x-(xy_boud1[1]-xy_boud1[0])/2;
+//        viewxbound[1] = baseview_y-(xy_boud1[3]-xy_boud1[2])/2;
+//		viewxbound[2] = baseview_x+(xy_boud1[1]-xy_boud1[0])/2;
+//        viewxbound[3] = baseview_y+(xy_boud1[3]-xy_boud1[2])/2;
+//		MoveProjectView(projectViewl,projeclview_x,projeclview_y);
+//		MoveProjectView(projectViewr,projecRview_x,projecRview_y);
+//
+//		NXOpen::Point3d point2(projecRview_x, projeclview_y, 0.0);
+//		tag_t IsometricView = CreateBaseView(partTag,"Isometric", point2,stdscale*2);
+//		/*UF_VIEW_ask_xy_clip(IsometricView,xy_boud4);
+//		ModifyBaseViewScale(IsometricView, xy_boud2[3]-xy_boud2[2]-12.5,xy_boud4[3]-xy_boud4[2]-12.5);*/
+//		NXOpen::Session *theSession = NXOpen::Session::GetSession();
+//		NXOpen::Part *workPart(theSession->Parts()->Work());
+//		std::vector<NXOpen::Drawings::DraftingView *> views1(2);
+//		NXOpen::Drawings::ProjectedView *projectedView1(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewl)));
+//		NXOpen::Drawings::ProjectedView *projectedView2(dynamic_cast<NXOpen::Drawings::ProjectedView *>(NXOpen::NXObjectManager::Get(projectViewr)));
+//		views1[0] = projectedView1;
+//		views1[1] = projectedView2;
+//		workPart->DraftingViews()->UpdateViews(views1);
+//		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale*2,xy_boud1);
+//		if(stdscale<20)
+//		{
+//			if(projecRview_x+xy_boud1[1]>sheetLen || projecRview_x-xy_boud1[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
+//			{
+//				int err = 0;
+//				UF_VIEW_delete(projectViewl,&err);
+//				UF_VIEW_delete(projectViewr,&err);
+//				UF_VIEW_delete(baseView,&err);
+//				UF_VIEW_delete(IsometricView,&err);
+//				return 1;
+//			}
+//		}
+//		/*char msg[133]="";
+//		sprintf(msg,"%f",xy_boud1[1]);
+//		uc1601(msg,1);*/
+//	}
+//    symbolView = baseView;
+//	return 0;
+//}
+
+static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXString& scale)
+{
+	UF_DRAW_info_t drawing_info;
+	drawing_info.drawing_scale = 1.0;
+	drawing_info.units = UF_PART_METRIC;
+	drawing_info.projection_angle = UF_DRAW_FIRST_ANGLE_PROJECTION;
+	drawing_info.size_state = UF_DRAW_METRIC_SIZE;
+
+	UF_import_part_modes_t modes;
+	tag_t group = NULL_TAG;
+	tag_t new_drawing_tag = NULL_TAG;
+	char titleblock[MAX_FSPEC_SIZE] = "";
+	double dest_csys[6]={1,0,0,0,1,0};
+	double dest_point[3]={0,0,0};
+	modes.layer_mode=1;
+	modes.group_mode=1;
+	modes.csys_mode=0;
+	modes.plist_mode=0;
+	modes.view_mode=0;
+	modes.cam_mode=false;
+	modes.use_search_dirs=false;
+	char *p_env = getenv("UGII_USER_DIR");
+	if( 0 == strcmp("A3横",frame.GetLocaleText()))
+	{
+		drawing_info.size_state = UF_DRAW_METRIC_SIZE;
+		drawing_info.size.metric_size_code = UF_DRAW_A3;
+		sprintf(titleblock,"%s\\templates\\Royal_A3.prt",p_env);
+	}
+	else if( 0 == strcmp("A3竖",frame.GetLocaleText()))
+	{
+		drawing_info.size_state = UF_DRAW_CUSTOM_SIZE;
+		drawing_info.size.custom_size[0]=420;
+		drawing_info.size.custom_size[1]=297;
+		sprintf(titleblock,"%s\\templates\\Royal_A3V.prt",p_env);
+	}
+	else //if( 0 == strcmp("A4横",frame.GetLocaleText()))
+	{
+		drawing_info.size_state = UF_DRAW_METRIC_SIZE;
+		drawing_info.size.metric_size_code = UF_DRAW_A4;
+		sprintf(titleblock,"%s\\templates\\Royal_A4.prt",p_env);
+	}
+	UF_DRAW_create_drawing( name.getLocaleText(), &drawing_info,&new_drawing_tag);
+	UF_DRAW_open_drawing( new_drawing_tag );
+	UF_PART_import(titleblock,&modes,dest_csys,dest_point,1.0,&group);
+	Point3d pt;
+	tag_t view = CreateBaseView(part,"Top",pt,1.0);
+	int i = 0;
+}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
+#if 0
 int autodrafting::apply_cb()
 {
     int errorCode = 0;
     try
     {
         //---- Enter your callback code here -----
+		std::vector<Node*> SelectedNodes;
+		NXOpen::BlockStyler::Node * treeNode = tree_control0->RootNode();
+		while( NULL != treeNode )
+		{
+			SelectedNodes.push_back(treeNode);
+			treeNode = treeNode->NextNode();
+		}
+        for( int idx = 0; idx < SelectedNodes.size(); ++idx )
+        {
+            NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
+            std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+            if( objects.size() > 0 )
+            {
+				StlTagVector bodies;
+				bodies.push_back(objects[0]->Tag());
+				NXString name = SelectedNodes[idx]->GetColumnDisplayText(0);
+				CreateReferenceSet(bodies,name);
+            }
+        }
+		tag_t disp = UF_PART_ask_display_part();
+		tag_t newpart = CreateDWGPart();
+		if( NULL_TAG != newpart )
+		{
+			for( int idx = 0; idx < SelectedNodes.size(); ++idx )
+			{
+				NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
+				std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+				if( objects.size() > 0 )
+				{
+					NXString name = SelectedNodes[idx]->GetColumnDisplayText(0);
+					NXString frame = SelectedNodes[idx]->GetColumnDisplayText(1);
+					NXString scale = SelectedNodes[idx]->GetColumnDisplayText(2);
+					CreateDrawingViewDWG(name,frame,scale);
+				}
+			}
+			UF_PART_save();
+			UF_PART_close(newpart,0,1);
+			theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
+		}
+		UF_PART_set_display_part(disp);
     }
     catch(exception& ex)
     {
@@ -334,7 +698,7 @@ int autodrafting::apply_cb()
     }
     return errorCode;
 }
-
+#endif
 //------------------------------------------------------------------------------
 //Callback Name: update_cb
 //------------------------------------------------------------------------------
@@ -401,7 +765,47 @@ int autodrafting::ok_cb()
     int errorCode = 0;
     try
     {
-        errorCode = apply_cb();
+        //errorCode = apply_cb();
+		std::vector<Node*> SelectedNodes;
+		NXOpen::BlockStyler::Node * treeNode = tree_control0->RootNode();
+		while( NULL != treeNode )
+		{
+			SelectedNodes.push_back(treeNode);
+			treeNode = treeNode->NextNode();
+		}
+        for( int idx = 0; idx < SelectedNodes.size(); ++idx )
+        {
+            NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
+            std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+            if( objects.size() > 0 )
+            {
+				StlTagVector bodies;
+				bodies.push_back(objects[0]->Tag());
+				NXString name = SelectedNodes[idx]->GetColumnDisplayText(0);
+				CreateReferenceSet(bodies,name);
+            }
+        }
+		tag_t disp = UF_PART_ask_display_part();
+		tag_t newpart = CreateDWGPart();
+		if( NULL_TAG != newpart )
+		{
+			for( int idx = 0; idx < SelectedNodes.size(); ++idx )
+			{
+				NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
+				std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+				if( objects.size() > 0 )
+				{
+					NXString name = SelectedNodes[idx]->GetColumnDisplayText(0);
+					NXString frame = SelectedNodes[idx]->GetColumnDisplayText(1);
+					NXString scale = SelectedNodes[idx]->GetColumnDisplayText(2);
+					CreateDrawingViewDWG(disp,name,frame,scale);
+				}
+			}
+			UF_PART_save();
+			//UF_PART_close(newpart,0,1);
+			//theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
+		}
+		//UF_PART_set_display_part(disp);
     }
     catch(exception& ex)
     {
@@ -469,9 +873,12 @@ void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::Blo
     {
         if( selected )
         {
-            UF_DISP_set_highlight(objects[0]->Tag(),1);//
-            NXString type = node->GetColumnDisplayText(0);
-            //enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetUTF8Text());
+            UF_DISP_set_highlight(objects[0]->Tag(),1);
+            NXString type = node->GetColumnDisplayText(1);
+            NXString scale = node->GetColumnDisplayText(2);
+            enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetLocaleText());
+			double sc = atof(scale.GetText());
+			doubleDwgScale->GetProperties()->SetDouble("Value",sc);
         }
         else
             UF_DISP_set_highlight(objects[0]->Tag(),0);
