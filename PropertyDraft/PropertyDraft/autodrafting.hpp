@@ -229,6 +229,8 @@
 #include <NXOpen/View.hxx>
 #include <NXOpen/ViewCollection.hxx>
 #include <NXOpen/Xform.hxx>
+#include <NXOpen/DexManager.hxx>
+#include <NXOpen/DxfdwgCreator.hxx>
 #include "Common_Function.h"
 #include "Common_Function_UG.h"
 #include "Excel/BasicExcel.hpp"

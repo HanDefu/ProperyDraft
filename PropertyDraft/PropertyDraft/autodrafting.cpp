@@ -235,7 +235,7 @@ void autodrafting::ReadExcelConfigData( )
 	BasicExcel excel;
     char regfile[256]="";
     sheetNames.clear();
-    sheetNames.push_back("全部");
+    //sheetNames.push_back("全部");
     sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
 	bool isOk = excel.Load(regfile);
 	if( isOk )
@@ -259,11 +259,19 @@ void autodrafting::dialogShown_cb()
     try
     {
         //---- Enter your callback code here -----
+		char file_name[UF_CFI_MAX_PATH_NAME_SIZE]="";
+		char dspec[MAX_FSPEC_BUFSIZE]="";
+		char fname[UF_CFI_MAX_FILE_NAME_BUFSIZE]="";
 		StlTagVector solidboies;
         ReadExcelConfigData();
         enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
 		CF_GetCurrentPartSolidBodies(solidboies);
 		CreateUITree(solidboies,true);
+
+		tag_t disPart = UF_PART_ask_display_part();
+		UF_PART_ask_part_name (disPart, file_name );
+		uc4576(file_name,2,dspec,fname);
+		nativeFolderBrowser01->GetProperties()->SetString("Path",dspec);
     }
     catch(exception& ex)
     {
@@ -317,6 +325,79 @@ int autodrafting::CreateUITree( StlTagVector& bodies, logical insertCol )
     return 0;
 }
 
+static void export_sheet_to_acad_dwg2d( char* inputfile, char* outputfile, NXString& drawingName )
+{
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+    NXOpen::Part *workPart(theSession->Parts()->Work());
+    NXOpen::Part *displayPart(theSession->Parts()->Display());
+
+	int status = 0;
+	UF_CFI_ask_file_exist(outputfile,&status);
+	if( 0 == status )
+	{
+		uc4561(outputfile,0);
+	}
+	char *p_env;
+    char dwgdef[MAX_FSPEC_SIZE];
+    p_env = getenv("UGII_USER_DIR");
+    strcpy(dwgdef,p_env);
+    strcat(dwgdef,"\\application\\dxfdwg.def");
+  
+    NXOpen::DxfdwgCreator *dxfdwgCreator1;
+    dxfdwgCreator1 = theSession->DexManager()->CreateDxfdwgCreator();
+    
+    dxfdwgCreator1->SetExportData(NXOpen::DxfdwgCreator::ExportDataOptionDrawing);
+    
+    dxfdwgCreator1->SetAutoCADRevision(NXOpen::DxfdwgCreator::AutoCADRevisionOptionsR2004);
+    
+    dxfdwgCreator1->SetViewEditMode(true);
+    
+    dxfdwgCreator1->SetFlattenAssembly(true);
+    
+    dxfdwgCreator1->ObjectTypes()->SetCurves(true);
+    
+    dxfdwgCreator1->ObjectTypes()->SetAnnotations(true);
+    
+    dxfdwgCreator1->ObjectTypes()->SetStructures(true);
+    
+    dxfdwgCreator1->SetFlattenAssembly(false);
+    
+    dxfdwgCreator1->SetSettingsFile(dwgdef);
+    
+    dxfdwgCreator1->SetOutputFileType(NXOpen::DxfdwgCreator::OutputFileTypeOptionDwg);
+    
+    dxfdwgCreator1->SetInputFile(inputfile);
+    
+    dxfdwgCreator1->SetOutputFile(outputfile);
+    
+    dxfdwgCreator1->SetExportSplinesAs(NXOpen::DxfdwgCreator::ExportSplinesAsOptionsPolyline2D);
+    
+    //dxfdwgCreator1->SetTextFontMappingFile("C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\Admi0A188E06nlb3.txt");
+    
+    dxfdwgCreator1->SetWidthFactorMode(NXOpen::DxfdwgCreator::WidthfactorMethodOptionsAutomaticCalculation);
+    
+    //dxfdwgCreator1->SetCrossHatchMappingFile("C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\Admi0A188E06nlb4.txt");
+    
+    //dxfdwgCreator1->SetLineFontMappingFile("C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\Admi0A188E06nlb5.txt");
+    
+    dxfdwgCreator1->SetLayerMask("1-256");
+    
+    dxfdwgCreator1->SetDrawingList( drawingName );
+    
+    NXOpen::NXObject *nXObject1;
+    nXObject1 = dxfdwgCreator1->Commit();
+    
+    dxfdwgCreator1->Destroy();
+	int count = 0;
+    UF_CFI_ask_file_exist(outputfile,&status);
+    while( count < 300 && 1 == status)
+    {
+        _sleep(1000);
+        count++;
+        UF_CFI_ask_file_exist(outputfile,&status);
+    }
+}
+
 static tag_t  CreateDWGPart( )
 {
 	tag_t partTag = NULL_TAG;
@@ -325,25 +406,6 @@ static tag_t  CreateDWGPart( )
 	char fname[_MAX_FNAME];
 
 	NXOpen::Session *theSession = NXOpen::Session::GetSession();
-
-	/*UF_DRAW_info_t drawing_info;
-	drawing_info.drawing_scale = 1.0;
-	drawing_info.units = UF_PART_METRIC;
-	drawing_info.projection_angle = UF_DRAW_FIRST_ANGLE_PROJECTION;
-	drawing_info.size_state = UF_DRAW_METRIC_SIZE;
-
-	UF_import_part_modes_t modes;
-	tag_t group = NULL_TAG;
-	char titleblock[MAX_FSPEC_SIZE] = "";
-	double dest_csys[6]={1,0,0,0,1,0};
-	double dest_point[3]={0,0,0};
-	modes.layer_mode=1;
-	modes.group_mode=1;
-	modes.csys_mode=0;
-	modes.plist_mode=0;
-	modes.view_mode=0;
-	modes.cam_mode=false;
-	modes.use_search_dirs=false;*/
 
 	tag_t disPart = UF_PART_ask_display_part();
 	tag_t rootocc = UF_ASSEM_ask_root_part_occ(disPart);
@@ -680,7 +742,7 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 	return 0;
 }
 
-static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXString& scale)
+static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXString& scale,NXString& typeStr)
 {
 	UF_DRAW_info_t drawing_info;
 	drawing_info.drawing_scale = 1.0;
@@ -706,20 +768,20 @@ static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXSt
 	{
 		drawing_info.size_state = UF_DRAW_METRIC_SIZE;
 		drawing_info.size.metric_size_code = UF_DRAW_A3;
-		sprintf(titleblock,"%s\\templates\\Royal_A3.prt",p_env);
+		sprintf(titleblock,"%s\\templates\\A3.prt",p_env);
 	}
 	else if( 0 == strcmp("A3竖",frame.GetLocaleText()))
 	{
 		drawing_info.size_state = UF_DRAW_CUSTOM_SIZE;
 		drawing_info.size.custom_size[0]=420;
 		drawing_info.size.custom_size[1]=297;
-		sprintf(titleblock,"%s\\templates\\Royal_A3V.prt",p_env);
+		sprintf(titleblock,"%s\\templates\\A3V.prt",p_env);
 	}
 	else //if( 0 == strcmp("A4横",frame.GetLocaleText()))
 	{
 		drawing_info.size_state = UF_DRAW_METRIC_SIZE;
 		drawing_info.size.metric_size_code = UF_DRAW_A4;
-		sprintf(titleblock,"%s\\templates\\Royal_A4.prt",p_env);
+		sprintf(titleblock,"%s\\templates\\A4%s.prt",p_env,typeStr.GetLocaleText());
 	}
 	UF_DRAW_create_drawing( name.getLocaleText(), &drawing_info,&new_drawing_tag);
 	UF_DRAW_open_drawing( new_drawing_tag );
@@ -742,7 +804,7 @@ static void CreateDrawingViewDWG(tag_t part, NXString& name,NXString& frame,NXSt
         }
         irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);
     }
-
+	UF_PART_save();
 }
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
@@ -871,7 +933,12 @@ int autodrafting::ok_cb()
     try
     {
         //errorCode = apply_cb();
+		char inputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
+		char outputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
 		std::vector<Node*> SelectedNodes;
+		NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value");
+		NXString savepath = nativeFolderBrowser01->GetProperties()->GetString("Path");
+
 		NXOpen::BlockStyler::Node * treeNode = tree_control0->RootNode();
 		while( NULL != treeNode )
 		{
@@ -894,6 +961,7 @@ int autodrafting::ok_cb()
 		tag_t newpart = CreateDWGPart();
 		if( NULL_TAG != newpart )
 		{
+			UF_PART_ask_part_name(newpart,inputfile);
 			for( int idx = 0; idx < SelectedNodes.size(); ++idx )
 			{
 				NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
@@ -903,10 +971,12 @@ int autodrafting::ok_cb()
 					NXString name = SelectedNodes[idx]->GetColumnDisplayText(0);
 					NXString frame = SelectedNodes[idx]->GetColumnDisplayText(1);
 					NXString scale = SelectedNodes[idx]->GetColumnDisplayText(2);
-					CreateDrawingViewDWG(disp,name,frame,scale);
+					CreateDrawingViewDWG(disp,name,frame,scale,typeStr);
+					sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),name.GetLocaleText());
+					export_sheet_to_acad_dwg2d(inputfile,outputfile,name);
 				}
 			}
-			UF_PART_save();
+			//UF_PART_save();
 			//UF_PART_close(newpart,0,1);
 			//theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
 		}
