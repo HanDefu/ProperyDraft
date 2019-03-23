@@ -437,7 +437,56 @@ static tag_t  CreateDWGPart( )
 	return partTag;
 }
 
-static tag_t CreateBaseView(tag_t partTag, NXString viewType, Point3d& viewRefPoint, double stdscale )
+tag_t GetReferencesetBody(tag_t part,NXString& refsetName)
+{
+	tag_t body = NULL_TAG;
+	tag_t refset = NULL_TAG;
+  	UF_OBJ_cycle_by_name_and_type(part, refsetName.GetLocaleText(),UF_reference_set_type, FALSE, &refset);
+	if( refset != NULL_TAG )
+	{
+		int n_members = 0;
+		tag_t * members = NULL;
+		UF_ASSEM_ask_ref_set_members( refset , & n_members , & members ) ;
+		for( int i = 0 ; i < n_members ; i ++ )
+		{
+			int type = 0, subtype = 0;
+			UF_OBJ_ask_type_and_subtype( members[ i ] , & type , & subtype ) ;
+			if (type == UF_solid_type && subtype == UF_solid_body_subtype &&
+				UF_OBJ_ALIVE == UF_OBJ_ask_status( members[ i ] ) )
+			{
+				body = members[i];
+			}
+		}
+		UF_free( members ) ;
+	}
+	return body;
+}
+
+int Roy_ask_obj_string_attr( tag_t obj , const char *title , char *string )
+{
+	UF_ATTR_value_t  value ;
+	strcpy( string , "" ) ;
+	if( obj == NULL_TAG ) 
+        return 1 ;
+	if( UF_ASSEM_is_occurrence( obj ))
+	{
+		obj = UF_ASSEM_ask_prototype_of_occ ( obj ) ;
+    }
+
+	UF_ATTR_read_value( obj, (char*)title, UF_ATTR_any, &value );
+	if( value.type == UF_ATTR_string ) 
+	{
+        strcpy( string , value.value.string ) ;
+        UF_free(value.value.string) ;
+	}
+	else 
+    {
+		return -1 ;
+    }
+	return 0 ;
+}
+
+static tag_t CreateBaseView(tag_t partTag, NXString viewType, NXString& refset,Point3d& viewRefPoint, double stdscale )
 {
 	tag_t viewTag = NULL_TAG;
 
@@ -475,9 +524,9 @@ static tag_t CreateBaseView(tag_t partTag, NXString viewType, Point3d& viewRefPo
     baseViewBuilder1->Style()->ViewStyleBase()->SetPartName(NXString(part_fspec));
     
 	NXOpen::NXObject *nXObject2;
-	logical adjust = false;
-	NXOpen::Vector3d vec1(0.0, 0.0, 1.0);
-	NXOpen::Vector3d vec2(1.0, 0.0, 0.0);
+	//logical adjust = false;
+	//NXOpen::Vector3d vec1(0.0, 0.0, 1.0);
+	//NXOpen::Vector3d vec2(1.0, 0.0, 0.0);
 	if( 0 == strcmp("Top",viewType.GetText()) )
 	{
 		workPart->DrawingSheets()->CurrentDrawingSheet();
@@ -492,6 +541,43 @@ static tag_t CreateBaseView(tag_t partTag, NXString viewType, Point3d& viewRefPo
 		NXOpen::Point3d origin1(0.0, 0.0, 0.0);
 		NXOpen::Vector3d vector1(0.0, 0.0, 1.0);
 		NXOpen::Vector3d vector2(1.0, 0.0, 0.0);
+
+		tag_t body = GetReferencesetBody(part,refset);
+		if( NULL_TAG != body )
+		{
+			char VZx[133]="",VZy[133]="",VZz[133]="";
+			char VXx[133]="",VXy[133]="",VXz[133]="";
+			int irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_X,VZx);
+			if( 0 == irc )
+			{
+				irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_Y,VZy);
+			}
+			if( 0 == irc )
+			{
+				irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_Z,VZz);
+			}
+			if( 0 == irc )
+			{
+				irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_X,VXx);
+			}
+			if( 0 == irc )
+			{
+				irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_Y,VXy);
+			}
+			if( 0 == irc )
+			{
+				irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_Z,VXz);
+			}
+			if( 0 == irc )
+			{
+				vector1.X = atof(VZx);
+				vector1.Y = atof(VZy);
+				vector1.Z = atof(VZz);
+				vector2.X = atof(VXx);
+				vector2.Y = atof(VXy);
+				vector2.Z = atof(VXz);
+			}
+		}
 		
 		direction1 = workPart->Directions()->CreateDirection(origin1, vector1, NXOpen::SmartObject::UpdateOptionAfterModeling);
 		baseViewBuilder1->Style()->ViewStyleOrientation()->Ovt()->SetNormalDirection(direction1);
@@ -619,7 +705,7 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 	Session *theSession = Session::GetSession();
     Part *workPart(theSession->Parts()->Work());
 	NXOpen::Point3d point1(0, 0, 0.0);
-	tag_t baseView = CreateBaseView(partTag,"Top", point1,stdscale);
+	tag_t baseView = CreateBaseView(partTag,"Top",refset, point1,stdscale);
 
     tag_t proto = partTag;
     tag_t currentDrawing = NULL_TAG;
@@ -636,7 +722,7 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
         {
             int err = 0;
             UF_ASSEM_replace_refset(1,&comps[idx],refset.GetLocaleText());
-            tag_t baseView2 = CreateBaseView(partTag,"Top", point1,stdscale);
+            tag_t baseView2 = CreateBaseView(partTag,"Top",refset, point1,stdscale);
             UF_VIEW_delete(baseView,&err);
             baseView = baseView2;
         }
@@ -888,6 +974,47 @@ int autodrafting::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == buttonApplyCSYS)
         {
         //---------Enter your code here-----------
+			Point3d originPoint;
+			double org[3] = {0.0,0,0}, csys[6] = {1,0,0,0,1,0};
+			std::vector<NXOpen::TaggedObject* > csysObjects = coord_system0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+			if( csysObjects.size() > 0 )
+			{
+				tag_t csys_tag = csysObjects[0]->Tag();
+				NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+				originPoint =  coord_system->Origin(); 
+				NXOpen::NXMatrix *matrix = coord_system->Orientation();
+				Matrix3x3 matrix33 = matrix->Element();
+				csys[0] = matrix33.Xx;
+				csys[1] = matrix33.Xy;
+				csys[2] = matrix33.Xz;
+				csys[3] = matrix33.Zx;
+				csys[4] = matrix33.Zy;
+				csys[5] = matrix33.Zz;
+				//org[0] = originPoint.X; org[1] = originPoint.Y;org[2] = originPoint.Z;
+			}
+			std::vector<Node*> SelectedNodes = tree_control0->GetSelectedNodes();
+			for( int idx = 0; idx < SelectedNodes.size(); ++idx )
+			{
+				NXOpen::DataContainer *nodeData = SelectedNodes[idx]->GetNodeData();
+				std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+				if( objects.size() > 0 && csysObjects.size() > 0 )
+				{
+					char str[133]="";
+					tag_t body =objects[0]->Tag();
+					sprintf(str,"%g",csys[0]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_X,str);
+					sprintf(str,"%g",csys[1]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Y,str);
+					sprintf(str,"%g",csys[2]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Z,str);
+					sprintf(str,"%g",csys[3]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_X,str);
+					sprintf(str,"%g",csys[4]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Y,str);
+					sprintf(str,"%g",csys[5]);
+					Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Z,str);
+				}
+			}
         }
         else if(block == enumFrameType)
         {
