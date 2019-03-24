@@ -462,29 +462,7 @@ tag_t GetReferencesetBody(tag_t part,NXString& refsetName)
 	return body;
 }
 
-int Roy_ask_obj_string_attr( tag_t obj , const char *title , char *string )
-{
-	UF_ATTR_value_t  value ;
-	strcpy( string , "" ) ;
-	if( obj == NULL_TAG ) 
-        return 1 ;
-	if( UF_ASSEM_is_occurrence( obj ))
-	{
-		obj = UF_ASSEM_ask_prototype_of_occ ( obj ) ;
-    }
 
-	UF_ATTR_read_value( obj, (char*)title, UF_ATTR_any, &value );
-	if( value.type == UF_ATTR_string ) 
-	{
-        strcpy( string , value.value.string ) ;
-        UF_free(value.value.string) ;
-	}
-	else 
-    {
-		return -1 ;
-    }
-	return 0 ;
-}
 
 static tag_t CreateBaseView(tag_t partTag, NXString viewType, NXString& refset,Point3d& viewRefPoint, double stdscale )
 {

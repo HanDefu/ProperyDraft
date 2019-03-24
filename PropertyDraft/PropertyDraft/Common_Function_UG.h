@@ -208,6 +208,7 @@ int RY_GetWeldBodiesForOneBody(tag_t seedBody, vtag_t& allBodies, vtag_t &weldBo
 int RY_GetGroupSelIndexs(NXString gruopNumber, vint &selIndexs);
 int Royal_set_obj_attr_Long(tag_t body, NXString title, NXString &value);
 int Royal_get_obj_attr_Long(tag_t obj, NXString title, NXString &value);
+int Roy_ask_obj_string_attr( tag_t obj , const char *title , char *string );
 logical Royal_get_obj_attr_Long2(tag_t obj, NXString title, NXString &value);
 int Royal_set_obj_attr_Long2(tag_t obj, NXString title, NXString &value);
 int Royal_ProjectCurveToFace(tag_t curve, tag_t face, tag_t &proFeature);

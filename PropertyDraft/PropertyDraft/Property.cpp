@@ -273,6 +273,104 @@ void Property::dialogShown_cb()
     }
 }
 
+static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates2,Vector3d xDirection1, Vector3d yDirection1)
+{
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+    NXOpen::Part *workPart(theSession->Parts()->Work());
+
+    NXOpen::Features::Text *nullNXOpen_Features_Text(NULL);
+    
+	int worklayer = -1;
+	int layerStatus = -1;
+	UF_LAYER_ask_work_layer(&worklayer);
+	UF_LAYER_ask_status(255,&layerStatus);
+	UF_LAYER_set_status(255, UF_LAYER_WORK_LAYER);
+    
+    NXOpen::Features::TextBuilder *textBuilder1;
+    textBuilder1 = workPart->Features()->CreateTextBuilder(nullNXOpen_Features_Text);
+    
+    NXOpen::Point3d origin1(0.0, 0.0, 0.0);
+    NXOpen::Vector3d normal1(0.0, 0.0, 1.0);
+    NXOpen::Plane *plane1;
+    plane1 = workPart->Planes()->CreatePlane(origin1, normal1, NXOpen::SmartObject::UpdateOptionWithinModeling);
+    
+    textBuilder1->SetSectionPlane(plane1);
+    
+    /*NXOpen::Unit *unit1;
+    unit1 = textBuilder1->PlanarFrame()->Length()->Units();
+    
+    textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("50");*/
+    
+    //textBuilder1->SetOnFacePlacementMethod(NXOpen::Features::TextBuilder::OnFacePlacementMethodOptionsSectionPlane);
+    
+    textBuilder1->SetScript(NXOpen::Features::TextBuilder::ScriptOptionsWestern);
+    
+    textBuilder1->SetCanUseKerningSpaces(false);
+    
+    textBuilder1->PlanarFrame()->SetAnchorLocation(NXOpen::GeometricUtilities::RectangularFrameBuilder::AnchorLocationTypeBottomLeft);
+    //textBuilder1->PlanarFrame()->Length()->SetRightHandSide("17.6908611782542");2.7*n
+    
+    textBuilder1->PlanarFrame()->Height()->SetRightHandSide(textHeight);
+    
+    textBuilder1->PlanarFrame()->SetWScale(100);
+    textBuilder1->PlanarFrame()->Shear()->SetRightHandSide("0");
+    
+    /*textBuilder1->FrameOnPath()->SetAnchorLocation(NXOpen::GeometricUtilities::FrameOnPathBuilder::AnchorLocationTypeLeft);
+    
+    textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("30");
+    
+    textBuilder1->FrameOnPath()->AnchorPosition()->SetParameterUsed(false);
+    
+    textBuilder1->FrameOnPath()->Offset()->SetRightHandSide("4.5");
+    
+    textBuilder1->FrameOnPath()->Length()->SetRightHandSide("9.53025449104364");2.7*n*/
+    
+    //textBuilder1->FrameOnPath()->Height()->SetRightHandSide("4");
+    
+    //textBuilder1->FrameOnPath()->SetWScale(35.4339270372263);
+    
+    textBuilder1->SetCanProjectCurves(true);
+    
+    textBuilder1->SelectFont("宋体", NXOpen::Features::TextBuilder::ScriptOptionsWestern);//Arial
+    
+    textBuilder1->SetTextString(textStr);
+
+	NXOpen::CoordinateSystem *coordinateSystem1;
+
+	CoordinateSystemCollection *csysCollectionPtr = workPart->CoordinateSystems();
+	NXMatrixCollection *matrixCollection = workPart->NXMatrices();
+	double mtx[9], vx[3]={xDirection1.X,xDirection1.Y,xDirection1.Z},vy[3]={yDirection1.X,yDirection1.Y,yDirection1.Z};
+	UF_MTX3_initialize(vx,vy,mtx);
+	Matrix3x3 element(mtx[0],mtx[1],mtx[2],mtx[3],mtx[4],mtx[5],mtx[6],mtx[7],mtx[8]);
+	NXOpen::NXMatrix * orientation = matrixCollection->Create(element);
+	
+	//coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2,xDirection1, yDirection1);
+	coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2,orientation,true);
+
+	textBuilder1->PlanarFrame()->SetCoordinateSystem(coordinateSystem1);
+    
+    textBuilder1->PlanarFrame()->UpdateOnCoordinateSystem();
+
+    NXOpen::Point *point2;
+    point2 = workPart->Points()->CreatePoint(coordinates2);
+    
+    NXOpen::Point3d point3(coordinates2.X, coordinates2.Y, coordinates2.Z);
+	//point2 = workPart->Points()->CreatePoint(point3);
+    textBuilder1->PlanarFrame()->AnchorLocator()->SetValue(point2, workPart->ModelingViews()->WorkView(), point3);
+
+
+    NXOpen::NXObject *nXObject1;
+    nXObject1 = textBuilder1->Commit();
+
+	tag_t texttag = nXObject1->Tag();
+
+    textBuilder1->Destroy();
+    
+    plane1->DestroyPlane();
+	UF_LAYER_set_status(worklayer, UF_LAYER_WORK_LAYER);
+	UF_LAYER_set_status(255,layerStatus);
+	return texttag;
+}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
@@ -316,7 +414,44 @@ int Property::apply_cb()
 			Royal_set_obj_attr(body,"已设零件标记","1");
 			logical is = toggleoutNO->GetProperties()->GetLogical("Value");
 			if(is)
+			{
+				char textHeight[64]="3";
 				Royal_set_obj_attr(body,"输出材料编号","1");
+				Point3d  originPoint(5,5,0);
+				double csysorg[3]={5,5,0};
+				double org[3]={0,0,0};
+				Vector3d vecDirX(1,0,0);
+				Vector3d vecDirY(0,1,0);
+				tag_t workcsys = NULL_TAG;
+				UF_CSYS_ask_wcs(&workcsys);
+				std::vector<NXOpen::TaggedObject* > csysObjects = coord_system01->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+				if( csysObjects.size() > 0 )
+				{
+					tag_t csys_tag = csysObjects[0]->Tag();
+					NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+					originPoint =  coord_system->Origin(); 
+					NXOpen::NXMatrix *matrix = coord_system->Orientation();
+					Matrix3x3 matrix33 = matrix->Element();
+					vecDirX.X = matrix33.Xx;
+					vecDirX.Y = matrix33.Xy;
+					vecDirX.Z = matrix33.Xz;
+					vecDirY.X = matrix33.Yx;
+					vecDirY.Y = matrix33.Yy;
+					vecDirY.Z = matrix33.Yz;
+					tag_t temp = NULL_TAG;
+					int irc  = UF_CSYS_set_wcs(csys_tag);
+					UF_CSYS_map_point(UF_CSYS_ROOT_WCS_COORDS,csysorg,UF_CSYS_ROOT_COORDS,org);
+					UF_CSYS_set_wcs(workcsys);
+					originPoint.X = org[0];
+					originPoint.Y = org[1];
+					originPoint.Z = org[2];
+				}
+				tag_t textTag = CreateText(maNO,textHeight,originPoint,vecDirX,vecDirY);
+				char *handle = 0;
+				UF_TAG_ask_handle_from_tag(RY_Prototype(textTag), &handle);
+				Royal_set_obj_attr( body, ATTR_RY_TEXT_SPLINE_BODY_HANDLE, handle );
+				UF_free(handle);
+			}
 			else
 				Royal_set_obj_attr(body,"输出材料编号","0");
             logical blank = hideBody->GetProperties()->GetLogical("Value");

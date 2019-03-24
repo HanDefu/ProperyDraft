@@ -3906,7 +3906,7 @@ void CreateReferenceSet(vtag_t bodies,NXString& refsetName)
 	}*/
     try
     {
-        UF_OBJ_cycle_by_name_and_type(workPart->Tag(), refsetName.GetText(),UF_reference_set_type, FALSE, &refset);
+		UF_OBJ_cycle_by_name_and_type(workPart->Tag(), refsetName.GetLocaleText(),UF_reference_set_type, FALSE, &refset);
         if( refset != NULL_TAG )
         {
             referenceSet1 = (ReferenceSet *)NXObjectManager::Get(refset);	
@@ -3918,7 +3918,19 @@ void CreateReferenceSet(vtag_t bodies,NXString& refsetName)
         }
         for( int idx = 0; idx < bodies.size(); ++idx )
         {
-            UF_ASSEM_add_ref_set_members(referenceSet1->Tag(),1,&bodies[idx]);
+			char handle[UF_ATTR_MAX_STRING_BUFSIZE+1]="";
+			tag_t body = bodies[idx];
+            UF_ASSEM_add_ref_set_members(referenceSet1->Tag(),1,&body);
+			int irc = Roy_ask_obj_string_attr(body,ATTR_RY_TEXT_SPLINE_BODY_HANDLE,handle);
+			if( 0 == irc )
+			{
+				int n_eids = 0;
+				tag_t *eids = NULL;
+				tag_t recTag = UF_TAG_ask_tag_of_handle(handle);
+				irc = UF_MODL_ask_feat_object(recTag, &n_eids, &eids);
+				irc = UF_ASSEM_add_ref_set_members(referenceSet1->Tag(),n_eids,eids);
+				UF_free(eids);
+			}
         }
         //referenceSet1->AddObjectsToReferenceSet(components1);
         int nErrs3;
@@ -3928,7 +3940,29 @@ void CreateReferenceSet(vtag_t bodies,NXString& refsetName)
     {
     }
 }
+int Roy_ask_obj_string_attr( tag_t obj , const char *title , char *string )
+{
+	UF_ATTR_value_t  value ;
+	strcpy( string , "" ) ;
+	if( obj == NULL_TAG ) 
+        return 1 ;
+	if( UF_ASSEM_is_occurrence( obj ))
+	{
+		obj = UF_ASSEM_ask_prototype_of_occ ( obj ) ;
+    }
 
+	UF_ATTR_read_value( obj, (char*)title, UF_ATTR_any, &value );
+	if( value.type == UF_ATTR_string ) 
+	{
+        strcpy( string , value.value.string ) ;
+        UF_free(value.value.string) ;
+	}
+	else 
+    {
+		return -1 ;
+    }
+	return 0 ;
+}
 int RY_DraftingPreferences_SetShowLineWidth(bool show)
 {
 	NXOpen::Session *theSession = NXOpen::Session::GetSession();
