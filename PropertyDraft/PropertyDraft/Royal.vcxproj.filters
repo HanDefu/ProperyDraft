@@ -57,6 +57,9 @@
     <ClCompile Include="autodrafting.cpp">
       <Filter>Command</Filter>
     </ClCompile>
+    <ClCompile Include="Excel\Excel.cpp">
+      <Filter>Excel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entry.hpp">
@@ -85,6 +88,42 @@
     </ClInclude>
     <ClInclude Include="autodrafting.hpp">
       <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CApplication.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CBorder.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CBorders.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CFont0.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\Cnterior.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CRange.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CRanges.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CWorkbook.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CWorkbooks.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CWorksheet.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\CWorksheets.h">
+      <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Excel\Excel.h">
+      <Filter>Excel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

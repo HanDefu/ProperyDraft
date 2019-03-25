@@ -44,6 +44,7 @@
 #include "AutoDraft.hpp"
 #include "autodrafting.hpp"
 //#include "UpdateFile.h"
+#include "Excel/Excel.h"
 
 using namespace NXOpen;
 
@@ -146,6 +147,28 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		{
 			GZ_PART_DRAFT_Main();
 		}
+
+
+		//示例代码
+		Excel::CExcelUtil xls;
+
+		CString xlsName =  L"C:\\mytemplate.xlsx";
+		xls.OpenExcel(xlsName);
+		xls.SaveAs("D:\\mydata.xlsx");
+		xls.SetVisible(true);
+		xls.SetActiveSheet(1);
+
+		CString str;
+		for (int i = 0; i < 10; i++)
+		{
+			str.Format(L"%d", i+1);
+			xls.SetCellValue(i+2, 1, str);
+		}
+		xls.CloseExcel();
+
+		//示例代码结束
+
+
 	}
 	catch(std::exception& ex)
 	{
