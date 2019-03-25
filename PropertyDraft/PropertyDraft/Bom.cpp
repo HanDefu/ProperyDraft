@@ -193,6 +193,11 @@ void Bom::dialogShown_cb()
     }
 }
 
+static logical CheckBodyType(tag_t body, NXString& type)
+{
+	logical is = false;
+	return is;
+}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
@@ -202,6 +207,77 @@ int Bom::apply_cb()
     try
     {
         //---- Enter your callback code here -----
+		std::vector<tag_t> bombodies;
+		logical logicalmatName = matName->GetProperties()->GetLogical("Value");
+		logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
+		logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
+		logical logicalmaterial = material->GetProperties()->GetLogical("Value");
+		logical logicaldesnity = desnity->GetProperties()->GetLogical("Value");
+		logical logicallength = length->GetProperties()->GetLogical("Value");
+		logical logicalarea = togglearea->GetProperties()->GetLogical("Value");
+		logical logicalquantity = togglequantity->GetProperties()->GetLogical("Value");
+		logical logicalWeight = toggleWeight->GetProperties()->GetLogical("Value");
+		logical logicalunitPrice = unitPrice->GetProperties()->GetLogical("Value");
+		logical logicaltotalPrice = totalPrice->GetProperties()->GetLogical("Value");
+		logical logicalsupplier = supplier->GetProperties()->GetLogical("Value");
+		logical logicalRemark = toggleRemark->GetProperties()->GetLogical("Value");
+
+		std::vector<NXOpen::TaggedObject* > objects = bodySelect->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+		NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value");
+		if(objects.size()>0)
+		{
+			for(int idx = 0; idx < objects.size(); ++idx)
+			{
+				if( strcmp("全部",typeStr.GetLocaleText()))
+				{
+					bombodies.push_back(objects[idx]->Tag());
+				}
+				else if(CheckBodyType(objects[idx]->Tag(),typeStr))
+				{
+					bombodies.push_back(objects[idx]->Tag());
+				}
+			}
+		}
+		if(objects.size()>0)
+		{
+			char file_name[UF_CFI_MAX_PATH_NAME_SIZE]="";
+			char fname[_MAX_FNAME]="";
+			char sFilePath[_MAX_FNAME]="";
+			int status = 0;
+			tag_t disPart = UF_PART_ask_display_part();
+			UF_PART_ask_part_name (disPart, file_name );
+			char *p = strstr(file_name,".prt");
+			if( p != NULL )
+			{
+				*p='\0';
+			}
+			uc4576 (file_name, 2, sFilePath, fname );
+			char *p_env = getenv("UGII_USER_DIR");
+			char srcspc[MAX_FSPEC_SIZE]="";
+			char desspc[MAX_FSPEC_SIZE]="";
+			sprintf(srcspc,"%s\\application\\GZBOM.xlsx",p_env);
+			UF_CFI_ask_file_exist(srcspc,&status);
+			if( 0 != status )
+			{
+				uc1601("没有找到模板文件",1);
+				return;
+			}
+			sprintf(desspc,"%s_%s_BOM.xlsx",file_name,typeStr.GetLocaleText());
+
+			Excel::CExcelUtil xls;
+			//CString xlsName =  L"C:\\mytemplate.xlsx";
+			xls.OpenExcel(srcspc);
+			xls.SaveAs(desspc);
+			xls.SetVisible(true);
+			xls.SetActiveSheet(1);
+			CString str;
+			for (int i = 0; i < 10; i++)
+			{
+				str.Format(L"%d", i+1);
+				xls.SetCellValue(i+2, 1, str);
+			}
+			xls.CloseExcel();
+		}
     }
     catch(exception& ex)
     {

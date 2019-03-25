@@ -150,7 +150,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 
 
 		//示例代码
-		Excel::CExcelUtil xls;
+		/*Excel::CExcelUtil xls;
 
 		CString xlsName =  L"C:\\mytemplate.xlsx";
 		xls.OpenExcel(xlsName);
@@ -164,7 +164,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 			str.Format(L"%d", i+1);
 			xls.SetCellValue(i+2, 1, str);
 		}
-		xls.CloseExcel();
+		xls.CloseExcel();*/
 
 		//示例代码结束
 

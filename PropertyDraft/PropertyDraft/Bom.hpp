@@ -21,6 +21,9 @@
 //------------------------------------------------------------------------------
 #include <uf_defs.h>
 #include <uf_ui_types.h>
+#include <uf.h>
+#include <uf_ui.h>
+#include <uf_part.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>
 #include <NXOpen/UI.hxx>
@@ -34,7 +37,7 @@
 #include <NXOpen/BlockStyler_Toggle.hxx>
 #include <NXOpen/BlockStyler_Enumeration.hxx>
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
-
+#include "Excel/Excel.h"
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------
