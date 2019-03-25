@@ -60,6 +60,9 @@
     <ClCompile Include="Excel\Excel.cpp">
       <Filter>Excel</Filter>
     </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entry.hpp">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="Excel\Excel.h">
       <Filter>Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

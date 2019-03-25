@@ -37,7 +37,7 @@
 #include <NXOpen/BlockStyler_Toggle.hxx>
 #include <NXOpen/BlockStyler_Enumeration.hxx>
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
-#include "Excel/Excel.h"
+
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------

@@ -296,4 +296,5 @@ int CF_SetPrintPDFName( const char* fileName);
 bool checkuse();
 
 void CF_getFilesInDirectory( string path, vector<string>& files );
+
 #endif

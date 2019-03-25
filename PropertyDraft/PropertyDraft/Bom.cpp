@@ -35,6 +35,7 @@
 //These includes are needed for the following template code
 //------------------------------------------------------------------------------
 #include "Bom.hpp"
+#include "Common.h"
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
@@ -246,37 +247,29 @@ int Bom::apply_cb()
 			int status = 0;
 			tag_t disPart = UF_PART_ask_display_part();
 			UF_PART_ask_part_name (disPart, file_name );
+            uc4576 (file_name, 2, sFilePath, fname );
 			char *p = strstr(file_name,".prt");
 			if( p != NULL )
 			{
 				*p='\0';
 			}
-			uc4576 (file_name, 2, sFilePath, fname );
 			char *p_env = getenv("UGII_USER_DIR");
 			char srcspc[MAX_FSPEC_SIZE]="";
 			char desspc[MAX_FSPEC_SIZE]="";
-			sprintf(srcspc,"%s\\application\\GZBOM.xlsx",p_env);
+			sprintf(srcspc,"%s\\application\\GZBOM.xls",p_env);
 			UF_CFI_ask_file_exist(srcspc,&status);
 			if( 0 != status )
 			{
 				uc1601("没有找到模板文件",1);
-				return;
+				return 1;
 			}
-			sprintf(desspc,"%s_%s_BOM.xlsx",file_name,typeStr.GetLocaleText());
+			//sprintf(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+			sprintf(desspc,"%s_BOM.xls",file_name);
 
-			Excel::CExcelUtil xls;
-			//CString xlsName =  L"C:\\mytemplate.xlsx";
-			xls.OpenExcel(srcspc);
-			xls.SaveAs(desspc);
-			xls.SetVisible(true);
-			xls.SetActiveSheet(1);
-			CString str;
-			for (int i = 0; i < 10; i++)
-			{
-				str.Format(L"%d", i+1);
-				xls.SetCellValue(i+2, 1, str);
-			}
-			xls.CloseExcel();
+			test(srcspc,desspc);
+            char cmd[512]="";
+			sprintf(cmd,"start %s",sFilePath);
+			system(cmd);
 		}
     }
     catch(exception& ex)
