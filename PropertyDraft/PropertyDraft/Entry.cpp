@@ -149,6 +149,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		}
 
 
+		UF_terminate();
 		//Ê¾Àý´úÂë
 		/*Excel::CExcelUtil xls;
 
@@ -203,8 +204,8 @@ extern "C" DllExport int ufusr_ask_unload()
 {
 	UF_terminate();
 	//return (int)Session::LibraryUnloadOptionExplicitly;
-	return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
-	//return (int)Session::LibraryUnloadOptionAtTermination;
+	//return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
+	return (int)Session::LibraryUnloadOptionAtTermination;
 }
 
 //------------------------------------------------------------------------------

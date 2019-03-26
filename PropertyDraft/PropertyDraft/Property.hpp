@@ -172,46 +172,45 @@ public:
     PropertyList* GetBlockProperties(const char *blockID);
     
 private:
-    const char* theDlxFileName;
-    NXOpen::BlockStyler::BlockDialog* theDialog;
-    NXOpen::BlockStyler::Group* group;// Block type: Group
-    NXOpen::BlockStyler::MultilineString* str_techReq;// Block type: Multiline String
-    NXOpen::BlockStyler::Group* group3;// Block type: Group
-    NXOpen::BlockStyler::Enumeration* enumType;// Block type: Enumeration
-    NXOpen::BlockStyler::BodyCollector* bodySelect0;// Block type: Body Collector
-    NXOpen::BlockStyler::Group* group1;// Block type: Group
-    NXOpen::BlockStyler::Enumeration* enum09;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* enum08;// Block type: Enumeration
-    NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
-    NXOpen::BlockStyler::Button* buttonCalculate;// Block type: Button
-    NXOpen::BlockStyler::DoubleBlock* bodyLen;// Block type: Double
-    NXOpen::BlockStyler::DoubleBlock* bodyWidth;// Block type: Double
-    NXOpen::BlockStyler::DoubleBlock* bodyarea;// Block type: Double
-    NXOpen::BlockStyler::Group* group0;// Block type: Group
-    NXOpen::BlockStyler::Enumeration* matName;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* matNO;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* matSize;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* material;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* matDensity;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* unitPrice;// Block type: Enumeration
-    NXOpen::BlockStyler::Enumeration* supplier;// Block type: Enumeration
-    NXOpen::BlockStyler::DoubleBlock* weight;// Block type: Double
-    NXOpen::BlockStyler::DoubleBlock* totalPrice;// Block type: Double
-    NXOpen::BlockStyler::Enumeration* remark;// Block type: Enumeration
-    NXOpen::BlockStyler::Toggle* toggleoutNO;// Block type: Toggle
-    NXOpen::BlockStyler::Group* group4;// Block type: Group
-    NXOpen::BlockStyler::SpecifyCSYS* coord_system01;// Block type: Specify Csys
-    NXOpen::BlockStyler::Group* group2;// Block type: Group
-    NXOpen::BlockStyler::Toggle* hideBody;// Block type: Toggle
-    NXOpen::BlockStyler::Enumeration* enum011;// Block type: Enumeration
-    NXOpen::BlockStyler::Toggle* inheriteFrombody;// Block type: Toggle
-    NXOpen::BlockStyler::BodyCollector* selectFrombody;// Block type: Body Collector
-    NXOpen::BlockStyler::Button* buttonHideBody;// Block type: Button
+	const char* theDlxFileName;
+	NXOpen::BlockStyler::BlockDialog* theDialog;
+	NXOpen::BlockStyler::Group* group;// Block type: Group
+	NXOpen::BlockStyler::MultilineString* str_techReq;// Block type: Multiline String
+	NXOpen::BlockStyler::Group* group3;// Block type: Group
+	NXOpen::BlockStyler::Enumeration* enumType;// Block type: Enumeration
+	NXOpen::BlockStyler::BodyCollector* bodySelect0;// Block type: Body Collector
+	NXOpen::BlockStyler::Group* group1;// Block type: Group
+	NXOpen::BlockStyler::Enumeration* enum09;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* enum08;// Block type: Enumeration
+	NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
+	NXOpen::BlockStyler::Button* buttonCalculate;// Block type: Button
+	NXOpen::BlockStyler::DoubleBlock* bodyLen;// Block type: Double
+	NXOpen::BlockStyler::DoubleBlock* bodyWidth;// Block type: Double
+	NXOpen::BlockStyler::DoubleBlock* bodyarea;// Block type: Double
+	NXOpen::BlockStyler::Group* group0;// Block type: Group
+	NXOpen::BlockStyler::Enumeration* matName;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* matNO;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* matSize;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* material;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* matDensity;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* unitPrice;// Block type: Enumeration
+	NXOpen::BlockStyler::Enumeration* supplier;// Block type: Enumeration
+	NXOpen::BlockStyler::DoubleBlock* weight;// Block type: Double
+	NXOpen::BlockStyler::DoubleBlock* totalPrice;// Block type: Double
+	NXOpen::BlockStyler::Enumeration* remark;// Block type: Enumeration
+	NXOpen::BlockStyler::Group* group4;// Block type: Group
+	NXOpen::BlockStyler::Toggle* toggleoutNO;// Block type: Toggle
+	NXOpen::BlockStyler::SpecifyCSYS* coord_system01;// Block type: Specify Csys
+	NXOpen::BlockStyler::Group* group2;// Block type: Group
+	NXOpen::BlockStyler::Toggle* hideBody;// Block type: Toggle
+	NXOpen::BlockStyler::Enumeration* enum011;// Block type: Enumeration
+	NXOpen::BlockStyler::Toggle* inheriteFrombody;// Block type: Toggle
+	NXOpen::BlockStyler::BodyCollector* selectFrombody;// Block type: Body Collector
+	NXOpen::BlockStyler::Button* buttonHideBody;// Block type: Button
     int SetBodyBoundingBoxSize( );
     void SetUIConfigData( );
     void ReadExcelConfigData();
     StlNXStringVector sheetNames;
-    VVecNXStringVector configData;
 };
 
 void GZ_PART_ATTR_Main();
