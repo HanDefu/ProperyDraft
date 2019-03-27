@@ -191,51 +191,88 @@ void Property::initialize_cb()
         Property::theUI->NXMessageBox()->Show("Block Styler", NXOpen::NXMessageBox::DialogTypeError, ex.what());
     }
 }
-#include "Excel/Excel.h"
+//#include "Excel/Excel.h"
+//void Property::ReadExcelConfigData( )
+//{
+//	if (configData.size() > 0)
+//		return;
+//
+//	Excel::CExcelUtil xls;
+//	BasicExcel excel;
+//    char regfile[256]="";
+//    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+//	//bool isOk = excel.Load(regfile);
+//	xls.OpenExcel(regfile);
+//	xls.SetVisible(false);
+//	int num = xls.GetSheetNum();
+//
+//
+//	
+//
+//	for( int idx = 0; idx < num; ++idx )
+//	{
+//		//xls.GetSheet();
+//
+//		xls.SetActiveSheet(idx+1);
+//
+//		size_t maxRows = 256;
+//		size_t maxCols = 9;
+//
+//		VecNXStringVector sheetData;
+//		for(int i = 1; i < maxCols; i++)
+//		{
+//			StlNXStringVector matNameEtc;
+//			for(int j = 2; j < maxRows; ++j)
+//			{
+//				CString str = xls.GetCellValue(j,i).GetBuffer();
+//				if (str.GetLength() > 0)
+//				{
+//				    matNameEtc.push_back(WCHARTOCHAR(str.GetBuffer()));
+//				}
+//			}
+//			sheetData.push_back(matNameEtc);
+//		}
+//		configData.push_back(sheetData);
+//
+//	}
+//	xls.CloseExcel();
+//	return;
+//}
 void Property::ReadExcelConfigData( )
 {
-	if (configData.size() > 0)
-		return;
-
-	Excel::CExcelUtil xls;
 	BasicExcel excel;
     char regfile[256]="";
     sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
-	//bool isOk = excel.Load(regfile);
-	xls.OpenExcel(regfile);
-	xls.SetVisible(false);
-	int num = xls.GetSheetNum();
-
-
-	
-
-	for( int idx = 0; idx < num; ++idx )
+	bool isOk = excel.Load(regfile);
+	if( isOk )
 	{
-		//xls.GetSheet();
-
-		xls.SetActiveSheet(idx+1);
-
-		size_t maxRows = 256;
-		size_t maxCols = 9;
-
-		VecNXStringVector sheetData;
-		for(int i = 1; i < maxCols; i++)
-		{
-			StlNXStringVector matNameEtc;
-			for(int j = 2; j < maxRows; ++j)
-			{
-				CString str = xls.GetCellValue(j,i).GetBuffer();
-				if (str.GetLength() > 0)
-				{
-				    matNameEtc.push_back(WCHARTOCHAR(str.GetBuffer()));
-				}
-			}
-			sheetData.push_back(matNameEtc);
-		}
-		configData.push_back(sheetData);
-
+        int num = excel.GetTotalWorkSheets();
+        for( int idx = 0; idx < num; ++idx )
+        {
+            const wchar_t* sheetName = excel.GetUnicodeSheetName(idx);
+			sheetNames.push_back(WCHARTOCHAR(sheetName));
+            BasicExcelWorksheet* sheet1 = excel.GetWorksheet(sheetName);
+            if (sheet1)
+            {
+                size_t maxRows = sheet1->GetTotalRows();
+                size_t maxCols = sheet1->GetTotalCols();
+                {
+                    VecNXStringVector sheetData;
+                    for(int i = 0; i < maxCols; i++)
+                    {
+                        StlNXStringVector matNameEtc;
+                        for(int j = 1; j < maxRows; ++j)
+                        {
+                            BasicExcelCell *cel = sheet1->Cell(j,i);
+                            matNameEtc.push_back(cel->Get());
+                        }
+                        sheetData.push_back(matNameEtc);
+                    }
+                    configData.push_back(sheetData);
+                }
+            }
+        }
 	}
-	xls.CloseExcel();
 	return;
 }
 
@@ -274,7 +311,7 @@ void Property::dialogShown_cb()
         selectFrombody->GetProperties()->SetLogical("Show",inheritBody);
         logical out  = toggleoutNO->GetProperties()->GetLogical("Value");
         coord_system01->GetProperties()->SetLogical("Show",out);
-        //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
+        enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
     }
     catch(exception& ex)
@@ -514,7 +551,7 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == buttonCalculate)
         {
         //---------Enter your code here-----------
-			//SetBodyBoundingBoxSize();
+			SetBodyBoundingBoxSize();
         }
         else if(block == bodyLen)
         {

@@ -39,6 +39,23 @@
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
+void ReadExcelConfigData( StlNXStringVector& types )
+{
+	BasicExcel excel;
+    char regfile[256]="";
+    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+	bool isOk = excel.Load(regfile);
+	if( isOk )
+	{
+        int num = excel.GetTotalWorkSheets();
+        for( int idx = 0; idx < num; ++idx )
+        {
+            const wchar_t* sheetName = excel.GetUnicodeSheetName(idx);
+			types.push_back(WCHARTOCHAR(sheetName));
+        }
+	}
+	return;
+}
 //------------------------------------------------------------------------------
 // Initialize static variables
 //------------------------------------------------------------------------------
@@ -186,6 +203,10 @@ void Bom::dialogShown_cb()
     try
     {
         //---- Enter your callback code here -----
+        StlNXStringVector types;
+        types.push_back("全部");
+        ReadExcelConfigData( types );
+        enumType->GetProperties()->SetEnumMembers("Value",types);
     }
     catch(exception& ex)
     {
@@ -199,6 +220,7 @@ static logical CheckBodyType(tag_t body, NXString& type)
 	logical is = false;
 	return is;
 }
+
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
@@ -245,6 +267,7 @@ int Bom::apply_cb()
 			char fname[_MAX_FNAME]="";
 			char sFilePath[_MAX_FNAME]="";
 			int status = 0;
+            StlNXStringVectorVector BOMStr;
 			tag_t disPart = UF_PART_ask_display_part();
 			UF_PART_ask_part_name (disPart, file_name );
             uc4576 (file_name, 2, sFilePath, fname );
@@ -256,17 +279,22 @@ int Bom::apply_cb()
 			char *p_env = getenv("UGII_USER_DIR");
 			char srcspc[MAX_FSPEC_SIZE]="";
 			char desspc[MAX_FSPEC_SIZE]="";
-			sprintf(srcspc,"%s\\application\\GZBOM.xls",p_env);
+			sprintf(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText());
 			UF_CFI_ask_file_exist(srcspc,&status);
 			if( 0 != status )
 			{
 				uc1601("没有找到模板文件",1);
 				return 1;
 			}
-			//sprintf(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
-			sprintf(desspc,"%s_BOM.xls",file_name);
+			sprintf(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+			//sprintf(desspc,"%s_BOM.xls",file_name);
+            UF_CFI_ask_file_exist(desspc,&status);
+			if( 0 == status )
+			{
+				uc4561(desspc,-1); 
+			}
 
-			test(srcspc,desspc);
+			WriteBOM(srcspc,desspc,BOMStr);
             char cmd[512]="";
 			sprintf(cmd,"start %s",sFilePath);
 			system(cmd);

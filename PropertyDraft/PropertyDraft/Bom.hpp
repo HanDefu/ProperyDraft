@@ -54,7 +54,9 @@
 using namespace std;
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
-
+#include "Excel/BasicExcel.hpp"
+#include "Common_Function.h"
+using namespace YExcel;
 class DllExport Bom
 {
     // class members
