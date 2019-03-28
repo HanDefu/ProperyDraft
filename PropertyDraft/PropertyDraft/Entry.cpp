@@ -204,8 +204,8 @@ extern "C" DllExport int ufusr_ask_unload()
 {
 	UF_terminate();
 	//return (int)Session::LibraryUnloadOptionExplicitly;
-	//return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
-	return (int)Session::LibraryUnloadOptionAtTermination;
+	return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
+	//return (int)Session::LibraryUnloadOptionAtTermination;
 }
 
 //------------------------------------------------------------------------------
