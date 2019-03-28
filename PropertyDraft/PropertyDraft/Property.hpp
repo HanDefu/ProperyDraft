@@ -47,6 +47,7 @@
 #include <NXOpen/BlockStyler_SpecifyCSYS.hxx>
 #include <NXOpen/BlockStyler_Button.hxx>
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
+#include <NXOpen/BlockStyler_LinearDimension.hxx>
 #include <NXOpen/BlockStyler_Toggle.hxx>
 
 #include <NXOpen/CoordinateSystemCollection.hxx>
@@ -140,6 +141,27 @@ typedef std::vector<VecNXStringVector> VVecNXStringVector;
 #define                        BodyRules_FeatureBodies (1 << 1);
 #define                        BodyRules_BodiesinGroup (1 << 2);
 //------------------------------------------------------------------------------
+//Bit Option for Property: SnapPointTypesOnByDefault
+//------------------------------------------------------------------------------
+#define          SnapPointTypesOnByDefault_UserDefined (1 << 0);
+#define             SnapPointTypesOnByDefault_Inferred (1 << 1);
+#define       SnapPointTypesOnByDefault_ScreenPosition (1 << 2);
+#define             SnapPointTypesOnByDefault_EndPoint (1 << 3);
+#define             SnapPointTypesOnByDefault_MidPoint (1 << 4);
+#define         SnapPointTypesOnByDefault_ControlPoint (1 << 5);
+#define         SnapPointTypesOnByDefault_Intersection (1 << 6);
+#define            SnapPointTypesOnByDefault_ArcCenter (1 << 7);
+#define        SnapPointTypesOnByDefault_QuadrantPoint (1 << 8);
+#define        SnapPointTypesOnByDefault_ExistingPoint (1 << 9);
+#define         SnapPointTypesOnByDefault_PointonCurve (1 <<10);
+#define       SnapPointTypesOnByDefault_PointonSurface (1 <<11);
+#define     SnapPointTypesOnByDefault_PointConstructor (1 <<12);
+#define SnapPointTypesOnByDefault_TwocurveIntersection (1 <<13);
+#define         SnapPointTypesOnByDefault_TangentPoint (1 <<14);
+#define                SnapPointTypesOnByDefault_Poles (1 <<15);
+#define     SnapPointTypesOnByDefault_BoundedGridPoint (1 <<16);
+#define     SnapPointTypesOnByDefault_FacetVertexPoint (1 <<17);
+//------------------------------------------------------------------------------
 // Namespaces needed for following template
 //------------------------------------------------------------------------------
 using namespace std;
@@ -185,6 +207,8 @@ private:
 	NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
 	NXOpen::BlockStyler::Button* buttonCalculate;// Block type: Button
 	NXOpen::BlockStyler::DoubleBlock* bodyLen;// Block type: Double
+    NXOpen::BlockStyler::LinearDimension* linear_bodyLen;// Block type: Linear Dim
+    NXOpen::BlockStyler::LinearDimension* linear_bodyWidth;// Block type: Linear Dim
 	NXOpen::BlockStyler::DoubleBlock* bodyWidth;// Block type: Double
 	NXOpen::BlockStyler::DoubleBlock* bodyarea;// Block type: Double
 	NXOpen::BlockStyler::Group* group0;// Block type: Group
@@ -201,6 +225,7 @@ private:
 	NXOpen::BlockStyler::Group* group4;// Block type: Group
 	NXOpen::BlockStyler::Toggle* toggleoutNO;// Block type: Toggle
 	NXOpen::BlockStyler::SpecifyCSYS* coord_system01;// Block type: Specify Csys
+    NXOpen::BlockStyler::DoubleBlock* textHeight;// Block type: Double
 	NXOpen::BlockStyler::Group* group2;// Block type: Group
 	NXOpen::BlockStyler::Toggle* hideBody;// Block type: Toggle
 	NXOpen::BlockStyler::Enumeration* enum011;// Block type: Enumeration

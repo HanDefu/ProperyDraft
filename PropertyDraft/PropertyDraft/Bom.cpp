@@ -203,10 +203,10 @@ void Bom::dialogShown_cb()
     try
     {
         //---- Enter your callback code here -----
-        StlNXStringVector types;
-        types.push_back("全部");
-        ReadExcelConfigData( types );
-        enumType->GetProperties()->SetEnumMembers("Value",types);
+        //StlNXStringVector types;
+        //types.push_back("全部");
+        //ReadExcelConfigData( types );
+        //enumType->GetProperties()->SetEnumMembers("Value",types);
     }
     catch(exception& ex)
     {
@@ -218,8 +218,15 @@ void Bom::dialogShown_cb()
 static logical CheckBodyType(tag_t body, NXString& type)
 {
 	logical is = false;
+    char attriValue2[133] = "";
+    int has = USER_ask_obj_string_attr( body , "材料类型" , attriValue2 );
+    if( has && 0 == strcmp(attriValue2,type.GetLocaleText()))
+    {
+        is = true;
+    }
 	return is;
 }
+//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	数量	重量	单价	总价	供应商	备注		
 
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
@@ -231,6 +238,7 @@ int Bom::apply_cb()
     {
         //---- Enter your callback code here -----
 		std::vector<tag_t> bombodies;
+        logical isAll = false;
 		logical logicalmatName = matName->GetProperties()->GetLogical("Value");
 		logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
 		logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
@@ -247,11 +255,15 @@ int Bom::apply_cb()
 
 		std::vector<NXOpen::TaggedObject* > objects = bodySelect->GetProperties()->GetTaggedObjectVector("SelectedObjects");
 		NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value");
+        if( 0 == strcmp("全部",typeStr.GetLocaleText()))
+        {
+            isAll = true;
+        }
 		if(objects.size()>0)
 		{
 			for(int idx = 0; idx < objects.size(); ++idx)
 			{
-				if( strcmp("全部",typeStr.GetLocaleText()))
+				if( isAll )
 				{
 					bombodies.push_back(objects[idx]->Tag());
 				}
@@ -261,7 +273,7 @@ int Bom::apply_cb()
 				}
 			}
 		}
-		if(objects.size()>0)
+		if(bombodies.size()>0)
 		{
 			char file_name[UF_CFI_MAX_PATH_NAME_SIZE]="";
 			char fname[_MAX_FNAME]="";
@@ -293,7 +305,6 @@ int Bom::apply_cb()
 			{
 				uc4561(desspc,-1); 
 			}
-
 			WriteBOM(srcspc,desspc,BOMStr);
             char cmd[512]="";
 			sprintf(cmd,"start %s",sFilePath);

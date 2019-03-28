@@ -36,12 +36,15 @@
 #include <NXOpen/BlockStyler_PropertyList.hxx>
 #include <NXOpen/BlockStyler_Node.hxx>
 #include <NXOpen/BlockStyler_Group.hxx>
+#include <NXOpen/BlockStyler_StringBlock.hxx>
 #include <NXOpen/BlockStyler_Enumeration.hxx>
 #include <NXOpen/BlockStyler_MultilineString.hxx>
 #include <NXOpen/BlockStyler_ScrolledWindow.hxx>
 #include <NXOpen/BlockStyler_Tree.hxx>
-#include <NXOpen/BlockStyler_SpecifyCSYS.hxx>
+#include <NXOpen/BlockStyler_BodyCollector.hxx>
+#include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_Button.hxx>
+#include <NXOpen/BlockStyler_SpecifyCSYS.hxx>
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_FolderSelection.hxx>
 #include <NXOpen/NXObjectManager.hxx>
@@ -255,6 +258,7 @@ using namespace NXOpen::BlockStyler;
 #define ATTR_DRAFTING_X_DIR_Z "ATTR_DRAFTING_X_DIR_Z"
 
 typedef std::vector<tag_t> StlTagVector;
+typedef std::vector<double> StlDoubVector;
 typedef std::vector<NXString> StlNXStringVector;
 
 class DllExport autodrafting
@@ -306,6 +310,11 @@ private:
     const char* theDlxFileName;
     NXOpen::BlockStyler::BlockDialog* theDialog;
     NXOpen::BlockStyler::Group* group1;// Block type: Group
+    NXOpen::BlockStyler::StringBlock* projectName;// Block type: String
+    NXOpen::BlockStyler::StringBlock* projectNO;// Block type: String
+    NXOpen::BlockStyler::StringBlock* drawingName;// Block type: String
+    NXOpen::BlockStyler::StringBlock* drawingNO;// Block type: String
+    NXOpen::BlockStyler::StringBlock* DesignDate;// Block type: String
     NXOpen::BlockStyler::Enumeration* enumType;// Block type: Enumeration
     NXOpen::BlockStyler::MultilineString* multiline_string0;// Block type: Multiline String
     NXOpen::BlockStyler::ScrolledWindow* scrolledWindow;// Block type: Scrolled Window
@@ -313,6 +322,7 @@ private:
     NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
     NXOpen::BlockStyler::Button* buttonApplyCSYS;// Block type: Button
     NXOpen::BlockStyler::Group* group;// Block type: Group
+    NXOpen::BlockStyler::BodyCollector* bodySelect0;// Block type: Body Collector
     NXOpen::BlockStyler::Enumeration* enumFrameType;// Block type: Enumeration
     NXOpen::BlockStyler::DoubleBlock* doubleDwgScale;// Block type: Double
     NXOpen::BlockStyler::FolderSelection* nativeFolderBrowser01;// Block type: NativeFolderBrowser

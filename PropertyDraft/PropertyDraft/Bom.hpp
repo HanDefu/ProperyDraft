@@ -101,6 +101,17 @@ private:
     NXOpen::BlockStyler::Toggle* totalPrice;// Block type: Toggle
     NXOpen::BlockStyler::Toggle* supplier;// Block type: Toggle
     NXOpen::BlockStyler::Toggle* toggleRemark;// Block type: Toggle
+    StlNXStringVector gangcaiAttri;
+    StlNXStringVector lvbanAttri;
+    StlNXStringVector shuzhibanAttri;
+    StlNXStringVector shicaiAttri;
+    StlNXStringVector lvcaiAttri;
+    StlNXStringVector boliAttri;
+    StlNXStringVector wujinAttri;
+    StlNXStringVector mudiaoAttri;
+    StlNXStringVector wumianwaAttri;
+    StlNXStringVector tongshiAttri;
+    StlNXStringVector fucaiAttri;
 };
 void GZ_PART_BOM_Main();
 #endif //BOM_H_INCLUDED

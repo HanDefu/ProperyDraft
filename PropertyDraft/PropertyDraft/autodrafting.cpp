@@ -168,6 +168,11 @@ void autodrafting::initialize_cb()
     try
     {
         group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
+        projectName = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectName"));
+        projectNO = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectNO"));
+        drawingName = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("drawingName"));
+        drawingNO = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("drawingNO"));
+        DesignDate = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("DesignDate"));
         enumType = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enumType"));
         multiline_string0 = dynamic_cast<NXOpen::BlockStyler::MultilineString*>(theDialog->TopBlock()->FindBlock("multiline_string0"));
         scrolledWindow = dynamic_cast<NXOpen::BlockStyler::ScrolledWindow*>(theDialog->TopBlock()->FindBlock("scrolledWindow"));
@@ -175,6 +180,7 @@ void autodrafting::initialize_cb()
         coord_system0 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system0"));
         buttonApplyCSYS = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonApplyCSYS"));
         group = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group"));
+        bodySelect0 = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("bodySelect0"));
         enumFrameType = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enumFrameType"));
         doubleDwgScale = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("doubleDwgScale"));
         nativeFolderBrowser01 = dynamic_cast<NXOpen::BlockStyler::FolderSelection*>(theDialog->TopBlock()->FindBlock("nativeFolderBrowser01"));
@@ -264,11 +270,22 @@ void autodrafting::dialogShown_cb()
 		char dspec[MAX_FSPEC_BUFSIZE]="";
 		char fname[UF_CFI_MAX_FILE_NAME_BUFSIZE]="";
 		StlTagVector solidboies;
-        ReadExcelConfigData();
+        StlDoubVector scalelist;
+        scalelist.push_back(1);
+        scalelist.push_back(2);
+        scalelist.push_back(3);
+        scalelist.push_back(4);
+        scalelist.push_back(5);
+        //ReadExcelConfigData();
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
 		CF_GetCurrentPartSolidBodies(solidboies);
-		CreateUITree(solidboies,true);
-
+		//CreateUITree(solidboies,true);
+        doubleDwgScale->GetProperties()->SetDoubleVector("ComboOptions",scalelist);
+        projectName->GetProperties()->SetString("Value","工程名称");
+        projectNO->GetProperties()->SetString("Value","工程编号");
+        drawingName->GetProperties()->SetString("Value","图名");
+        drawingNO->GetProperties()->SetString("Value","图号");
+        DesignDate->GetProperties()->SetString("Value","20190328");
 		tag_t disPart = UF_PART_ask_display_part();
 		UF_PART_ask_part_name (disPart, file_name );
 		uc4576(file_name,2,dspec,fname);

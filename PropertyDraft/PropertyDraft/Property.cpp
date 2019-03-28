@@ -151,39 +151,42 @@ void Property::initialize_cb()
 {
     try
     {
-		group = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group"));
-		str_techReq = dynamic_cast<NXOpen::BlockStyler::MultilineString*>(theDialog->TopBlock()->FindBlock("str_techReq"));
-		group3 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group3"));
-		enumType = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enumType"));
-		bodySelect0 = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("bodySelect0"));
-		group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
-		enum09 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum09"));
-		enum08 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum08"));
-		coord_system0 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system0"));
-		buttonCalculate = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonCalculate"));
-		bodyLen = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyLen"));
-		bodyWidth = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyWidth"));
-		bodyarea = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyarea"));
-		group0 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group0"));
-		matName = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matName"));
-		matNO = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matNO"));
-		matSize = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matSize"));
-		material = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("material"));
-		matDensity = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matDensity"));
-		unitPrice = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("unitPrice"));
-		supplier = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("supplier"));
-		weight = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("weight"));
-		totalPrice = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("totalPrice"));
-		remark = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("remark"));
-		group4 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group4"));
-		toggleoutNO = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleoutNO"));
-		coord_system01 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system01"));
-		group2 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group2"));
-		hideBody = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("hideBody"));
-		enum011 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum011"));
-		inheriteFrombody = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("inheriteFrombody"));
-		selectFrombody = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("selectFrombody"));
-		buttonHideBody = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonHideBody"));
+        group = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group"));
+        str_techReq = dynamic_cast<NXOpen::BlockStyler::MultilineString*>(theDialog->TopBlock()->FindBlock("str_techReq"));
+        group3 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group3"));
+        enumType = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enumType"));
+        bodySelect0 = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("bodySelect0"));
+        group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
+        enum09 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum09"));
+        enum08 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum08"));
+        coord_system0 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system0"));
+        buttonCalculate = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonCalculate"));
+        bodyLen = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyLen"));
+        linear_bodyLen = dynamic_cast<NXOpen::BlockStyler::LinearDimension*>(theDialog->TopBlock()->FindBlock("linear_bodyLen"));
+        linear_bodyWidth = dynamic_cast<NXOpen::BlockStyler::LinearDimension*>(theDialog->TopBlock()->FindBlock("linear_bodyWidth"));
+        bodyWidth = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyWidth"));
+        bodyarea = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyarea"));
+        group0 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group0"));
+        matName = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matName"));
+        matNO = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matNO"));
+        matSize = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matSize"));
+        material = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("material"));
+        matDensity = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("matDensity"));
+        unitPrice = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("unitPrice"));
+        supplier = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("supplier"));
+        weight = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("weight"));
+        totalPrice = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("totalPrice"));
+        remark = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("remark"));
+        group4 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group4"));
+        toggleoutNO = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleoutNO"));
+        coord_system01 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system01"));
+        textHeight = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("textHeight"));
+        group2 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group2"));
+        hideBody = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("hideBody"));
+        enum011 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum011"));
+        inheriteFrombody = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("inheriteFrombody"));
+        selectFrombody = dynamic_cast<NXOpen::BlockStyler::BodyCollector*>(theDialog->TopBlock()->FindBlock("selectFrombody"));
+        buttonHideBody = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonHideBody"));
     }
     catch(exception& ex)
     {
@@ -311,7 +314,8 @@ void Property::dialogShown_cb()
         selectFrombody->GetProperties()->SetLogical("Show",inheritBody);
         logical out  = toggleoutNO->GetProperties()->GetLogical("Value");
         coord_system01->GetProperties()->SetLogical("Show",out);
-        enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
+        textHeight->GetProperties()->SetLogical("Show",out);
+        //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
     }
     catch(exception& ex)
@@ -561,6 +565,14 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         {
         //---------Enter your code here-----------
         }
+        else if(block == linear_bodyLen)
+        {
+        //---------Enter your code here-----------
+        }
+        else if(block == linear_bodyWidth)
+        {
+        //---------Enter your code here-----------
+        }
         else if(block == bodyWidth)
         {
         //---------Enter your code here-----------
@@ -614,8 +626,13 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         //---------Enter your code here-----------
             logical out  = toggleoutNO->GetProperties()->GetLogical("Value");
             coord_system01->GetProperties()->SetLogical("Show",out);
+            textHeight->GetProperties()->SetLogical("Show",out);
         }
         else if(block == coord_system01)
+        {
+        //---------Enter your code here-----------
+        }
+        else if(block == textHeight)
         {
         //---------Enter your code here-----------
         }
@@ -674,8 +691,8 @@ int Property::SetBodyBoundingBoxSize( )
 		double box[6] = {0.0};
 		UF_MODL_ask_bounding_box_exact( body, csys_tag, min_corner, directions, distances );
 		//UF_MODL_ask_bounding_box(objects.at(idx)->GetTag(), box );
-		bodyLen->GetProperties()->SetDouble("Value",distances[0]);
-		bodyWidth->GetProperties()->SetDouble("Value",distances[1]);
+		linear_bodyLen->GetProperties()->SetDouble("Value",distances[0]);
+		linear_bodyWidth->GetProperties()->SetDouble("Value",distances[1]);
 		bodyarea->GetProperties()->SetDouble("Value",distances[2]);
 	}
 	return irc;
