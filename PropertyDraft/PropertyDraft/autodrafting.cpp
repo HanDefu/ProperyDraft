@@ -35,6 +35,7 @@
 //These includes are needed for the following template code
 //------------------------------------------------------------------------------
 #include "autodrafting.hpp"
+#include "Common_UI.h"
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
@@ -232,7 +233,7 @@ void autodrafting::initialize_cb()
 }
 void autodrafting::ReadExcelConfigData( )
 {
-	BasicExcel excel;
+	/*BasicExcel excel;
     char regfile[256]="";
     sheetNames.clear();
     //sheetNames.push_back("全部");
@@ -246,7 +247,7 @@ void autodrafting::ReadExcelConfigData( )
             const wchar_t* sheetName = excel.GetUnicodeSheetName(idx);
 			sheetNames.push_back(WCHARTOCHAR(sheetName));
         }
-	}
+	}*/
 	return;
 }
 //------------------------------------------------------------------------------
@@ -264,7 +265,7 @@ void autodrafting::dialogShown_cb()
 		char fname[UF_CFI_MAX_FILE_NAME_BUFSIZE]="";
 		StlTagVector solidboies;
         ReadExcelConfigData();
-        enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
+        //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
 		CF_GetCurrentPartSolidBodies(solidboies);
 		CreateUITree(solidboies,true);
 
@@ -1041,7 +1042,13 @@ int autodrafting::ok_cb()
 		char inputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
 		char outputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
 		std::vector<Node*> SelectedNodes;
-		NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value");
+		std::vector<NXString> typestrs = enumType->GetEnumMembers();
+		int sel = 0;
+		UI_EnumGetCurrentSel(enumType, sel);
+		NXString typeStr = typestrs[sel];
+
+			
+
 		NXString savepath = nativeFolderBrowser01->GetProperties()->GetString("Path");
 
 		NXOpen::BlockStyler::Node * treeNode = tree_control0->RootNode();

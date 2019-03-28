@@ -394,80 +394,84 @@ int Property::apply_cb()
 		std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
 		if(objects.size()>0)
 		{
-			tag_t body = objects[0]->Tag();
-			NXString type = enumType->GetProperties()->GetEnumAsString("Value");
-			NXString name = matName->GetProperties()->GetEnumAsString("Value");
-			NXString maNO = matNO->GetProperties()->GetEnumAsString("Value");
-			NXString size = matSize->GetProperties()->GetEnumAsString("Value");
-			NXString mate = material->GetProperties()->GetEnumAsString("Value");
-			NXString dens = matDensity->GetProperties()->GetEnumAsString("Value");
-			NXString unpr = unitPrice->GetProperties()->GetEnumAsString("Value");
-			NXString supp = supplier->GetProperties()->GetEnumAsString("Value");
-			NXString rema = remark->GetProperties()->GetEnumAsString("Value");
-
-			double topr = totalPrice->GetProperties()->GetDouble("Value");
-			double weig = weight->GetProperties()->GetDouble("Value");
-			char toprStr[133]="";
-			char weigStr[133]="";
-			sprintf(toprStr,"%f",topr);
-			sprintf(weigStr,"%f",weig);
-			Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
-			Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
-			Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
-			Royal_set_obj_attr(body,"规格",size.GetLocaleText());
-			Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
-			Royal_set_obj_attr(body,"密度",dens.GetLocaleText());
-			Royal_set_obj_attr(body,"单价",unpr.GetLocaleText());
-			Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
-			Royal_set_obj_attr(body,"重量",weigStr);
-			Royal_set_obj_attr(body,"总价",toprStr);
-			Royal_set_obj_attr(body,"备注",rema.GetLocaleText());
-			Royal_set_obj_attr(body,"已设零件标记","1");
-			logical is = toggleoutNO->GetProperties()->GetLogical("Value");
-			if(is)
+			for (int mm = 0; mm < objects.size(); mm++)
 			{
-				char textHeight[64]="3";
-				Royal_set_obj_attr(body,"输出材料编号","1");
-				Point3d  originPoint(5,5,0);
-				double csysorg[3]={5,5,0};
-				double org[3]={0,0,0};
-				Vector3d vecDirX(1,0,0);
-				Vector3d vecDirY(0,1,0);
-				tag_t workcsys = NULL_TAG;
-				UF_CSYS_ask_wcs(&workcsys);
-				std::vector<NXOpen::TaggedObject* > csysObjects = coord_system01->GetProperties()->GetTaggedObjectVector("SelectedObjects");
-				if( csysObjects.size() > 0 )
+				tag_t body = objects[mm]->Tag();
+
+				NXString type = enumType->GetProperties()->GetEnumAsString("Value");
+				NXString name = matName->GetProperties()->GetEnumAsString("Value");
+				NXString maNO = matNO->GetProperties()->GetEnumAsString("Value");
+				NXString size = matSize->GetProperties()->GetEnumAsString("Value");
+				NXString mate = material->GetProperties()->GetEnumAsString("Value");
+				NXString dens = matDensity->GetProperties()->GetEnumAsString("Value");
+				NXString unpr = unitPrice->GetProperties()->GetEnumAsString("Value");
+				NXString supp = supplier->GetProperties()->GetEnumAsString("Value");
+				NXString rema = remark->GetProperties()->GetEnumAsString("Value");
+
+				double topr = totalPrice->GetProperties()->GetDouble("Value");
+				double weig = weight->GetProperties()->GetDouble("Value");
+				char toprStr[133]="";
+				char weigStr[133]="";
+				sprintf(toprStr,"%f",topr);
+				sprintf(weigStr,"%f",weig);
+				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
+				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
+				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
+				Royal_set_obj_attr(body,"规格",size.GetLocaleText());
+				Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
+				Royal_set_obj_attr(body,"密度",dens.GetLocaleText());
+				Royal_set_obj_attr(body,"单价",unpr.GetLocaleText());
+				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
+				Royal_set_obj_attr(body,"重量",weigStr);
+				Royal_set_obj_attr(body,"总价",toprStr);
+				Royal_set_obj_attr(body,"备注",rema.GetLocaleText());
+				Royal_set_obj_attr(body,"已设零件标记","1");
+				logical is = toggleoutNO->GetProperties()->GetLogical("Value");
+				if(is)
 				{
-					tag_t csys_tag = csysObjects[0]->Tag();
-					NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
-					originPoint =  coord_system->Origin(); 
-					NXOpen::NXMatrix *matrix = coord_system->Orientation();
-					Matrix3x3 matrix33 = matrix->Element();
-					vecDirX.X = matrix33.Xx;
-					vecDirX.Y = matrix33.Xy;
-					vecDirX.Z = matrix33.Xz;
-					vecDirY.X = matrix33.Yx;
-					vecDirY.Y = matrix33.Yy;
-					vecDirY.Z = matrix33.Yz;
-					tag_t temp = NULL_TAG;
-					int irc  = UF_CSYS_set_wcs(csys_tag);
-					UF_CSYS_map_point(UF_CSYS_ROOT_WCS_COORDS,csysorg,UF_CSYS_ROOT_COORDS,org);
-					UF_CSYS_set_wcs(workcsys);
-					originPoint.X = org[0];
-					originPoint.Y = org[1];
-					originPoint.Z = org[2];
+					char textHeight[64]="3";
+					Royal_set_obj_attr(body,"输出材料编号","1");
+					Point3d  originPoint(5,5,0);
+					double csysorg[3]={5,5,0};
+					double org[3]={0,0,0};
+					Vector3d vecDirX(1,0,0);
+					Vector3d vecDirY(0,1,0);
+					tag_t workcsys = NULL_TAG;
+					UF_CSYS_ask_wcs(&workcsys);
+					std::vector<NXOpen::TaggedObject* > csysObjects = coord_system01->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+					if( csysObjects.size() > 0 )
+					{
+						tag_t csys_tag = csysObjects[0]->Tag();
+						NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+						originPoint =  coord_system->Origin(); 
+						NXOpen::NXMatrix *matrix = coord_system->Orientation();
+						Matrix3x3 matrix33 = matrix->Element();
+						vecDirX.X = matrix33.Xx;
+						vecDirX.Y = matrix33.Xy;
+						vecDirX.Z = matrix33.Xz;
+						vecDirY.X = matrix33.Yx;
+						vecDirY.Y = matrix33.Yy;
+						vecDirY.Z = matrix33.Yz;
+						tag_t temp = NULL_TAG;
+						int irc  = UF_CSYS_set_wcs(csys_tag);
+						UF_CSYS_map_point(UF_CSYS_ROOT_WCS_COORDS,csysorg,UF_CSYS_ROOT_COORDS,org);
+						UF_CSYS_set_wcs(workcsys);
+						originPoint.X = org[0];
+						originPoint.Y = org[1];
+						originPoint.Z = org[2];
+					}
+					tag_t textTag = CreateText(maNO,textHeight,originPoint,vecDirX,vecDirY);
+					char *handle = 0;
+					UF_TAG_ask_handle_from_tag(RY_Prototype(textTag), &handle);
+					Royal_set_obj_attr( body, ATTR_RY_TEXT_SPLINE_BODY_HANDLE, handle );
+					UF_free(handle);
 				}
-				tag_t textTag = CreateText(maNO,textHeight,originPoint,vecDirX,vecDirY);
-				char *handle = 0;
-				UF_TAG_ask_handle_from_tag(RY_Prototype(textTag), &handle);
-				Royal_set_obj_attr( body, ATTR_RY_TEXT_SPLINE_BODY_HANDLE, handle );
-				UF_free(handle);
+				else
+					Royal_set_obj_attr(body,"输出材料编号","0");
+				logical blank = hideBody->GetProperties()->GetLogical("Value");
+				if(blank)
+					UF_OBJ_set_blank_status( body,UF_OBJ_BLANKED);
 			}
-			else
-				Royal_set_obj_attr(body,"输出材料编号","0");
-            logical blank = hideBody->GetProperties()->GetLogical("Value");
-            if(blank)
-                UF_OBJ_set_blank_status( body,UF_OBJ_BLANKED);
 		}
     }
     catch(exception& ex)
@@ -514,7 +518,7 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         else if(block == buttonCalculate)
         {
         //---------Enter your code here-----------
-			//SetBodyBoundingBoxSize();
+			SetBodyBoundingBoxSize();
         }
         else if(block == bodyLen)
         {
