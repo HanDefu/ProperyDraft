@@ -453,8 +453,8 @@ int Property::apply_cb()
 				double weig = weight->GetProperties()->GetDouble("Value");
 				char toprStr[133]="";
 				char weigStr[133]="";
-				sprintf(toprStr,"%f",topr);
-				sprintf(weigStr,"%f",weig);
+				sprintf(toprStr,"%g",topr);
+				sprintf(weigStr,"%g",weig);
 				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
 				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());

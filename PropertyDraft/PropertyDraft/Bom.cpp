@@ -43,7 +43,7 @@ void ReadExcelConfigData( StlNXStringVector& types )
 {
 	BasicExcel excel;
     char regfile[256]="";
-    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+    sprintf_s(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
 	bool isOk = excel.Load(regfile);
 	if( isOk )
 	{
@@ -226,8 +226,150 @@ static logical CheckBodyType(tag_t body, NXString& type)
     }
 	return is;
 }
-//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	数量	重量	单价	总价	供应商	备注		
+	
+//序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		钢材1
+//序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		铝材5
 
+//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注	     铝板2	
+//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注		树脂板3
+//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商   备注		石材4
+
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		玻璃6
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		五金件7
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		木雕8
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		屋面瓦9
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		铜饰10
+//序号	材料名称	材料编号	规格	尺寸	密度	体积	数量	总面积	单价	 总价	供应商	备注		辅材11
+
+
+void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr )
+{
+    StlNXStringVector attriName;
+    BOMStr.clear();
+    logical logicalmatName = matName->GetProperties()->GetLogical("Value");
+    logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
+    logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
+    logical logicalmaterial = material->GetProperties()->GetLogical("Value");
+    logical logicaldesnity = desnity->GetProperties()->GetLogical("Value");
+    logical logicallength = length->GetProperties()->GetLogical("Value");
+    logical logicalarea = togglearea->GetProperties()->GetLogical("Value");
+    logical logicalquantity = togglequantity->GetProperties()->GetLogical("Value");
+    logical logicalWeight = toggleWeight->GetProperties()->GetLogical("Value");
+    logical logicalunitPrice = unitPrice->GetProperties()->GetLogical("Value");
+    logical logicaltotalPrice = totalPrice->GetProperties()->GetLogical("Value");
+    logical logicalsupplier = supplier->GetProperties()->GetLogical("Value");
+    logical logicalRemark = toggleRemark->GetProperties()->GetLogical("Value");
+    //attriName.push_back("序号");
+    if(logicalmatName)
+        attriName.push_back("材料名称");
+    else
+        attriName.push_back("空");
+    if(logicalMatNO)
+        attriName.push_back("材料编号");
+    else
+        attriName.push_back("空");
+    if(logicalmatSize)
+        attriName.push_back("规格");
+    else
+        attriName.push_back("空");
+    if( type < 6 )
+    {
+        if(logicalmaterial)
+            attriName.push_back("材质");
+        else
+            attriName.push_back("空");
+    }
+    else
+    {
+        attriName.push_back("尺寸");
+    }
+    if( 2 == type || 3 == type || 4 == type )
+    {
+        attriName.push_back("尺寸");
+    }
+    else
+    {
+        if(logicaldesnity)
+            attriName.push_back("密度");
+        else
+            attriName.push_back("空");
+    }
+    if( 1 == type || 5 == type )
+    {
+        if(logicallength)
+            attriName.push_back("长度");
+        else
+            attriName.push_back("空");;
+        if(logicalquantity)
+            attriName.push_back("数量");
+        else
+            attriName.push_back("空");
+        if(logicalWeight)
+            attriName.push_back("重量");
+        else
+            attriName.push_back("空");
+    }
+    else
+    {
+        if( 11 == type )
+        {
+            attriName.push_back("体积");
+        }
+        else
+        {
+            if(logicalarea)
+                attriName.push_back("面积");
+            else
+                attriName.push_back("空");
+        }
+        if(logicalquantity)
+            attriName.push_back("数量");
+        else
+            attriName.push_back("空");
+        attriName.push_back("总面积");
+    }
+
+    if(logicalunitPrice)
+        attriName.push_back("单价");
+    else
+        attriName.push_back("空");
+
+    if(logicaltotalPrice)
+        attriName.push_back("总价");
+    else
+        attriName.push_back("空");
+
+    if(logicalsupplier)
+        attriName.push_back("供应商");
+    else
+        attriName.push_back("空");
+    if(logicalRemark)
+        attriName.push_back("备注");
+    else
+        attriName.push_back("空");
+    for(int idx = 0; idx < bombodies.size(); ++idx )
+    {
+        char num[32]="";
+        StlNXStringVector rowStr;
+        tag_t body = bombodies[idx];
+        sprintf_s(num,"%d",idx+1);
+        rowStr.push_back(num);
+        for(int jdx = 0; jdx < attriName.size(); ++jdx )
+        {
+            if(0 == strcmp(attriName[jdx].GetText(),"空"))
+            {
+                rowStr.push_back("");
+            }
+            else
+            {
+                char attriValue2[133] = "";
+                USER_ask_obj_string_attr( body ,(char*)attriName[jdx].GetText() , attriValue2 );
+                rowStr.push_back(attriValue2);
+            }
+        }
+        BOMStr.push_back(rowStr);
+    }
+}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
@@ -239,31 +381,21 @@ int Bom::apply_cb()
         //---- Enter your callback code here -----
 		std::vector<tag_t> bombodies;
         logical isAll = false;
-		logical logicalmatName = matName->GetProperties()->GetLogical("Value");
-		logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
-		logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
-		logical logicalmaterial = material->GetProperties()->GetLogical("Value");
-		logical logicaldesnity = desnity->GetProperties()->GetLogical("Value");
-		logical logicallength = length->GetProperties()->GetLogical("Value");
-		logical logicalarea = togglearea->GetProperties()->GetLogical("Value");
-		logical logicalquantity = togglequantity->GetProperties()->GetLogical("Value");
-		logical logicalWeight = toggleWeight->GetProperties()->GetLogical("Value");
-		logical logicalunitPrice = unitPrice->GetProperties()->GetLogical("Value");
-		logical logicaltotalPrice = totalPrice->GetProperties()->GetLogical("Value");
-		logical logicalsupplier = supplier->GetProperties()->GetLogical("Value");
-		logical logicalRemark = toggleRemark->GetProperties()->GetLogical("Value");
-
+		
+        StlNXStringVector alltypes = enumType->GetEnumMembers();
 		std::vector<NXOpen::TaggedObject* > objects = bodySelect->GetProperties()->GetTaggedObjectVector("SelectedObjects");
-		NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value");
-        if( 0 == strcmp("全部",typeStr.GetLocaleText()))
+		//NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value").GetText();
+        int type = enumType->GetProperties()->GetEnum("Value");
+        NXString typeStr= alltypes[type];
+        /*if( 0 == strcmp("全部",typeStr.GetLocaleText()))
         {
             isAll = true;
-        }
+        }*/
 		if(objects.size()>0)
 		{
 			for(int idx = 0; idx < objects.size(); ++idx)
 			{
-				if( isAll )
+				if( 0 == type )
 				{
 					bombodies.push_back(objects[idx]->Tag());
 				}
@@ -291,23 +423,61 @@ int Bom::apply_cb()
 			char *p_env = getenv("UGII_USER_DIR");
 			char srcspc[MAX_FSPEC_SIZE]="";
 			char desspc[MAX_FSPEC_SIZE]="";
-			sprintf(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText());
-			UF_CFI_ask_file_exist(srcspc,&status);
-			if( 0 != status )
-			{
-				uc1601("没有找到模板文件",1);
-				return 1;
-			}
-			sprintf(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
-			//sprintf(desspc,"%s_BOM.xls",file_name);
-            UF_CFI_ask_file_exist(desspc,&status);
-			if( 0 == status )
-			{
-				uc4561(desspc,-1); 
-			}
-			WriteBOM(srcspc,desspc,BOMStr);
+            if( 0 == type ) //all 
+            {
+                for( int idx = 1; idx < alltypes.size(); ++idx )
+                {
+                    type = idx;
+                    typeStr = alltypes[idx];
+                    vtag_t tempbodies;
+                    for( int jdx = 0;jdx < bombodies.size(); ++jdx )
+                    {
+                        if(CheckBodyType(bombodies[jdx],typeStr))
+                            tempbodies.push_back(bombodies[jdx]);
+                    }
+                    if(tempbodies.size() > 0)
+                    {
+                        sprintf_s(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText());
+                        UF_CFI_ask_file_exist(srcspc,&status);
+                        if( 0 != status )
+                        {
+                            uc1601("没有找到模板文件",1);
+                            //return 1;
+                            continue;
+                        }
+                        sprintf_s(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+                        //sprintf_s(desspc,"%s_BOM.xls",file_name);
+                        UF_CFI_ask_file_exist(desspc,&status);
+                        if( 0 == status )
+                        {
+                            uc4561(desspc,-1); 
+                        }
+                        GetBOMInformation(tempbodies,type,BOMStr );
+                        WriteBOM(srcspc,desspc,BOMStr);
+                    }
+                }
+            }
+            else
+            {
+                sprintf_s(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText());
+                UF_CFI_ask_file_exist(srcspc,&status);
+                if( 0 != status )
+                {
+                    uc1601("没有找到模板文件",1);
+                    return 1;
+                }
+                sprintf_s(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+                //sprintf_s(desspc,"%s_BOM.xls",file_name);
+                UF_CFI_ask_file_exist(desspc,&status);
+                if( 0 == status )
+                {
+                    uc4561(desspc,-1); 
+                }
+                GetBOMInformation(bombodies,type,BOMStr );
+                WriteBOM(srcspc,desspc,BOMStr);
+            }
             char cmd[512]="";
-			sprintf(cmd,"start %s",sFilePath);
+			sprintf_s(cmd,"start %s",sFilePath);
 			system(cmd);
 		}
     }

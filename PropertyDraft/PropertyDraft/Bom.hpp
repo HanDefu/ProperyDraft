@@ -56,6 +56,8 @@ using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 #include "Excel/BasicExcel.hpp"
 #include "Common_Function.h"
+#include "Common.h"
+
 using namespace YExcel;
 class DllExport Bom
 {
@@ -79,7 +81,7 @@ public:
     int ok_cb();
     int update_cb(NXOpen::BlockStyler::UIBlock* block);
     PropertyList* GetBlockProperties(const char *blockID);
-    
+    void GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr );
 private:
     const char* theDlxFileName;
     NXOpen::BlockStyler::BlockDialog* theDialog;
