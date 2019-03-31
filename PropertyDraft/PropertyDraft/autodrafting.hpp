@@ -25,6 +25,9 @@
 #include <uf_draw.h>
 #include <uf_view.h>
 #include <uf_assem.h>
+#include <uf_group.h>
+#include <uf_vec.h>
+#include <uf_csys.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>
 #include <NXOpen/UI.hxx>

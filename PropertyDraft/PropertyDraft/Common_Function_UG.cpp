@@ -3910,8 +3910,9 @@ void CreateReferenceSet(vtag_t bodies,NXString& refsetName)
         if( refset != NULL_TAG )
         {
             referenceSet1 = (ReferenceSet *)NXObjectManager::Get(refset);	
+            UF_OBJ_delete_object(refset);
         }
-        else
+        //else
         {
             referenceSet1 = workPart->CreateReferenceSet();
             referenceSet1->SetName(refsetName);
