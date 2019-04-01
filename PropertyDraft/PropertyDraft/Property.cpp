@@ -298,6 +298,20 @@ void Property::SetUIConfigData( )
         supplier->GetProperties()->SetEnumMembers("Value",temp[6]);
         remark->GetProperties()->SetEnumMembers("Value",temp[7]);
     }
+
+	if (type==0 || type==4)//钢材 铝材
+	{
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(false);
+		bodyarea->SetShow(false);
+	}
+	else if (type==1 || type==2 || type == 3|| type == 5||type == 5 ||
+		type == 6||type == 7||type == 8||type == 9||type == 10)//铝板 树脂板 石材 玻璃等
+	{
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(true);
+		bodyarea->SetShow(true);
+	}
 }
 //------------------------------------------------------------------------------
 //Callback Name: dialogShown_cb
