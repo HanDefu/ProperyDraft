@@ -1840,7 +1840,7 @@ int autodrafting::ok_cb()
                 startX += (len+20);
                 //UF_PART_save();
                 sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),name.GetLocaleText());
-                export_sheet_to_acad_dwg2d(inputfile,outputfile,name);
+                export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
                 char cmd[512]="";
                 sprintf_s(cmd,"start %s",savepath.GetLocaleText());
                 system(cmd);
