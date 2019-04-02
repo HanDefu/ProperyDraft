@@ -131,6 +131,8 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 {
 	try
 	{
+		if (!checkuse())
+			return;
 
 		UF_initialize();
 

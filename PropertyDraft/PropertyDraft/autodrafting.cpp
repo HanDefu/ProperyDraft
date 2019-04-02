@@ -117,8 +117,8 @@ static int select_bodies(char *prompt, tag_t **bodies)
         UF_UI_SEL_SCOPE_ANY_IN_ASSEMBLY, mask_for_bodies, NULL, &resp, &cnt,
         bodies));
 
-    for (ii = 0; ii < cnt; ii++)
-        UF_CALL(UF_DISP_set_highlight((*bodies)[ii], FALSE));
+    //for (ii = 0; ii < cnt; ii++)
+        //UF_CALL(UF_DISP_set_highlight((*bodies)[ii], FALSE));
 
     return cnt;
 
@@ -1875,10 +1875,10 @@ int autodrafting::cancel_cb()
         {
             NXOpen::DataContainer *nodeData = nodes[idx]->GetNodeData();
             std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
-            if( objects.size() > 0 )
-            {
-                UF_DISP_set_highlight(objects[0]->Tag(),0);
-            }
+            //if( objects.size() > 0 )
+            //{
+                //UF_DISP_set_highlight(objects[0]->Tag(),0);
+            //}
         }
     }
     catch(exception& ex)
@@ -1919,15 +1919,15 @@ void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::Blo
     {
         if( selected )
         {
-            UF_DISP_set_highlight(objects[0]->Tag(),1);
+            //UF_DISP_set_highlight(objects[0]->Tag(),1);
             NXString type = node->GetColumnDisplayText(1);
             NXString scale = node->GetColumnDisplayText(2);
             enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetLocaleText());
 			double sc = atof(scale.GetText());
 			doubleDwgScale->GetProperties()->SetDouble("Value",sc);
         }
-        else
-            UF_DISP_set_highlight(objects[0]->Tag(),0);
+        //else
+            //UF_DISP_set_highlight(objects[0]->Tag(),0);
     }
 }
 
