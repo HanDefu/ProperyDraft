@@ -16,6 +16,16 @@ MENU CUSTOM2
     BITMAP drafting_automation_preferences
     ACTIONS Property.dll
 	
+	BUTTON CUSTOM_GZ_COPY_ATTR
+    LABEL ¼Ì³ÐÊôÐÔ
+    BITMAP display_show_all_drafting_annotation
+    ACTIONS Property.dll
+	
+	BUTTON CUSTOM_GZ_HIDE_NO
+    LABEL Òþ²Ø²ÄÁÏ±àºÅ
+    BITMAP drafting_shipbuilding_preferences
+    ACTIONS Property.dll
+	
 	BUTTON CUSTOM_GZ_PART_BOM
     LABEL BOM
     BITMAP bom_lc

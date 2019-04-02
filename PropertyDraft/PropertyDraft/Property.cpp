@@ -159,6 +159,7 @@ void Property::initialize_cb()
         group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
         enum09 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum09"));
         enum08 = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(theDialog->TopBlock()->FindBlock("enum08"));
+        face_select0 = dynamic_cast<NXOpen::BlockStyler::FaceCollector*>(theDialog->TopBlock()->FindBlock("face_select0"));
         coord_system0 = dynamic_cast<NXOpen::BlockStyler::SpecifyCSYS*>(theDialog->TopBlock()->FindBlock("coord_system0"));
         buttonCalculate = dynamic_cast<NXOpen::BlockStyler::Button*>(theDialog->TopBlock()->FindBlock("buttonCalculate"));
         bodyLen = dynamic_cast<NXOpen::BlockStyler::DoubleBlock*>(theDialog->TopBlock()->FindBlock("bodyLen"));
@@ -304,6 +305,7 @@ void Property::SetUIConfigData( )
 		linear_bodyLen->SetShow(true);
 		linear_bodyWidth->SetShow(false);
 		bodyarea->SetShow(false);
+        face_select0->SetShow(false);
 	}
 	else if (type==1 || type==2 || type == 3|| type == 5||type == 5 ||
 		type == 6||type == 7||type == 8||type == 9||type == 10)//铝板 树脂板 石材 玻璃等
@@ -311,6 +313,7 @@ void Property::SetUIConfigData( )
 		linear_bodyLen->SetShow(true);
 		linear_bodyWidth->SetShow(true);
 		bodyarea->SetShow(true);
+        face_select0->SetShow(true);
 	}
 }
 //------------------------------------------------------------------------------
@@ -349,8 +352,8 @@ static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates
 	int worklayer = -1;
 	int layerStatus = -1;
 	UF_LAYER_ask_work_layer(&worklayer);
-	UF_LAYER_ask_status(255,&layerStatus);
-	UF_LAYER_set_status(255, UF_LAYER_WORK_LAYER);
+	//UF_LAYER_ask_status(255,&layerStatus);
+	//UF_LAYER_set_status(255, UF_LAYER_WORK_LAYER);
     
     NXOpen::Features::TextBuilder *textBuilder1;
     textBuilder1 = workPart->Features()->CreateTextBuilder(nullNXOpen_Features_Text);
@@ -433,8 +436,8 @@ static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates
     textBuilder1->Destroy();
     
     plane1->DestroyPlane();
-	UF_LAYER_set_status(worklayer, UF_LAYER_WORK_LAYER);
-	UF_LAYER_set_status(255,layerStatus);
+	//UF_LAYER_set_status(worklayer, UF_LAYER_WORK_LAYER);
+	//UF_LAYER_set_status(255,layerStatus);
 	return texttag;
 }
 //------------------------------------------------------------------------------
@@ -484,7 +487,9 @@ int Property::apply_cb()
 				logical is = toggleoutNO->GetProperties()->GetLogical("Value");
 				if(is)
 				{
-					char textHeight[64]="3";
+					char textHei[64]="3";
+                    double hei = textHeight->GetProperties()->GetDouble("Value");
+                    sprintf(textHei,"%f",hei);
 					Royal_set_obj_attr(body,"输出材料编号","1");
 					Point3d  originPoint(5,5,0);
 					double csysorg[3]={5,5,0};
@@ -515,7 +520,7 @@ int Property::apply_cb()
 						originPoint.Y = org[1];
 						originPoint.Z = org[2];
 					}
-					tag_t textTag = CreateText(maNO,textHeight,originPoint,vecDirX,vecDirY);
+					tag_t textTag = CreateText(maNO,textHei,originPoint,vecDirX,vecDirY);
 					char *handle = 0;
 					UF_TAG_ask_handle_from_tag(RY_Prototype(textTag), &handle);
 					Royal_set_obj_attr( body, ATTR_RY_TEXT_SPLINE_BODY_HANDLE, handle );
@@ -703,11 +708,19 @@ int Property::SetBodyBoundingBoxSize( )
 		}
 		double min_corner[3]={0.0},directions[3][3]={0.0},distances[3] = {0.0};  
 		double box[6] = {0.0};
+        double area = 0;
 		UF_MODL_ask_bounding_box_exact( body, csys_tag, min_corner, directions, distances );
 		//UF_MODL_ask_bounding_box(objects.at(idx)->GetTag(), box );
 		linear_bodyLen->GetProperties()->SetDouble("Value",distances[0]);
 		linear_bodyWidth->GetProperties()->SetDouble("Value",distances[1]);
-		bodyarea->GetProperties()->SetDouble("Value",distances[2]);
+        std::vector<NXOpen::TaggedObject* > faceobjs = face_select0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+        for( int idx = 0; idx < faceobjs.size(); ++idx )
+        {
+            double temp = 0;
+            UF_AskFaceArea(faceobjs[idx]->Tag(),&temp);
+            area+=temp;
+        }
+		bodyarea->GetProperties()->SetDouble("Value",area);
 	}
 	return irc;
 }

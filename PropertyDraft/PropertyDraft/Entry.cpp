@@ -43,6 +43,8 @@
 #include "Bom.hpp"
 #include "AutoDraft.hpp"
 #include "autodrafting.hpp"
+#include "inheritProperty.hpp"
+#include "HideMatNO.hpp"
 //#include "UpdateFile.h"
 #include "Excel/Excel.h"
 
@@ -149,7 +151,15 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		{
 			GZ_PART_DRAFT_Main();
 		}
-
+        else if(strcmp(param, "CUSTOM_GZ_COPY_ATTR") == 0)
+		{
+			GZ_COPY_ATTR_Main();
+			//GZ_PART_DRAFT_Main1();
+		}
+		else if(strcmp(param, "CUSTOM_GZ_HIDE_NO") == 0)
+		{
+			GZ_HIDE_NO_Main();
+		}
 
 		UF_terminate();
 		//Ê¾Àý´úÂë

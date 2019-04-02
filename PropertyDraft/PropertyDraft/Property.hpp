@@ -49,6 +49,7 @@
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_LinearDimension.hxx>
 #include <NXOpen/BlockStyler_Toggle.hxx>
+#include <NXOpen/BlockStyler_FaceCollector.hxx>
 
 #include <NXOpen/CoordinateSystemCollection.hxx>
 #include <NXOpen/NXMatrixCollection.hxx>
@@ -204,6 +205,7 @@ private:
 	NXOpen::BlockStyler::Group* group1;// Block type: Group
 	NXOpen::BlockStyler::Enumeration* enum09;// Block type: Enumeration
 	NXOpen::BlockStyler::Enumeration* enum08;// Block type: Enumeration
+    NXOpen::BlockStyler::FaceCollector* face_select0;// Block type: Face Collector
 	NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
 	NXOpen::BlockStyler::Button* buttonCalculate;// Block type: Button
 	NXOpen::BlockStyler::DoubleBlock* bodyLen;// Block type: Double

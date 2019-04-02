@@ -167,6 +167,8 @@
     <ClCompile Include="Entry.cpp" />
     <ClCompile Include="Excel\BasicExcel.cpp" />
     <ClCompile Include="Excel\Excel.cpp" />
+    <ClCompile Include="HideMatNO.cpp" />
+    <ClCompile Include="inheritProperty.cpp" />
     <ClCompile Include="Property.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +193,8 @@
     <ClInclude Include="Excel\CWorksheet.h" />
     <ClInclude Include="Excel\CWorksheets.h" />
     <ClInclude Include="Excel\Excel.h" />
+    <ClInclude Include="HideMatNO.hpp" />
+    <ClInclude Include="inheritProperty.hpp" />
     <ClInclude Include="Property.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
