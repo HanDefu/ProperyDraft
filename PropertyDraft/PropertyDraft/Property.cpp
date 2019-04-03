@@ -440,6 +440,13 @@ static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates
 	//UF_LAYER_set_status(255,layerStatus);
 	return texttag;
 }
+
+void Royal_set_obj_attr(tag_t body,char *name , double val)
+{
+	char toprStr[133]="";
+	sprintf(toprStr,"%g",val);
+	Royal_set_obj_attr(body,name,toprStr);
+}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------
@@ -468,10 +475,9 @@ int Property::apply_cb()
 
 				double topr = totalPrice->GetProperties()->GetDouble("Value");
 				double weig = weight->GetProperties()->GetDouble("Value");
-				char toprStr[133]="";
-				char weigStr[133]="";
-				sprintf(toprStr,"%g",topr);
-				sprintf(weigStr,"%g",weig);
+				double area = bodyarea->GetProperties()->GetDouble("Value");
+				double len = linear_bodyLen->GetProperties()->GetDouble("Value");
+				double wid = linear_bodyWidth->GetProperties()->GetDouble("Value");
 				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
 				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
@@ -480,8 +486,11 @@ int Property::apply_cb()
 				Royal_set_obj_attr(body,"密度",dens.GetLocaleText());
 				Royal_set_obj_attr(body,"单价",unpr.GetLocaleText());
 				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
-				Royal_set_obj_attr(body,"重量",weigStr);
-				Royal_set_obj_attr(body,"总价",toprStr);
+				Royal_set_obj_attr(body,"重量",weig);
+				Royal_set_obj_attr(body,"总价",topr);
+				Royal_set_obj_attr(body,"面积",area);
+				Royal_set_obj_attr(body,"长度",len);
+				Royal_set_obj_attr(body,"宽度",wid);
 				Royal_set_obj_attr(body,"备注",rema.GetLocaleText());
 				Royal_set_obj_attr(body,"已设零件标记","1");
 				logical is = toggleoutNO->GetProperties()->GetLogical("Value");
@@ -693,6 +702,49 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
     return 0;
 }
 
+double MeasureFaceArea(std::vector<NXOpen::TaggedObject* > face_tags)
+{
+    char str[256];
+    NXOpen::Session *theSession = NXOpen::Session::GetSession();
+    NXOpen::Part *workPart(theSession->Parts()->Work());    
+    Unit *unit1(dynamic_cast<Unit *>(workPart->UnitCollection()->FindObject("SquareMilliMeter")));
+    Unit *unit2(dynamic_cast<Unit *>(workPart->UnitCollection()->FindObject("MilliMeter")));
+
+    //FaceCollector issue is fixed in NX9
+    NXObject *nullNXObject(NULL);
+    MeasureFaceBuilder *measureFaceBuilder1;
+    measureFaceBuilder1 = workPart->MeasureManager()->CreateMeasureFaceBuilder(nullNXObject);
+        
+    vector<Face *> faces1;
+	for(int idx = 0; idx < face_tags.size(); ++idx )
+	{
+		Face *face1 = dynamic_cast<Face *>(face_tags[idx]);
+		faces1.push_back(face1);
+	}
+    FaceDumbRule *faceDumbRule1;
+    faceDumbRule1 = workPart->ScRuleFactory()->CreateRuleFaceDumb(faces1);
+    
+    std::vector<SelectionIntentRule *> rules1(1);
+    rules1[0] = faceDumbRule1;
+    measureFaceBuilder1->FaceCollector()->ReplaceRules(rules1, false);
+    NXOpen::NXObject *nxObjct1 = measureFaceBuilder1->Commit();
+
+    NXOpen::ScCollector *scCollector1 = measureFaceBuilder1->FaceCollector();
+
+    MeasureFaces *measureFaces1;
+    measureFaces1 = workPart->MeasureManager()->NewFaceProperties(unit1, unit2, 0.99, scCollector1);
+
+    double face_area = measureFaces1->Area();
+	face_area = (int((face_area+0.05)*10))/10.0;
+    /*double face_perimeter = measureFaces1->Perimeter();
+    sprintf_s(str, sizeof(str), "Selected Face Perimeter: = %f",face_perimeter);*/
+
+    delete measureFaces1;   
+    delete faceDumbRule1;
+    measureFaceBuilder1->Destroy();
+    return face_area;
+}
+
 int Property::SetBodyBoundingBoxSize( )
 {
 	int irc = 0;
@@ -710,16 +762,22 @@ int Property::SetBodyBoundingBoxSize( )
 		double box[6] = {0.0};
         double area = 0;
 		UF_MODL_ask_bounding_box_exact( body, csys_tag, min_corner, directions, distances );
+		distances[0] = (int((distances[0]+0.05)*10))/10.0;
+		distances[1] = (int((distances[1]+0.05)*10))/10.0;
 		//UF_MODL_ask_bounding_box(objects.at(idx)->GetTag(), box );
 		linear_bodyLen->GetProperties()->SetDouble("Value",distances[0]);
 		linear_bodyWidth->GetProperties()->SetDouble("Value",distances[1]);
         std::vector<NXOpen::TaggedObject* > faceobjs = face_select0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
-        for( int idx = 0; idx < faceobjs.size(); ++idx )
-        {
-            double temp = 0;
-            UF_AskFaceArea(faceobjs[idx]->Tag(),&temp);
-            area+=temp;
-        }
+		if(faceobjs.size() > 0 )
+			area = MeasureFaceArea(faceobjs);
+   //     for( int idx = 0; idx < faceobjs.size(); ++idx )
+   //     {
+   //         double temp = 0;
+			////UF_WEIGHT_ask_props
+			////UF_MODL_ask_mass_props_3d
+   //         //UF_AskFaceArea(faceobjs[idx]->Tag(),&temp);
+   //         //area+=temp;
+   //     }
 		bodyarea->GetProperties()->SetDouble("Value",area);
 	}
 	return irc;

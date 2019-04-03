@@ -230,17 +230,31 @@ static logical CheckBodyType(tag_t body, NXString& type)
 //序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		钢材1
 //序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		铝材5
 
-//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注	     铝板2	
+//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注	     铝板2		
 //序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注		树脂板3
 //序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商   备注		石材4
 
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		玻璃6
+//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		玻璃6	
 //序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		五金件7
 //序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		木雕8
 //序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		屋面瓦9
 //序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		铜饰10
 //序号	材料名称	材料编号	规格	尺寸	密度	体积	数量	总面积	单价	 总价	供应商	备注		辅材11
 
+
+//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                钢材1
+//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                铝材5
+
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	 总价	供应商	备注	        铝板2
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            树脂板3
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            石材4
+//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                玻璃6
+//序号	材料名称	材料编号	规格  	长度（mm)	宽度（mm)	密度	数量	        单价	总价	供应商	备注                木雕8
+//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                屋面瓦9
+//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注	                铜饰10
+//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	密度	数量	总面积	单价	总价	供应商	备注                辅材11
+
+//序号	材料名称	材料编号	规格	长度	数量	单价	总价	供应商	备注                                                五金件7
 
 void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr )
 {
@@ -279,56 +293,51 @@ void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& B
         else
             attriName.push_back("空");
     }
-    else
-    {
-        attriName.push_back("尺寸");
-    }
-    if( 2 == type || 3 == type || 4 == type )
-    {
-        attriName.push_back("尺寸");
-    }
-    else
+    if( 1 == type || 5 == type )
     {
         if(logicaldesnity)
             attriName.push_back("密度");
         else
             attriName.push_back("空");
     }
-    if( 1 == type || 5 == type )
-    {
-        if(logicallength)
+	if(logicallength)
             attriName.push_back("长度");
-        else
-            attriName.push_back("空");;
-        if(logicalquantity)
-            attriName.push_back("数量");
-        else
-            attriName.push_back("空");
+	attriName.push_back("宽度");//??????
+
+    if( 1 != type && 5 != type )
+    {
+		if( 8 == type || 11 == type )
+		{
+			if(logicaldesnity)
+				attriName.push_back("密度");
+			else
+				attriName.push_back("空");
+		}
+		else
+		{
+			if(logicalarea)
+				attriName.push_back("面积");
+			else
+				attriName.push_back("空");
+		}
+	}
+	if(logicalquantity)
+		attriName.push_back("数量");
+	else
+		attriName.push_back("空");
+
+	if( 1 == type || 5 == type )
+    {
         if(logicalWeight)
             attriName.push_back("重量");
         else
             attriName.push_back("空");
     }
-    else
-    {
-        if( 11 == type )
-        {
-            attriName.push_back("体积");
-        }
-        else
-        {
-            if(logicalarea)
-                attriName.push_back("面积");
-            else
-                attriName.push_back("空");
-        }
-        if(logicalquantity)
-            attriName.push_back("数量");
-        else
-            attriName.push_back("空");
-        attriName.push_back("总面积");
-    }
-
+	else
+	{
+		if( 8 != type )
+			attriName.push_back("总面积"); //???
+	}
     if(logicalunitPrice)
         attriName.push_back("单价");
     else
@@ -370,6 +379,135 @@ void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& B
         BOMStr.push_back(rowStr);
     }
 }
+
+//void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr )
+//{
+//    StlNXStringVector attriName;
+//    BOMStr.clear();
+//    logical logicalmatName = matName->GetProperties()->GetLogical("Value");
+//    logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
+//    logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
+//    logical logicalmaterial = material->GetProperties()->GetLogical("Value");
+//    logical logicaldesnity = desnity->GetProperties()->GetLogical("Value");
+//    logical logicallength = length->GetProperties()->GetLogical("Value");
+//    logical logicalarea = togglearea->GetProperties()->GetLogical("Value");
+//    logical logicalquantity = togglequantity->GetProperties()->GetLogical("Value");
+//    logical logicalWeight = toggleWeight->GetProperties()->GetLogical("Value");
+//    logical logicalunitPrice = unitPrice->GetProperties()->GetLogical("Value");
+//    logical logicaltotalPrice = totalPrice->GetProperties()->GetLogical("Value");
+//    logical logicalsupplier = supplier->GetProperties()->GetLogical("Value");
+//    logical logicalRemark = toggleRemark->GetProperties()->GetLogical("Value");
+//    //attriName.push_back("序号");
+//    if(logicalmatName)
+//        attriName.push_back("材料名称");
+//    else
+//        attriName.push_back("空");
+//    if(logicalMatNO)
+//        attriName.push_back("材料编号");
+//    else
+//        attriName.push_back("空");
+//    if(logicalmatSize)
+//        attriName.push_back("规格");
+//    else
+//        attriName.push_back("空");
+//    if( type < 6 )
+//    {
+//        if(logicalmaterial)
+//            attriName.push_back("材质");
+//        else
+//            attriName.push_back("空");
+//    }
+//    else
+//    {
+//        attriName.push_back("尺寸");
+//    }
+//    if( 2 == type || 3 == type || 4 == type )
+//    {
+//        attriName.push_back("尺寸");
+//    }
+//    else
+//    {
+//        if(logicaldesnity)
+//            attriName.push_back("密度");
+//        else
+//            attriName.push_back("空");
+//    }
+//    if( 1 == type || 5 == type )
+//    {
+//        if(logicallength)
+//            attriName.push_back("长度");
+//        else
+//            attriName.push_back("空");;
+//        if(logicalquantity)
+//            attriName.push_back("数量");
+//        else
+//            attriName.push_back("空");
+//        if(logicalWeight)
+//            attriName.push_back("重量");
+//        else
+//            attriName.push_back("空");
+//    }
+//    else
+//    {
+//        if( 11 == type )
+//        {
+//            attriName.push_back("体积");
+//        }
+//        else
+//        {
+//            if(logicalarea)
+//                attriName.push_back("面积");
+//            else
+//                attriName.push_back("空");
+//        }
+//        if(logicalquantity)
+//            attriName.push_back("数量");
+//        else
+//            attriName.push_back("空");
+//        attriName.push_back("总面积");
+//    }
+//
+//    if(logicalunitPrice)
+//        attriName.push_back("单价");
+//    else
+//        attriName.push_back("空");
+//
+//    if(logicaltotalPrice)
+//        attriName.push_back("总价");
+//    else
+//        attriName.push_back("空");
+//
+//    if(logicalsupplier)
+//        attriName.push_back("供应商");
+//    else
+//        attriName.push_back("空");
+//    if(logicalRemark)
+//        attriName.push_back("备注");
+//    else
+//        attriName.push_back("空");
+//    for(int idx = 0; idx < bombodies.size(); ++idx )
+//    {
+//        char num[32]="";
+//        StlNXStringVector rowStr;
+//        tag_t body = bombodies[idx];
+//        sprintf_s(num,"%d",idx+1);
+//        rowStr.push_back(num);
+//        for(int jdx = 0; jdx < attriName.size(); ++jdx )
+//        {
+//            if(0 == strcmp(attriName[jdx].GetText(),"空"))
+//            {
+//                rowStr.push_back("");
+//            }
+//            else
+//            {
+//                char attriValue2[133] = "";
+//                USER_ask_obj_string_attr( body ,(char*)attriName[jdx].GetText() , attriValue2 );
+//                rowStr.push_back(attriValue2);
+//            }
+//        }
+//        BOMStr.push_back(rowStr);
+//    }
+//}
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
 //------------------------------------------------------------------------------

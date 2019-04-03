@@ -185,6 +185,32 @@ int HideMatNO::apply_cb()
     try
     {
         //---- Enter your callback code here -----
+		std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+		if(objects.size()>0)
+		{
+			for (int mm = 0; mm < objects.size(); mm++)
+			{
+				tag_t body = objects[mm]->Tag();
+				char handle[UF_ATTR_MAX_STRING_BUFSIZE+1]="";
+				int irc = USER_ask_obj_string_attr(body,ATTR_RY_TEXT_SPLINE_BODY_HANDLE,handle);
+				if( 1 == irc )
+				{
+					tag_t recTag = UF_TAG_ask_tag_of_handle(handle);
+					if( recTag != NULL_TAG )
+					{
+						int n_eids = 0;
+						tag_t *eids = NULL;
+						UF_MODL_ask_feat_object(recTag, &n_eids, &eids);
+						for( int idx =  0; idx < n_eids; ++idx )
+						{
+							UF_OBJ_set_blank_status(eids[idx],UF_OBJ_BLANKED);
+						}
+						UF_free(eids);
+					}
+				}
+			}
+		}
+		
     }
     catch(exception& ex)
     {

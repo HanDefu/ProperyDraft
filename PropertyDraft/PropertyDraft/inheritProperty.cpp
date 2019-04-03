@@ -185,6 +185,39 @@ int inheritProperty::apply_cb()
     try
     {
         //---- Enter your callback code here -----
+		StlNXStringVector attrNames;
+		StlNXStringVector attrValues;
+		std::vector<NXOpen::TaggedObject* > objectS = bodySource->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+		std::vector<NXOpen::TaggedObject* > objectT = bodyTargets->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+		attrNames.push_back("材料类型");
+		attrNames.push_back("材料名称");
+		attrNames.push_back("材料编号");
+		attrNames.push_back("规格");
+		attrNames.push_back("材质");
+		attrNames.push_back("密度");
+		attrNames.push_back("单价");
+		attrNames.push_back("供应商");
+		attrNames.push_back("重量");
+		attrNames.push_back("总价");
+		attrNames.push_back("备注");
+		attrNames.push_back("长度");
+		attrNames.push_back("宽度");
+		attrNames.push_back("面积");
+		attrNames.push_back("已设零件标记");
+		attrNames.push_back("输出材料编号");
+		for(int jdx = 0; jdx < attrNames.size(); ++jdx )
+		{
+			char handle[UF_ATTR_MAX_STRING_BUFSIZE+1]="";
+			int irc = USER_ask_obj_string_attr(objectS[0]->Tag(),(char*)attrNames[jdx].GetText(),handle);
+			attrValues.push_back(handle);
+		}
+		for(int idx = 0; idx < objectT.size(); ++idx )
+		{
+			for(int jdx = 0; jdx < attrNames.size(); ++jdx )
+			{
+				Royal_set_obj_attr(objectT[idx]->Tag(),attrNames[jdx].GetText(),attrValues[jdx].GetText());
+			}
+		}
     }
     catch(exception& ex)
     {

@@ -20,6 +20,7 @@
 //These includes are needed for the following template code
 //------------------------------------------------------------------------------
 #include <uf_defs.h>
+#include <uf.h>
 #include <uf_ui_types.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>
@@ -33,7 +34,8 @@
 #include <NXOpen/BlockStyler_Group.hxx>
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
 #include <NXOpen/BlockStyler_Toggle.hxx>
-
+#include "Common_Function.h"
+#include "Common_Function_UG.h"
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------

@@ -32,7 +32,10 @@
 #include <NXOpen/BlockStyler_PropertyList.hxx>
 #include <NXOpen/BlockStyler_Group.hxx>
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
+#include "Common_Function.h"
+#include "Common_Function_UG.h"
 
+typedef std::vector<NXString> StlNXStringVector;
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------
