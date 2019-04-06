@@ -35,10 +35,23 @@
 //These includes are needed for the following template code
 //------------------------------------------------------------------------------
 #include "Property.hpp"
+#include "Common.h"
+#include "Common_UI.h"
 VVecNXStringVector configData;
 //StlNXStringVector g_allNames;
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
+
+static int 
+	s_type = 0,
+	s_mingcheng = 0,
+	s_bianhao = 0,
+	s_guige = 0,
+	s_caizhi = 0,
+	s_midu = 0,
+	s_danjia = 0,
+	s_gongyingshang = 0,
+	s_beizhu = 0;
 
 //------------------------------------------------------------------------------
 // Initialize static variables
@@ -300,20 +313,60 @@ void Property::SetUIConfigData( )
         remark->GetProperties()->SetEnumMembers("Value",temp[7]);
     }
 
+	weight->SetShow(false);//重量一直不显示
+	totalPrice->SetShow(false);//总价一直不显示
+
 	if (type==0 || type==4)//钢材 铝材
 	{
 		linear_bodyLen->SetShow(true);
-		linear_bodyWidth->SetShow(false);
+		linear_bodyWidth->SetShow(true);
 		bodyarea->SetShow(false);
         face_select0->SetShow(false);
+
+		matDensity->SetShow(true);//密度显示
+		material->SetShow(true);
 	}
-	else if (type==1 || type==2 || type == 3|| type == 5||type == 5 ||
-		type == 6||type == 7||type == 8||type == 9||type == 10)//铝板 树脂板 石材 玻璃等
+	else if (type==1 || type==2 || type == 3)//铝板 树脂板 石材
 	{
 		linear_bodyLen->SetShow(true);
 		linear_bodyWidth->SetShow(true);
 		bodyarea->SetShow(true);
         face_select0->SetShow(true);
+		
+		
+		matDensity->SetShow(false);//密度去掉
+		material->SetShow(true);
+	}
+	else if (type==5 || type==8 || type == 9)//玻璃 屋面瓦 铜饰
+	{
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(true);
+		bodyarea->SetShow(true);
+		face_select0->SetShow(true);
+		
+		
+		matDensity->SetShow(false);//密度去掉
+		material->SetShow(false);
+	}
+	else if (type==7 || type==10)//木雕 辅材
+	{
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(true);
+		bodyarea->SetShow(false);
+		face_select0->SetShow(false);
+		material->SetShow(false);
+		matDensity->SetShow(true);//密度去掉
+	}
+	else//6五金件
+	{
+	
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(false);
+		bodyarea->SetShow(false);
+		face_select0->SetShow(false);
+
+		matDensity->SetShow(false);//密度显示
+		material->SetShow(false);
 	}
 }
 //------------------------------------------------------------------------------
@@ -334,6 +387,33 @@ void Property::dialogShown_cb()
         textHeight->GetProperties()->SetLogical("Show",out);
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
+
+
+		UI_EnumSetCurrentSel(enumType, s_type);
+		UI_EnumSetCurrentSel(matName, s_mingcheng);
+		UI_EnumSetCurrentSel(matNO, s_bianhao);
+		UI_EnumSetCurrentSel(matSize, s_guige);
+
+		std::vector<NXString> strs;
+		strs = material->GetProperties()->GetEnumMembers("Value");
+		if (strs.size() > 1)
+			UI_EnumSetCurrentSel(material, s_caizhi);
+
+		strs = matDensity->GetProperties()->GetEnumMembers("Value");
+		if (strs.size() > 1)
+			UI_EnumSetCurrentSel(matDensity, s_midu);
+
+		strs = unitPrice->GetProperties()->GetEnumMembers("Value");
+		if (strs.size() > 1)
+			UI_EnumSetCurrentSel(unitPrice, s_danjia);
+
+		strs = supplier->GetProperties()->GetEnumMembers("Value");
+		if (strs.size() > 1)
+			UI_EnumSetCurrentSel(supplier, s_gongyingshang);
+
+		strs = remark->GetProperties()->GetEnumMembers("Value");
+		if (strs.size() > 1)
+			UI_EnumSetCurrentSel(remark, s_beizhu);
     }
     catch(exception& ex)
     {
@@ -444,7 +524,14 @@ static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates
 void Royal_set_obj_attr(tag_t body,char *name , double val)
 {
 	char toprStr[133]="";
-	sprintf(toprStr,"%g",val);
+	sprintf(toprStr,"%.1f",val);
+	Royal_set_obj_attr(body,name,toprStr);
+}
+
+void Royal_set_obj_attr2(tag_t body,char *name , double val)
+{
+	char toprStr[133]="";
+	sprintf(toprStr,"%.2f",val);
 	Royal_set_obj_attr(body,name,toprStr);
 }
 //------------------------------------------------------------------------------
@@ -474,19 +561,23 @@ int Property::apply_cb()
 				NXString rema = remark->GetProperties()->GetEnumAsString("Value");
 
 				double topr = totalPrice->GetProperties()->GetDouble("Value");
-				double weig = weight->GetProperties()->GetDouble("Value");
+				//double weig = weight->GetProperties()->GetDouble("Value");
 				double area = bodyarea->GetProperties()->GetDouble("Value");
+				area = area/1000000;
 				double len = linear_bodyLen->GetProperties()->GetDouble("Value");
 				double wid = linear_bodyWidth->GetProperties()->GetDouble("Value");
+
+				double volume = RY_GetBodyVolume(body);
+				NXString zhongLiang = StrMu(dens, volume/1000000000);
 				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
 				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
 				Royal_set_obj_attr(body,"规格",size.GetLocaleText());
 				Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
-				Royal_set_obj_attr(body,"密度",dens.GetLocaleText());
-				Royal_set_obj_attr(body,"单价",unpr.GetLocaleText());
+				Royal_set_obj_attr2(body,"密度",atof(dens.GetLocaleText()));
+				Royal_set_obj_attr(body,"单价",atof(unpr.GetLocaleText()));
 				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
-				Royal_set_obj_attr(body,"重量",weig);
+				Royal_set_obj_attr(body,"重量",atof(zhongLiang.getLocaleText()));
 				Royal_set_obj_attr(body,"总价",topr);
 				Royal_set_obj_attr(body,"面积",area);
 				Royal_set_obj_attr(body,"长度",len);
@@ -542,6 +633,17 @@ int Property::apply_cb()
 					UF_OBJ_set_blank_status( body,UF_OBJ_BLANKED);
 			}
 		}
+
+
+		UI_EnumGetCurrentSel(enumType, s_type);
+		UI_EnumGetCurrentSel(matName, s_mingcheng);
+		UI_EnumGetCurrentSel(matNO, s_bianhao);
+		UI_EnumGetCurrentSel(matSize, s_guige);
+		UI_EnumGetCurrentSel(material, s_caizhi);
+		UI_EnumGetCurrentSel(matDensity, s_midu);
+		UI_EnumGetCurrentSel(unitPrice, s_danjia);
+		UI_EnumGetCurrentSel(supplier, s_gongyingshang);
+		UI_EnumGetCurrentSel(remark, s_beizhu);
     }
     catch(exception& ex)
     {

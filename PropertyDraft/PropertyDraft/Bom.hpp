@@ -37,7 +37,7 @@
 #include <NXOpen/BlockStyler_Toggle.hxx>
 #include <NXOpen/BlockStyler_Enumeration.hxx>
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
-
+#include <NXOpen/BlockStyler_StringBlock.hxx>
 //------------------------------------------------------------------------------
 //Bit Option for Property: EntityType
 //------------------------------------------------------------------------------
@@ -88,6 +88,9 @@ private:
     NXOpen::BlockStyler::Group* group;// Block type: Group
     NXOpen::BlockStyler::Toggle* toggleOutAll;// Block type: Toggle
     NXOpen::BlockStyler::Enumeration* enumType;// Block type: Enumeration
+	NXOpen::BlockStyler::Group* group1;// Block type: Group
+	NXOpen::BlockStyler::StringBlock* projectName;// Block type: String
+	NXOpen::BlockStyler::StringBlock* projectNumber;// Block type: String
     NXOpen::BlockStyler::BodyCollector* bodySelect;// Block type: Body Collector
     NXOpen::BlockStyler::Group* group0;// Block type: Group
     NXOpen::BlockStyler::Toggle* matName;// Block type: Toggle

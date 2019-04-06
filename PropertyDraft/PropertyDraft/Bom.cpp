@@ -36,8 +36,12 @@
 //------------------------------------------------------------------------------
 #include "Bom.hpp"
 #include "Common.h"
+#include "Common_UI.h"
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
+
+static NXString s_projectName, s_projectNumber;
+
 
 void ReadExcelConfigData( StlNXStringVector& types )
 {
@@ -185,6 +189,9 @@ void Bom::initialize_cb()
         totalPrice = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("totalPrice"));
         supplier = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("supplier"));
         toggleRemark = dynamic_cast<NXOpen::BlockStyler::Toggle*>(theDialog->TopBlock()->FindBlock("toggleRemark"));
+		group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
+		projectName = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectName"));
+		projectNumber = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectNumber"));
     }
     catch(exception& ex)
     {
@@ -207,6 +214,8 @@ void Bom::dialogShown_cb()
         //types.push_back("全部");
         //ReadExcelConfigData( types );
         //enumType->GetProperties()->SetEnumMembers("Value",types);
+		UI_StringSetValue(projectName, s_projectName);
+		UI_StringSetValue(projectNumber, s_projectNumber);
     }
     catch(exception& ex)
     {
@@ -226,21 +235,15 @@ static logical CheckBodyType(tag_t body, NXString& type)
     }
 	return is;
 }
+
+NXString GetBodyType(tag_t body)
+{
+	logical is = false;
+	char attriValue2[133] = "";
+	int has = USER_ask_obj_string_attr( body , "材料类型" , attriValue2 );
+	return NXString(attriValue2);
+}
 	
-//序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		钢材1
-//序号	材料名称	材料编号	规格	材质	密度	长度	数量	重量	    单价	 总价	供应商	备注		铝材5
-
-//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注	     铝板2		
-//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商	备注		树脂板3
-//序号	材料名称	材料编号	规格	材质	尺寸	面积	数量	总面积  单价	 总价	供应商   备注		石材4
-
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		玻璃6	
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		五金件7
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		木雕8
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		屋面瓦9
-//序号	材料名称	材料编号	规格	尺寸	密度	面积	数量	总面积	单价	 总价	供应商	备注		铜饰10
-//序号	材料名称	材料编号	规格	尺寸	密度	体积	数量	总面积	单价	 总价	供应商	备注		辅材11
-
 
 //序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                钢材1
 //序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                铝材5
@@ -248,10 +251,12 @@ static logical CheckBodyType(tag_t body, NXString& type)
 //序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	 总价	供应商	备注	        铝板2
 //序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            树脂板3
 //序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            石材4
+
 //序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                玻璃6
-//序号	材料名称	材料编号	规格  	长度（mm)	宽度（mm)	密度	数量	        单价	总价	供应商	备注                木雕8
 //序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                屋面瓦9
-//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注	                铜饰10
+//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注	            铜饰10
+
+//序号	材料名称	材料编号	规格  	    长度（mm)	宽度（mm)	密度	数量	        单价	总价	供应商	备注                木雕8
 //序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	密度	数量	总面积	单价	总价	供应商	备注                辅材11
 
 //序号	材料名称	材料编号	规格	长度	数量	单价	总价	供应商	备注                                                五金件7
@@ -380,137 +385,299 @@ void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& B
     }
 }
 
-//void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr )
-//{
-//    StlNXStringVector attriName;
-//    BOMStr.clear();
-//    logical logicalmatName = matName->GetProperties()->GetLogical("Value");
-//    logical logicalMatNO = MatNO->GetProperties()->GetLogical("Value");
-//    logical logicalmatSize = matSize->GetProperties()->GetLogical("Value");
-//    logical logicalmaterial = material->GetProperties()->GetLogical("Value");
-//    logical logicaldesnity = desnity->GetProperties()->GetLogical("Value");
-//    logical logicallength = length->GetProperties()->GetLogical("Value");
-//    logical logicalarea = togglearea->GetProperties()->GetLogical("Value");
-//    logical logicalquantity = togglequantity->GetProperties()->GetLogical("Value");
-//    logical logicalWeight = toggleWeight->GetProperties()->GetLogical("Value");
-//    logical logicalunitPrice = unitPrice->GetProperties()->GetLogical("Value");
-//    logical logicaltotalPrice = totalPrice->GetProperties()->GetLogical("Value");
-//    logical logicalsupplier = supplier->GetProperties()->GetLogical("Value");
-//    logical logicalRemark = toggleRemark->GetProperties()->GetLogical("Value");
-//    //attriName.push_back("序号");
-//    if(logicalmatName)
-//        attriName.push_back("材料名称");
-//    else
-//        attriName.push_back("空");
-//    if(logicalMatNO)
-//        attriName.push_back("材料编号");
-//    else
-//        attriName.push_back("空");
-//    if(logicalmatSize)
-//        attriName.push_back("规格");
-//    else
-//        attriName.push_back("空");
-//    if( type < 6 )
-//    {
-//        if(logicalmaterial)
-//            attriName.push_back("材质");
-//        else
-//            attriName.push_back("空");
-//    }
-//    else
-//    {
-//        attriName.push_back("尺寸");
-//    }
-//    if( 2 == type || 3 == type || 4 == type )
-//    {
-//        attriName.push_back("尺寸");
-//    }
-//    else
-//    {
-//        if(logicaldesnity)
-//            attriName.push_back("密度");
-//        else
-//            attriName.push_back("空");
-//    }
-//    if( 1 == type || 5 == type )
-//    {
-//        if(logicallength)
-//            attriName.push_back("长度");
-//        else
-//            attriName.push_back("空");;
-//        if(logicalquantity)
-//            attriName.push_back("数量");
-//        else
-//            attriName.push_back("空");
-//        if(logicalWeight)
-//            attriName.push_back("重量");
-//        else
-//            attriName.push_back("空");
-//    }
-//    else
-//    {
-//        if( 11 == type )
-//        {
-//            attriName.push_back("体积");
-//        }
-//        else
-//        {
-//            if(logicalarea)
-//                attriName.push_back("面积");
-//            else
-//                attriName.push_back("空");
-//        }
-//        if(logicalquantity)
-//            attriName.push_back("数量");
-//        else
-//            attriName.push_back("空");
-//        attriName.push_back("总面积");
-//    }
-//
-//    if(logicalunitPrice)
-//        attriName.push_back("单价");
-//    else
-//        attriName.push_back("空");
-//
-//    if(logicaltotalPrice)
-//        attriName.push_back("总价");
-//    else
-//        attriName.push_back("空");
-//
-//    if(logicalsupplier)
-//        attriName.push_back("供应商");
-//    else
-//        attriName.push_back("空");
-//    if(logicalRemark)
-//        attriName.push_back("备注");
-//    else
-//        attriName.push_back("空");
-//    for(int idx = 0; idx < bombodies.size(); ++idx )
-//    {
-//        char num[32]="";
-//        StlNXStringVector rowStr;
-//        tag_t body = bombodies[idx];
-//        sprintf_s(num,"%d",idx+1);
-//        rowStr.push_back(num);
-//        for(int jdx = 0; jdx < attriName.size(); ++jdx )
-//        {
-//            if(0 == strcmp(attriName[jdx].GetText(),"空"))
-//            {
-//                rowStr.push_back("");
-//            }
-//            else
-//            {
-//                char attriValue2[133] = "";
-//                USER_ask_obj_string_attr( body ,(char*)attriName[jdx].GetText() , attriValue2 );
-//                rowStr.push_back(attriValue2);
-//            }
-//        }
-//        BOMStr.push_back(rowStr);
-//    }
-//}
-//------------------------------------------------------------------------------
-//Callback Name: apply_cb
-//------------------------------------------------------------------------------
+int FindSame(NXString type, StlNXStringVectorVector &exsit, StlNXStringVector &newone)
+{
+	if (strcmp(type.GetLocaleText(), "钢材")==0 ||
+		strcmp(type.GetLocaleText(), "铝材")==0)
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4]) &&
+				isSame(newone[5] , exsit[i][5]) &&
+				isSame(newone[6] , exsit[i][6]) &&
+				isSame(newone[7] , exsit[i][7])&&
+				isSame(newone[10] , exsit[i][10]) &&
+				isSame(newone[12] , exsit[i][12]))
+			{
+				return i;
+			}
+		}
+	}
+
+
+	else if (strcmp(type.GetLocaleText(), "铝板")==0 ||
+		strcmp(type.GetLocaleText(), "树脂板")==0||
+		strcmp(type.GetLocaleText(), "石材")==0
+
+		)
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4]) &&
+				isSame(newone[5] , exsit[i][5]) &&
+				isSame(newone[6] , exsit[i][6]) &&
+				isSame(newone[7] , exsit[i][7])&&
+				isSame(newone[10] , exsit[i][10]) &&
+				isSame(newone[12] , exsit[i][12])
+				)
+			{
+				return i;
+			}
+		}
+	}
+
+	else if (strcmp(type.GetLocaleText(), "玻璃")==0 ||
+		strcmp(type.GetLocaleText(), "屋面瓦")==0||
+		strcmp(type.GetLocaleText(), "铜饰")==0
+
+		)
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4]) &&
+				isSame(newone[5] , exsit[i][5]) &&
+				isSame(newone[6] , exsit[i][6]) &&
+				isSame(newone[9] , exsit[i][9]) &&
+				isSame(newone[11] , exsit[i][11])
+				)
+			{
+				return i;
+			}
+		}
+	}
+
+
+
+	else if (strcmp(type.GetLocaleText(), "木雕"))
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4]) &&
+				isSame(newone[5] , exsit[i][5]) &&
+				isSame(newone[6] , exsit[i][6])&&
+				isSame(newone[8] , exsit[i][8])&&
+				isSame(newone[10] , exsit[i][10])
+				)
+			{
+				return i;
+			}
+		}
+	}
+
+	else if (strcmp(type.GetLocaleText(), "五金件"))
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4])&&
+				isSame(newone[6] , exsit[i][6])&&
+				isSame(newone[8] , exsit[i][8])
+				)
+			{
+				return i;
+			}
+		}
+	}
+
+
+	else if (strcmp(type.GetLocaleText(), "辅材")==0
+
+		)
+	{
+		for (int i = 0; i < exsit.size();i++)
+		{
+			if (isSame(newone[1], exsit[i][1])  && 
+				isSame(newone[2] , exsit[i][2]) && 
+				isSame(newone[3] , exsit[i][3]) && 
+				isSame(newone[4] , exsit[i][4]) &&
+				isSame(newone[5] , exsit[i][5]) &&
+				isSame(newone[6] , exsit[i][6]) &&
+				isSame(newone[9] , exsit[i][9]) &&
+				isSame(newone[11] , exsit[i][11])
+				)
+			{
+				return i;
+			}
+		}
+	}
+
+	return -1;
+}
+
+
+
+void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
+{
+	StlNXStringVectorVector heJi;
+	if (strcmp(type.GetLocaleText(), "钢材")==0 ||
+		strcmp(type.GetLocaleText(), "铝材")==0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][8] = "1";//数量
+				BOMStr[i][11] = BOMStr[i][10];//总价=单价
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][8]);//数量+1
+				NXString zongJia = StrMu(heJi[index][10], heJi[index][8]);
+				heJi[index][11] = zongJia;
+			}
+		}
+	}
+	//
+	else if (strcmp(type.GetLocaleText(), "铝板")==0||
+		strcmp(type.GetLocaleText(), "树脂板")==0||
+		strcmp(type.GetLocaleText(), "石材")==0
+		)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][8] = "1";//数量
+				BOMStr[i][11] = BOMStr[i][10];//总价=单价
+				BOMStr[i][9] = BOMStr[i][7];//总面积=面积
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][8]);//数量+1
+				NXString zongJia = StrMu(heJi[index][10], heJi[index][8]);//总价计算
+				heJi[index][11] = zongJia;
+
+				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8]);//总面积计算
+				heJi[index][9] = zongmianji;
+			}
+		}
+	}
+
+
+	else if (strcmp(type.GetLocaleText(), "玻璃")==0||
+		strcmp(type.GetLocaleText(), "屋面瓦")==0||
+		strcmp(type.GetLocaleText(), "铜饰")==0
+		)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][7] = "1";//数量
+				BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				BOMStr[i][8] = BOMStr[i][6];//总面积=面积
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][7]);//数量+1
+				NXString zongJia = StrMu(heJi[index][9], heJi[index][7]);//总价计算
+				heJi[index][10] = zongJia;
+
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				heJi[index][8] = zongmianji;
+			}
+		}
+	}
+
+
+
+	else if (strcmp(type.GetLocaleText(), "木雕")==0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][7] = "1";//数量
+				BOMStr[i][9] = BOMStr[i][8];//总价=单价
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][7]);//数量+1
+				NXString zongJia = StrMu(heJi[index][8], heJi[index][7]);//总价计算
+				heJi[index][9] = zongJia;
+			}
+		}
+	}
+
+
+	else if (strcmp(type.GetLocaleText(), "五金件")==0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][5] = "1";//数量
+				BOMStr[i][7] = BOMStr[i][6];//总价=单价
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][5]);//数量+1
+				NXString zongJia = StrMu(heJi[index][6], heJi[index][5]);//总价计算
+				heJi[index][7] = zongJia;
+			}
+		}
+	}
+
+
+	else if (strcmp(type.GetLocaleText(), "辅材")==0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][7] = "1";//数量
+				BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][7]);//数量+1
+				NXString zongJia = StrMu(heJi[index][9], heJi[index][7]);//总价计算
+				heJi[index][10] = zongJia;
+			}
+		}
+	}
+
+
+	//////////////////////////////////////////////////////
+    
+
+	BOMStr = heJi;
+	
+}
+
+
 int Bom::apply_cb()
 {
     int errorCode = 0;
@@ -543,6 +710,11 @@ int Bom::apply_cb()
 				}
 			}
 		}
+
+
+		UI_StringGetValue(projectName, s_projectName);
+		UI_StringGetValue(projectNumber, s_projectNumber);
+
 		if(bombodies.size()>0)
 		{
 			char file_name[UF_CFI_MAX_PATH_NAME_SIZE]="";
@@ -591,7 +763,8 @@ int Bom::apply_cb()
                             uc4561(desspc,-1); 
                         }
                         GetBOMInformation(tempbodies,type,BOMStr );
-                        WriteBOM(srcspc,desspc,BOMStr);
+						PostProcess(GetBodyType(tempbodies[0]), BOMStr);
+                        WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
                     }
                 }
             }
@@ -612,7 +785,7 @@ int Bom::apply_cb()
                     uc4561(desspc,-1); 
                 }
                 GetBOMInformation(bombodies,type,BOMStr );
-                WriteBOM(srcspc,desspc,BOMStr);
+                WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
             }
             char cmd[512]="";
 			sprintf_s(cmd,"start %s",sFilePath);
