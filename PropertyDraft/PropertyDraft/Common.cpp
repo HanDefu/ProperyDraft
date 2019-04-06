@@ -50,23 +50,29 @@ void StrAdd1(NXString &str)//×Ö·û´®¼Ó1
 	return ;
 }
 
-NXString StrMu(NXString &str1, NXString &str2)//×Ö·û´®Ïà³Ë
+NXString StrMu(NXString &str1, NXString &str2, int xiaoShuDian)//×Ö·û´®Ïà³Ë
 {
 	double value1 = atof(str1.GetLocaleText());
 	int value2 = atof(str2.GetLocaleText());
 	value1*=value2;
 	char cstr[32] = "";
-	sprintf(cstr, "%.1f", value1);
+	if (xiaoShuDian == 1)
+	    sprintf(cstr, "%.1f", value1);
+	else
+		sprintf(cstr, "%.2f", value1);
 	NXString str = cstr;
 	return str;
 }
 
-NXString StrMu(NXString &str1, double value2)//×Ö·û´®Ïà³Ë
+NXString StrMu(NXString &str1, double value2, int xiaoShuDian)//×Ö·û´®Ïà³Ë
 {
 	double value1 = atof(str1.GetLocaleText());
 	value1*=value2;
 	char cstr[32] = "";
-	sprintf(cstr, "%.1f", value1);
+	if (xiaoShuDian == 1)
+		sprintf(cstr, "%.1f", value1);
+	else
+		sprintf(cstr, "%.2f", value1);
 	NXString str = cstr;
 	return str;
 }

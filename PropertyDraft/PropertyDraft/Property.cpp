@@ -560,15 +560,37 @@ int Property::apply_cb()
 				NXString supp = supplier->GetProperties()->GetEnumAsString("Value");
 				NXString rema = remark->GetProperties()->GetEnumAsString("Value");
 
-				double topr = totalPrice->GetProperties()->GetDouble("Value");
 				//double weig = weight->GetProperties()->GetDouble("Value");
 				double area = bodyarea->GetProperties()->GetDouble("Value");
 				area = area/1000000;
 				double len = linear_bodyLen->GetProperties()->GetDouble("Value");
 				double wid = linear_bodyWidth->GetProperties()->GetDouble("Value");
 
+				//重量计算
 				double volume = RY_GetBodyVolume(body);
-				NXString zhongLiang = StrMu(dens, volume/1000000000);
+				NXString zhongLiang = StrMu(dens, volume/1000000, 2);
+
+
+				//总价计算
+				double topr = 0;
+				if (strcmp(type.getLocaleText() , "钢材" ) == 0||
+					strcmp(type.getLocaleText() , "铝材") == 0||
+					strcmp(type.getLocaleText() , "木雕") ==0)
+				{
+					NXString zongJia = StrMu(unpr, volume);
+					topr = atof(zongJia.getLocaleText());
+				}
+				else if (strcmp(type.getLocaleText() ,"五金件")==0)
+				{
+					topr = atof(unpr.getLocaleText());
+				}
+				else
+				{
+					NXString zongJia = StrMu(unpr, area);
+					topr = atof(zongJia.getLocaleText());
+				}
+
+
 				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
 				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());

@@ -533,13 +533,13 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][8] = "1";//数量
-				BOMStr[i][11] = BOMStr[i][10];//总价=单价
+				//BOMStr[i][11] = BOMStr[i][10];//总价=单价
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][8]);//数量+1
-				NXString zongJia = StrMu(heJi[index][10], heJi[index][8]);
+				NXString zongJia = StrMu(heJi[index][11], heJi[index][8]);
 				heJi[index][11] = zongJia;
 			}
 		}
@@ -557,14 +557,14 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][8] = "1";//数量
-				BOMStr[i][11] = BOMStr[i][10];//总价=单价
+				//BOMStr[i][11] = BOMStr[i][10];//总价=单价
 				BOMStr[i][9] = BOMStr[i][7];//总面积=面积
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][8]);//数量+1
-				NXString zongJia = StrMu(heJi[index][10], heJi[index][8]);//总价计算
+				NXString zongJia = StrMu(heJi[index][11], heJi[index][8]);//总价计算
 				heJi[index][11] = zongJia;
 
 				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8]);//总面积计算
@@ -586,14 +586,14 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][7] = "1";//数量
-				BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				//BOMStr[i][10] = BOMStr[i][9];//总价=单价
 				BOMStr[i][8] = BOMStr[i][6];//总面积=面积
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][9], heJi[index][7]);//总价计算
+				NXString zongJia = StrMu(heJi[index][10], heJi[index][7]);//总价计算
 				heJi[index][10] = zongJia;
 
 				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
@@ -613,13 +613,13 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][7] = "1";//数量
-				BOMStr[i][9] = BOMStr[i][8];//总价=单价
+				//BOMStr[i][9] = BOMStr[i][8];//总价=单价
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][8], heJi[index][7]);//总价计算
+				NXString zongJia = StrMu(heJi[index][9], heJi[index][7]);//总价计算
 				heJi[index][9] = zongJia;
 			}
 		}
@@ -635,13 +635,13 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][5] = "1";//数量
-				BOMStr[i][7] = BOMStr[i][6];//总价=单价
+				//BOMStr[i][7] = BOMStr[i][6];//总价=单价
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][5]);//数量+1
-				NXString zongJia = StrMu(heJi[index][6], heJi[index][5]);//总价计算
+				NXString zongJia = StrMu(heJi[index][7], heJi[index][5]);//总价计算
 				heJi[index][7] = zongJia;
 			}
 		}
@@ -657,13 +657,13 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			if (index == -1)
 			{
 				BOMStr[i][7] = "1";//数量
-				BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				//BOMStr[i][10] = BOMStr[i][9];//总价=单价
 				heJi.push_back(BOMStr[i]);
 			}
 			else
 			{
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][9], heJi[index][7]);//总价计算
+				NXString zongJia = StrMu(heJi[index][10], heJi[index][7]);//总价计算
 				heJi[index][10] = zongJia;
 			}
 		}
@@ -785,6 +785,7 @@ int Bom::apply_cb()
                     uc4561(desspc,-1); 
                 }
                 GetBOMInformation(bombodies,type,BOMStr );
+				PostProcess(GetBodyType(bombodies[0]), BOMStr);
                 WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
             }
             char cmd[512]="";
