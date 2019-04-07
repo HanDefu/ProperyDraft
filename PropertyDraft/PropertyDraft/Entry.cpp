@@ -47,6 +47,7 @@
 #include "HideMatNO.hpp"
 //#include "UpdateFile.h"
 #include "Excel/Excel.h"
+#include "CaoLiaoBianHao.hpp"
 
 using namespace NXOpen;
 
@@ -160,6 +161,10 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		{
 			GZ_HIDE_NO_Main();
 		}
+		else if (strcmp(param, "CUSTOM_GZ_EXPORT_NO") == 0)
+		{
+			GZ_EXPORT_NO_Main();
+		}
 
 		UF_terminate();
 		//Ê¾Àý´úÂë
@@ -216,8 +221,8 @@ extern "C" DllExport int ufusr_ask_unload()
 {
 	UF_terminate();
 	//return (int)Session::LibraryUnloadOptionExplicitly;
-	//return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
-	return (int)Session::LibraryUnloadOptionAtTermination;
+	return (int)NXOpen::Session::LibraryUnloadOptionImmediately;
+	//return (int)Session::LibraryUnloadOptionAtTermination;
 }
 
 //------------------------------------------------------------------------------

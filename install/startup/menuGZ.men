@@ -25,6 +25,11 @@ MENU CUSTOM2
     LABEL Òþ²Ø²ÄÁÏ±àºÅ
     BITMAP drafting_shipbuilding_preferences
     ACTIONS Property.dll
+
+BUTTON CUSTOM_GZ_EXPORT_NO
+    LABEL Êä³ö²ÄÁÏ±àºÅ
+    BITMAP drafting_shipbuilding_preferences
+    ACTIONS Property.dll
 	
 	BUTTON CUSTOM_GZ_PART_BOM
     LABEL BOM

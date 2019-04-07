@@ -69,6 +69,9 @@
     <ClCompile Include="inheritProperty.cpp">
       <Filter>Command</Filter>
     </ClCompile>
+    <ClCompile Include="CaoLiaoBianHao.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entry.hpp">
@@ -141,6 +144,9 @@
       <Filter>Command</Filter>
     </ClInclude>
     <ClInclude Include="inheritProperty.hpp">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="CaoLiaoBianHao.hpp">
       <Filter>Command</Filter>
     </ClInclude>
   </ItemGroup>

@@ -285,4 +285,6 @@ void CreateReferenceSet(vtag_t bodies,NXString& refsetName);
 
 int RY_DraftingPreferences_SetShowLineWidth(bool show);
 bool RY_DraftingPreferences_GetShowLineWidth();
+
+//tag_t CreateText(NXString& textStr, char* textHeight, Point3d coordinates2, Vector3d xDirection1, Vector3d yDirection1);
 #endif

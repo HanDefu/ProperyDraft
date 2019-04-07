@@ -103,6 +103,10 @@
 #include <NXOpen/Features_DatumPlaneBuilder.hxx>
 #include <NXOpen/DatumPlane.hxx>
 #include <NXOpen/Preferences_PartVisualizationLine.hxx>
+#include "uf_layer.h"
+#include "uf_mtx.h"
+#include <NXOpen/NXMatrixCollection.hxx>
+#include <NXOpen/SelectSmartObject.hxx>
 
 using namespace NXOpen;
 using namespace std;
@@ -3986,3 +3990,4 @@ bool RY_DraftingPreferences_GetShowLineWidth()
 	// ----------------------------------------------
 	return workPart->Preferences()->LineVisualization()->ShowWidths();
 }
+

@@ -37,6 +37,128 @@
 #include "Property.hpp"
 #include "Common.h"
 #include "Common_UI.h"
+#include <NXOpen/Body.hxx>
+#include <NXOpen/BodyCollection.hxx>
+#include <NXOpen/NXMatrix.hxx>
+#include <NXOpen/NXMatrixCollection.hxx>
+#include <NXOpen/CoordinateSystem.hxx>
+#include <NXOpen/CoordinateSystemCollection.hxx>
+#include <NXOpen/Part.hxx>
+#include <NXOpen/PartCollection.hxx>
+#include <NXOpen/Session.hxx>
+#include <NXOpen/Measure.hxx>
+#include <NXOpen/MeasureBuilder.hxx>
+#include <NXOpen/MeasureFaces.hxx>
+#include <NXOpen/MeasureFaceBuilder.hxx>
+#include <NXOpen/MeasureManager.hxx>
+#include <NXOpen/FaceDumbRule.hxx>
+#include <NXOpen/ScRuleFactory.hxx>
+#include <NXOpen/Unit.hxx>
+#include <NXOpen/UnitCollection.hxx>
+#include "Common_Function.h"
+#include "Common_Function_UG.h"
+#include "Excel/BasicExcel.hpp"
+
+
+static tag_t CreateText(NXString& textStr, char* textHeight, Point3d coordinates2, Vector3d xDirection1, Vector3d yDirection1)
+{
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+	NXOpen::Part *workPart(theSession->Parts()->Work());
+
+	NXOpen::Features::Text *nullNXOpen_Features_Text(NULL);
+
+	int worklayer = -1;
+	int layerStatus = -1;
+	UF_LAYER_ask_work_layer(&worklayer);
+	//UF_LAYER_ask_status(255,&layerStatus);
+	//UF_LAYER_set_status(255, UF_LAYER_WORK_LAYER);
+
+	NXOpen::Features::TextBuilder *textBuilder1;
+	textBuilder1 = workPart->Features()->CreateTextBuilder(nullNXOpen_Features_Text);
+
+	NXOpen::Point3d origin1(0.0, 0.0, 0.0);
+	NXOpen::Vector3d normal1(0.0, 0.0, 1.0);
+	NXOpen::Plane *plane1;
+	plane1 = workPart->Planes()->CreatePlane(origin1, normal1, NXOpen::SmartObject::UpdateOptionWithinModeling);
+
+	textBuilder1->SetSectionPlane(plane1);
+
+	/*NXOpen::Unit *unit1;
+	unit1 = textBuilder1->PlanarFrame()->Length()->Units();
+
+	textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("50");*/
+
+	//textBuilder1->SetOnFacePlacementMethod(NXOpen::Features::TextBuilder::OnFacePlacementMethodOptionsSectionPlane);
+
+	textBuilder1->SetScript(NXOpen::Features::TextBuilder::ScriptOptionsWestern);
+
+	textBuilder1->SetCanUseKerningSpaces(false);
+
+	textBuilder1->PlanarFrame()->SetAnchorLocation(NXOpen::GeometricUtilities::RectangularFrameBuilder::AnchorLocationTypeBottomLeft);
+	//textBuilder1->PlanarFrame()->Length()->SetRightHandSide("17.6908611782542");2.7*n
+
+	textBuilder1->PlanarFrame()->Height()->SetRightHandSide(textHeight);
+
+	textBuilder1->PlanarFrame()->SetWScale(100);
+	textBuilder1->PlanarFrame()->Shear()->SetRightHandSide("0");
+
+	/*textBuilder1->FrameOnPath()->SetAnchorLocation(NXOpen::GeometricUtilities::FrameOnPathBuilder::AnchorLocationTypeLeft);
+
+	textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("30");
+
+	textBuilder1->FrameOnPath()->AnchorPosition()->SetParameterUsed(false);
+
+	textBuilder1->FrameOnPath()->Offset()->SetRightHandSide("4.5");
+
+	textBuilder1->FrameOnPath()->Length()->SetRightHandSide("9.53025449104364");2.7*n*/
+
+	//textBuilder1->FrameOnPath()->Height()->SetRightHandSide("4");
+
+	//textBuilder1->FrameOnPath()->SetWScale(35.4339270372263);
+
+	textBuilder1->SetCanProjectCurves(true);
+
+	textBuilder1->SelectFont("宋体", NXOpen::Features::TextBuilder::ScriptOptionsWestern);//Arial
+
+	textBuilder1->SetTextString(textStr);
+
+	NXOpen::CoordinateSystem *coordinateSystem1;
+
+	CoordinateSystemCollection *csysCollectionPtr = workPart->CoordinateSystems();
+	NXMatrixCollection *matrixCollection = workPart->NXMatrices();
+	double mtx[9], vx[3] = { xDirection1.X,xDirection1.Y,xDirection1.Z }, vy[3] = { yDirection1.X,yDirection1.Y,yDirection1.Z };
+	UF_MTX3_initialize(vx, vy, mtx);
+	Matrix3x3 element(mtx[0], mtx[1], mtx[2], mtx[3], mtx[4], mtx[5], mtx[6], mtx[7], mtx[8]);
+	NXOpen::NXMatrix * orientation = matrixCollection->Create(element);
+
+	//coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2,xDirection1, yDirection1);
+	coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2, orientation, true);
+
+	textBuilder1->PlanarFrame()->SetCoordinateSystem(coordinateSystem1);
+
+	textBuilder1->PlanarFrame()->UpdateOnCoordinateSystem();
+
+	NXOpen::Point *point2;
+	point2 = workPart->Points()->CreatePoint(coordinates2);
+
+	NXOpen::Point3d point3(coordinates2.X, coordinates2.Y, coordinates2.Z);
+	//point2 = workPart->Points()->CreatePoint(point3);
+	textBuilder1->PlanarFrame()->AnchorLocator()->SetValue(point2, workPart->ModelingViews()->WorkView(), point3);
+
+
+	NXOpen::NXObject *nXObject1;
+	nXObject1 = textBuilder1->Commit();
+
+	tag_t texttag = nXObject1->Tag();
+
+	textBuilder1->Destroy();
+
+	plane1->DestroyPlane();
+	//UF_LAYER_set_status(worklayer, UF_LAYER_WORK_LAYER);
+	//UF_LAYER_set_status(255,layerStatus);
+	return texttag;
+}
+
 VVecNXStringVector configData;
 //StlNXStringVector g_allNames;
 using namespace NXOpen;
@@ -422,104 +544,7 @@ void Property::dialogShown_cb()
     }
 }
 
-static tag_t CreateText( NXString& textStr, char* textHeight,Point3d coordinates2,Vector3d xDirection1, Vector3d yDirection1)
-{
-	NXOpen::Session *theSession = NXOpen::Session::GetSession();
-    NXOpen::Part *workPart(theSession->Parts()->Work());
 
-    NXOpen::Features::Text *nullNXOpen_Features_Text(NULL);
-    
-	int worklayer = -1;
-	int layerStatus = -1;
-	UF_LAYER_ask_work_layer(&worklayer);
-	//UF_LAYER_ask_status(255,&layerStatus);
-	//UF_LAYER_set_status(255, UF_LAYER_WORK_LAYER);
-    
-    NXOpen::Features::TextBuilder *textBuilder1;
-    textBuilder1 = workPart->Features()->CreateTextBuilder(nullNXOpen_Features_Text);
-    
-    NXOpen::Point3d origin1(0.0, 0.0, 0.0);
-    NXOpen::Vector3d normal1(0.0, 0.0, 1.0);
-    NXOpen::Plane *plane1;
-    plane1 = workPart->Planes()->CreatePlane(origin1, normal1, NXOpen::SmartObject::UpdateOptionWithinModeling);
-    
-    textBuilder1->SetSectionPlane(plane1);
-    
-    /*NXOpen::Unit *unit1;
-    unit1 = textBuilder1->PlanarFrame()->Length()->Units();
-    
-    textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("50");*/
-    
-    //textBuilder1->SetOnFacePlacementMethod(NXOpen::Features::TextBuilder::OnFacePlacementMethodOptionsSectionPlane);
-    
-    textBuilder1->SetScript(NXOpen::Features::TextBuilder::ScriptOptionsWestern);
-    
-    textBuilder1->SetCanUseKerningSpaces(false);
-    
-    textBuilder1->PlanarFrame()->SetAnchorLocation(NXOpen::GeometricUtilities::RectangularFrameBuilder::AnchorLocationTypeBottomLeft);
-    //textBuilder1->PlanarFrame()->Length()->SetRightHandSide("17.6908611782542");2.7*n
-    
-    textBuilder1->PlanarFrame()->Height()->SetRightHandSide(textHeight);
-    
-    textBuilder1->PlanarFrame()->SetWScale(100);
-    textBuilder1->PlanarFrame()->Shear()->SetRightHandSide("0");
-    
-    /*textBuilder1->FrameOnPath()->SetAnchorLocation(NXOpen::GeometricUtilities::FrameOnPathBuilder::AnchorLocationTypeLeft);
-    
-    textBuilder1->FrameOnPath()->AnchorPosition()->Expression()->SetRightHandSide("30");
-    
-    textBuilder1->FrameOnPath()->AnchorPosition()->SetParameterUsed(false);
-    
-    textBuilder1->FrameOnPath()->Offset()->SetRightHandSide("4.5");
-    
-    textBuilder1->FrameOnPath()->Length()->SetRightHandSide("9.53025449104364");2.7*n*/
-    
-    //textBuilder1->FrameOnPath()->Height()->SetRightHandSide("4");
-    
-    //textBuilder1->FrameOnPath()->SetWScale(35.4339270372263);
-    
-    textBuilder1->SetCanProjectCurves(true);
-    
-    textBuilder1->SelectFont("宋体", NXOpen::Features::TextBuilder::ScriptOptionsWestern);//Arial
-    
-    textBuilder1->SetTextString(textStr);
-
-	NXOpen::CoordinateSystem *coordinateSystem1;
-
-	CoordinateSystemCollection *csysCollectionPtr = workPart->CoordinateSystems();
-	NXMatrixCollection *matrixCollection = workPart->NXMatrices();
-	double mtx[9], vx[3]={xDirection1.X,xDirection1.Y,xDirection1.Z},vy[3]={yDirection1.X,yDirection1.Y,yDirection1.Z};
-	UF_MTX3_initialize(vx,vy,mtx);
-	Matrix3x3 element(mtx[0],mtx[1],mtx[2],mtx[3],mtx[4],mtx[5],mtx[6],mtx[7],mtx[8]);
-	NXOpen::NXMatrix * orientation = matrixCollection->Create(element);
-	
-	//coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2,xDirection1, yDirection1);
-	coordinateSystem1 = csysCollectionPtr->CreateCoordinateSystem(coordinates2,orientation,true);
-
-	textBuilder1->PlanarFrame()->SetCoordinateSystem(coordinateSystem1);
-    
-    textBuilder1->PlanarFrame()->UpdateOnCoordinateSystem();
-
-    NXOpen::Point *point2;
-    point2 = workPart->Points()->CreatePoint(coordinates2);
-    
-    NXOpen::Point3d point3(coordinates2.X, coordinates2.Y, coordinates2.Z);
-	//point2 = workPart->Points()->CreatePoint(point3);
-    textBuilder1->PlanarFrame()->AnchorLocator()->SetValue(point2, workPart->ModelingViews()->WorkView(), point3);
-
-
-    NXOpen::NXObject *nXObject1;
-    nXObject1 = textBuilder1->Commit();
-
-	tag_t texttag = nXObject1->Tag();
-
-    textBuilder1->Destroy();
-    
-    plane1->DestroyPlane();
-	//UF_LAYER_set_status(worklayer, UF_LAYER_WORK_LAYER);
-	//UF_LAYER_set_status(255,layerStatus);
-	return texttag;
-}
 
 void Royal_set_obj_attr(tag_t body,char *name , double val)
 {
@@ -593,6 +618,7 @@ int Property::apply_cb()
 
 				Royal_set_obj_attr(body,"材料类型",type.GetLocaleText());
 				Royal_set_obj_attr(body,"材料名称",name.GetLocaleText());
+				Royal_set_obj_attr(body, "1_材料名称", name.GetLocaleText());
 				Royal_set_obj_attr(body,"材料编号",maNO.GetLocaleText());
 				Royal_set_obj_attr(body,"规格",size.GetLocaleText());
 				Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
