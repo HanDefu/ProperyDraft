@@ -287,13 +287,14 @@ public:
     int cancel_cb();
     int update_cb(NXOpen::BlockStyler::UIBlock* block);
     PropertyList* GetBlockProperties(const char *blockID);
+    void SetTypeUI();
     
     //void OnExpandCallback (NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnInsertColumnCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //void OnInsertNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnDeleteNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnPreSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int ID, bool selected);
-    void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
+    //void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
     //void OnStateChangeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int state);
     //NXString ToolTipTextCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //int ColumnSortCallback(NXOpen::BlockStyler::Tree *tree, int columnID, NXOpen::BlockStyler::Node *node1, NXOpen::BlockStyler::Node *node2);
