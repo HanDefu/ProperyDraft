@@ -1002,7 +1002,7 @@ static void CreateDrawingSheet( double len, double hei )
 	UF_DRAW_open_drawing( new_drawing_tag );
 }
 
-static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXString& frame,NXString& typeStr,double viewbound[4] )
+static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXString& frame,NXString& typeStr,double viewbound[4],double &stdscale )
 {
 	UF_import_part_modes_t modes;
 	tag_t group = NULL_TAG;
@@ -1044,7 +1044,7 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
 		drawing_info.size.custom_size[1]=297*scale;*/
         sheetlen = 297;
         sheethei = 210;
-		sprintf(titleblock,"%s\\templates\\A4%s.prt",p_env,typeStr.GetLocaleText());
+		sprintf(titleblock,"%s\\templates\\A4.prt",p_env);
 	}
 
     CreateDrawingSheet( sheetlen,sheethei );
@@ -1069,7 +1069,7 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
     //UF_MODL_create_scale
     //Point3d pt;
     //tag_t view = NULL_TAG;
-    double sug = 0,stdscale = 1;
+    double sug = 0;
     //double viewbound[4]={0,0,0,0};
     /*int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);*/
     int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
@@ -1087,7 +1087,7 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
         irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
     }
     UF_PART_save();
-    return sheetlen;
+    return group;
 }
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
@@ -1827,6 +1827,98 @@ void RY_DWG_create_demention(tag_t partTag, tag_t viewTag ,double bound[4])
 //    return errorCode;
 //}
 
+static void EditLableNote(  tag_t orgNote, StlNXStringVector text )
+{
+    Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+    int type = 0;
+    int subType = 0;
+    NXString noteStr;
+    UF_OBJ_ask_type_and_subtype( orgNote, &type, &subType );
+    if( UF_draft_note_subtype == subType )
+    {
+        Annotations::Note *note1 = (NXOpen::Annotations::Note *)NXOpen::NXObjectManager::Get(orgNote);
+        Annotations::DraftingNoteBuilder *draftingNoteBuilder1;
+        draftingNoteBuilder1 = workPart->Annotations()->CreateDraftingNoteBuilder((Annotations::SimpleDraftingAid *)note1);
+        draftingNoteBuilder1->Text()->TextBlock()->SetText(text);
+        NXObject *nXObject1;
+        nXObject1 = draftingNoteBuilder1->Commit();
+        draftingNoteBuilder1->Destroy();
+    }
+}
+
+int autodrafting::GZ_SetDrawingNoteInformation( tag_t part, tag_t group, double scale )
+{
+	int n = 0;
+	tag_t *members = NULL;
+	UF_GROUP_ask_group_data(group, &members, &n);
+	for( int idx = 0; idx < n; ++idx )
+	{
+		int type = 0;
+        int subType = 0;
+        UF_OBJ_ask_type_and_subtype( members[idx], &type, &subType );
+        if( UF_draft_note_subtype == subType )//UF_tabular_note_type UF_draft_label_subtype == subType || 
+        {
+			char note_name[MAX_ENTITY_NAME_SIZE+1]="";
+            UF_OBJ_ask_name(members[idx],note_name);
+			if( 0 == strcmp("技术说明",note_name) )
+			{
+                StlNXStringVector tech;
+                tech = multiline_string0->GetValue();
+                /*tech.push_back("技术说明:");
+                tech.push_back("1.");
+                tech.push_back("2.");*/
+                EditLableNote(members[idx],tech);
+			}
+			else if( 0 == strcmp("日期",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = DesignDate->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("图名",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = drawingName->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("图号",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = drawingNO->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);;
+			}
+            else if( 0 == strcmp("工程名称",note_name) )
+			{
+                StlNXStringVector tech;
+                NXString projName = projectName->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+            }
+            else if( 0 == strcmp("工程编号",note_name) )
+            {
+                StlNXStringVector tech;
+                NXString projNO = projectNO->GetProperties()->GetString("Value");
+                tech.push_back(projNO);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("比例",note_name) )
+            {
+                StlNXStringVector tech;
+                char str[32]="";
+                sprintf(str,"1:%g",scale);
+                tech.push_back(str);
+                EditLableNote(members[idx],tech);
+			}
+        }
+	}
+	UF_free(members);
+	return 0;
+}
+
 int autodrafting::ok_cb()
 {
     int errorCode = 0;
@@ -1852,27 +1944,60 @@ int autodrafting::ok_cb()
 		Royal_set_obj_attr(disp,"工程编号",projNO.GetLocaleText());
         if(objects.size()<1)
             return 1;
-		
+
+        Point3d originPoint;
+        double org[3] = {0.0,0,0}, csys[6] = {1,0,0,0,1,0};
+        std::vector<NXOpen::TaggedObject* > csysObjects = coord_system0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+        if( csysObjects.size() > 0 )
+        {
+            tag_t csys_tag = csysObjects[0]->Tag();
+            NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+            originPoint =  coord_system->Origin(); 
+            NXOpen::NXMatrix *matrix = coord_system->Orientation();
+            Matrix3x3 matrix33 = matrix->Element();
+            csys[0] = matrix33.Xx;
+            csys[1] = matrix33.Xy;
+            csys[2] = matrix33.Xz;
+            csys[3] = matrix33.Zx;
+            csys[4] = matrix33.Zy;
+            csys[5] = matrix33.Zz;
+            //org[0] = originPoint.X; org[1] = originPoint.Y;org[2] = originPoint.Z;
+        }
         int num = objects.size();
         StlTagVector bodies;
         for( int idx = 0; idx < num; ++idx )
         {
-            bodies.push_back(objects[idx]->Tag()); 
+            bodies.push_back(objects[idx]->Tag());
+            char str[133]="";
+            tag_t body =objects[idx]->Tag();
+            sprintf(str,"%g",csys[0]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_X,str);
+            sprintf(str,"%g",csys[1]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Y,str);
+            sprintf(str,"%g",csys[2]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Z,str);
+            sprintf(str,"%g",csys[3]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_X,str);
+            sprintf(str,"%g",csys[4]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Y,str);
+            sprintf(str,"%g",csys[5]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Z,str);
         }
         CreateReferenceSet(bodies,DrawingRefSet);
 		tag_t newpart = CreateDWGPart();
 		if( NULL_TAG != newpart )
 		{
 			UF_PART_ask_part_name(newpart,inputfile);
-            double startX = 0;
+            //double startX = 0;
             tag_t view = NULL_TAG;
+            double scale = 1;
             double viewbound[4] = {0};
-            double len = CreateDrawingViewDWG(disp,view,DrawingRefSet,frame,typeStr,viewbound);
+            tag_t group = CreateDrawingViewDWG(disp,view,DrawingRefSet,frame,typeStr,viewbound,scale);
+            GZ_SetDrawingNoteInformation(newpart,group,scale);
             RY_DWG_create_demention(disp,view,viewbound);
-            startX += (len+20);
             //UF_PART_save();
             sprintf(outputfile,"%s\\temp.dwg",savepath.GetLocaleText());
-            export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
+            //export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
             char cmd[512]="";
             sprintf_s(cmd,"start %s",savepath.GetLocaleText());
             system(cmd);
