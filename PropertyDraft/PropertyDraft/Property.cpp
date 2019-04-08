@@ -330,53 +330,57 @@ void Property::initialize_cb()
         Property::theUI->NXMessageBox()->Show("Block Styler", NXOpen::NXMessageBox::DialogTypeError, ex.what());
     }
 }
-//#include "Excel/Excel.h"
-//void Property::ReadExcelConfigData( )
-//{
-//	if (configData.size() > 0)
-//		return;
-//
-//	Excel::CExcelUtil xls;
-//	BasicExcel excel;
-//    char regfile[256]="";
-//    sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
-//	//bool isOk = excel.Load(regfile);
-//	xls.OpenExcel(regfile);
-//	xls.SetVisible(false);
-//	int num = xls.GetSheetNum();
-//
-//
-//	
-//
-//	for( int idx = 0; idx < num; ++idx )
-//	{
-//		//xls.GetSheet();
-//
-//		xls.SetActiveSheet(idx+1);
-//
-//		size_t maxRows = 256;
-//		size_t maxCols = 9;
-//
-//		VecNXStringVector sheetData;
-//		for(int i = 1; i < maxCols; i++)
-//		{
-//			StlNXStringVector matNameEtc;
-//			for(int j = 2; j < maxRows; ++j)
-//			{
-//				CString str = xls.GetCellValue(j,i).GetBuffer();
-//				if (str.GetLength() > 0)
-//				{
-//				    matNameEtc.push_back(WCHARTOCHAR(str.GetBuffer()));
-//				}
-//			}
-//			sheetData.push_back(matNameEtc);
-//		}
-//		configData.push_back(sheetData);
-//
-//	}
-//	xls.CloseExcel();
-//	return;
-//}
+
+#include "Excel/Excel.h"
+#include "Excel/Excel.h"
+void Property::ReadExcelConfigData( )
+{
+	if (configData.size() > 0)
+		return;
+
+	Excel::CExcelUtil xls;
+	BasicExcel excel;
+	char regfile[256]="";
+	sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
+	//bool isOk = excel.Load(regfile);
+	xls.OpenExcel(regfile);
+	xls.SetVisible(false);
+	int num = xls.GetSheetNum();
+
+
+
+
+	for( int idx = 0; idx < num; ++idx )
+	{
+		//xls.GetSheet();
+
+		xls.SetActiveSheet(idx+1);
+
+		size_t maxRows = 256;
+		size_t maxCols = 9;
+
+		VecNXStringVector sheetData;
+		for(int i = 1; i < maxCols; i++)
+		{
+			StlNXStringVector matNameEtc;
+			for(int j = 2; j < maxRows; ++j)
+			{
+				CString str = xls.GetCellValue(j,i).GetBuffer();
+				if (str.GetLength() > 0)
+				{
+					matNameEtc.push_back(WCHARTOCHAR(str.GetBuffer()));
+				}
+			}
+			sheetData.push_back(matNameEtc);
+		}
+		configData.push_back(sheetData);
+
+	}
+	xls.CloseExcel();
+	return;
+}
+
+/*
 void Property::ReadExcelConfigData( )
 {
 	BasicExcel excel;
@@ -413,7 +417,7 @@ void Property::ReadExcelConfigData( )
         }
 	}
 	return;
-}
+}*/
 
 void Property::SetUIConfigData( )
 {
