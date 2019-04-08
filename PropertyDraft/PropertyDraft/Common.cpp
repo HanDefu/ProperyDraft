@@ -53,13 +53,17 @@ void StrAdd1(NXString &str)//×Ö·û´®¼Ó1
 NXString StrMu(NXString &str1, NXString &str2, int xiaoShuDian)//×Ö·û´®Ïà³Ë
 {
 	double value1 = atof(str1.GetLocaleText());
-	int value2 = atof(str2.GetLocaleText());
+	double value2 = atof(str2.GetLocaleText());
 	value1*=value2;
 	char cstr[32] = "";
 	if (xiaoShuDian == 1)
 	    sprintf(cstr, "%.1f", value1);
-	else
+	else if(xiaoShuDian == 2)
 		sprintf(cstr, "%.2f", value1);
+	else if(xiaoShuDian == 3)
+		sprintf(cstr, "%.3f", value1);
+	else
+		sprintf(cstr, "%.4f", value1);
 	NXString str = cstr;
 	return str;
 }

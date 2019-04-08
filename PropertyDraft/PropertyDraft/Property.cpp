@@ -597,7 +597,7 @@ int Property::apply_cb()
 
 				//重量计算
 				double volume = RY_GetBodyVolume(body);
-				NXString zhongLiang = StrMu(dens, volume/1000000, 2);
+				NXString zhongLiang = StrMu(dens, volume/1000, 3);
 
 
 				//总价计算
@@ -606,7 +606,7 @@ int Property::apply_cb()
 					strcmp(type.getLocaleText() , "铝材") == 0||
 					strcmp(type.getLocaleText() , "木雕") ==0)
 				{
-					NXString zongJia = StrMu(unpr, volume);
+					NXString zongJia = StrMu(unpr, zhongLiang,2);
 					topr = atof(zongJia.getLocaleText());
 				}
 				else if (strcmp(type.getLocaleText() ,"五金件")==0)
@@ -629,8 +629,8 @@ int Property::apply_cb()
 				Royal_set_obj_attr2(body,"密度",atof(dens.GetLocaleText()));
 				Royal_set_obj_attr(body,"单价",atof(unpr.GetLocaleText()));
 				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
-				Royal_set_obj_attr(body,"重量",atof(zhongLiang.getLocaleText()));
-				Royal_set_obj_attr(body,"总价",topr);
+				Royal_set_obj_attr2(body,"重量",atof(zhongLiang.getLocaleText()));
+				Royal_set_obj_attr2(body,"总价",topr);
 				Royal_set_obj_attr(body,"面积",area);
 				Royal_set_obj_attr(body,"长度",len);
 				Royal_set_obj_attr(body,"宽度",wid);
