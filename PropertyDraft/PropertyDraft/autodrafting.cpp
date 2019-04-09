@@ -39,6 +39,7 @@
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
+VecNXStringVector techData;
 
 #define UF_CALL(X) (report_error( __FILE__, __LINE__, #X, (X)))
 
@@ -1086,8 +1087,41 @@ static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStri
         }
         irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
     }
-    UF_PART_save();
+    //UF_PART_save();
     return group;
+}
+
+#include "Excel/Excel.h"
+void autodrafting::ReadExcelTechData( )
+{
+	if (techData.size() > 0)
+		return;
+
+	Excel::CExcelUtil xls;
+	//BasicExcel excel;
+	char regfile[256]="";
+	sprintf(regfile,"%s\\Parameter\\ConfigTech.xls",getenv("UGII_USER_DIR"));
+    xls.SetVisible(false);
+	xls.OpenExcel(regfile);
+	int num = xls.GetSheetNum();
+
+	for( int idx = 0; idx < num; ++idx )
+	{
+		xls.SetActiveSheet(idx+1);
+		int maxRows = 32;
+        StlNXStringVector sheetData;
+        for(int j = 1; j < maxRows; ++j)
+        {
+            CString str = xls.GetCellValue(j,1).GetBuffer();
+            if (str.GetLength() > 0)
+            {
+                sheetData.push_back(WCHARTOCHAR(str.GetBuffer()));
+            }
+        }
+        techData.push_back(sheetData);
+	}
+	xls.CloseExcel();
+	return;
 }
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
@@ -1159,6 +1193,9 @@ void autodrafting::SetTypeUI()
     NXString typeStr = typestrs[sel];
     sprintf(attriValue2,"%s加工图",typeStr.GetLocaleText());
     drawingName->GetProperties()->SetString("Value",attriValue2);
+    ReadExcelTechData();
+    StlNXStringVector tech = techData[sel];
+    multiline_string0->SetValue(tech);
 }
 //------------------------------------------------------------------------------
 //Callback Name: update_cb
@@ -1995,9 +2032,9 @@ int autodrafting::ok_cb()
             tag_t group = CreateDrawingViewDWG(disp,view,DrawingRefSet,frame,typeStr,viewbound,scale);
             GZ_SetDrawingNoteInformation(newpart,group,scale);
             RY_DWG_create_demention(disp,view,viewbound);
-            //UF_PART_save();
+            UF_PART_save();
             sprintf(outputfile,"%s\\temp.dwg",savepath.GetLocaleText());
-            //export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
+            export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
             char cmd[512]="";
             sprintf_s(cmd,"start %s",savepath.GetLocaleText());
             system(cmd);

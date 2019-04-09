@@ -332,14 +332,12 @@ void Property::initialize_cb()
 }
 
 #include "Excel/Excel.h"
-#include "Excel/Excel.h"
+//#include "Excel/Excel.h"
 void Property::ReadExcelConfigData( )
 {
 	if (configData.size() > 0)
 		return;
-
 	Excel::CExcelUtil xls;
-	BasicExcel excel;
 	char regfile[256]="";
 	sprintf(regfile,"%s\\Parameter\\Config.xls",getenv("UGII_USER_DIR"));
 	//bool isOk = excel.Load(regfile);
