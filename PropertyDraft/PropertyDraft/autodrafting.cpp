@@ -342,7 +342,7 @@ void autodrafting::initialize_cb()
         
         //tree_control0->SetOnPreSelectHandler(make_callback(this, &autodrafting::OnPreSelectCallback));
         
-        tree_control0->SetOnSelectHandler(make_callback(this, &autodrafting::OnSelectCallback));
+        //tree_control0->SetOnSelectHandler(make_callback(this, &autodrafting::OnSelectCallback));
         
         //tree_control0->SetOnStateChangeHandler(make_callback(this, &autodrafting::OnStateChangeCallback));
         
@@ -401,6 +401,17 @@ void autodrafting::ReadExcelConfigData( )
 	}*/
 	return;
 }
+
+NXString GetDateStr()
+{
+    time_t timep;
+    struct tm *time_ptr;
+    time(&timep);
+    time_ptr = localtime(&timep);
+    char timeStr[32] = "";
+    sprintf_s(timeStr,"%d%02d%02d",time_ptr->tm_year+1900, time_ptr->tm_mon+1, time_ptr->tm_mday);
+    return NXString(timeStr);
+}
 //------------------------------------------------------------------------------
 //Callback Name: dialogShown_cb
 //This callback is executed just before the dialog launch. Thus any value set 
@@ -426,11 +437,17 @@ void autodrafting::dialogShown_cb()
 		CF_GetCurrentPartSolidBodies(solidboies);
 		//CreateUITree(solidboies,true);
         doubleDwgScale->GetProperties()->SetDoubleVector("ComboOptions",scalelist);
-        projectName->GetProperties()->SetString("Value","工程名称");
-        projectNO->GetProperties()->SetString("Value","工程编号");
-        drawingName->GetProperties()->SetString("Value","图名");
-        drawingNO->GetProperties()->SetString("Value","图号");
-        DesignDate->GetProperties()->SetString("Value","20190328");
+
+        char attriValue2[133] = "";
+        tag_t part = UF_ASSEM_ask_work_part();
+        USER_ask_obj_string_attr( part , "工程名称" , attriValue2 );
+        projectName->GetProperties()->SetString("Value",attriValue2);
+        USER_ask_obj_string_attr( part , "工程编号" , attriValue2 );
+        projectNO->GetProperties()->SetString("Value",attriValue2);
+
+        SetTypeUI();
+        //drawingNO->GetProperties()->SetString("Value","图号");
+        DesignDate->GetProperties()->SetString("Value",GetDateStr());
 		tag_t disPart = UF_PART_ask_display_part();
 		UF_PART_ask_part_name (disPart, file_name );
 		uc4576(file_name,2,dspec,fname);
@@ -985,14 +1002,14 @@ static void CreateDrawingSheet( double len, double hei )
 	UF_DRAW_open_drawing( new_drawing_tag );
 }
 
-static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXString& frame,NXString& typeStr, double scale, double startX, int num,double viewbound[4] )
+static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXString& frame,NXString& typeStr,double viewbound[4],double &stdscale )
 {
 	UF_import_part_modes_t modes;
 	tag_t group = NULL_TAG;
 	tag_t new_drawing_tag = NULL_TAG;
 	char titleblock[MAX_FSPEC_SIZE] = "";
 	double dest_csys[6]={1,0,0,0,1,0};
-	double dest_point[3]={startX,0,0};
+	double dest_point[3]={0,0,0};
 	modes.layer_mode=1;
 	modes.group_mode=1;
 	modes.csys_mode=0;
@@ -1008,7 +1025,6 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
 	{
         /*drawing_info.size.custom_size[0]=297*scale;
 		drawing_info.size.custom_size[1]=420*scale;*/
-        xlengh = 420*scale+gap;
         sheetlen = 420;
         sheethei = 297;
 		sprintf(titleblock,"%s\\templates\\A3.prt",p_env);
@@ -1018,7 +1034,6 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
 		
 		/*drawing_info.size.custom_size[0]=420*scale;
 		drawing_info.size.custom_size[1]=297*scale;*/
-        xlengh = 297*scale+gap;
         sheetlen = 297;
         sheethei = 420;
 		sprintf(titleblock,"%s\\templates\\A3V.prt",p_env);
@@ -1027,15 +1042,12 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
 	{
 		/*drawing_info.size.custom_size[0]=210*scale;
 		drawing_info.size.custom_size[1]=297*scale;*/
-        xlengh = 297*scale+gap;
         sheetlen = 297;
         sheethei = 210;
-		sprintf(titleblock,"%s\\templates\\A4%s.prt",p_env,typeStr.GetLocaleText());
+		sprintf(titleblock,"%s\\templates\\A4.prt",p_env);
 	}
-    if( startX < 1 )
-    {
-        CreateDrawingSheet( sheetlen*num+ 20*(num-1),sheethei );
-    }
+
+    CreateDrawingSheet( sheetlen,sheethei );
 
     UF_PART_import(titleblock,&modes,dest_csys,dest_point,1,&group);
 
@@ -1057,7 +1069,7 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
     //UF_MODL_create_scale
     //Point3d pt;
     //tag_t view = NULL_TAG;
-    double sug = 0,stdscale = 1;
+    double sug = 0;
     //double viewbound[4]={0,0,0,0};
     /*int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);*/
     int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
@@ -1075,7 +1087,7 @@ static double CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStr
         irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
     }
     UF_PART_save();
-    return sheetlen;
+    return group;
 }
 //------------------------------------------------------------------------------
 //Callback Name: apply_cb
@@ -1137,6 +1149,17 @@ int autodrafting::apply_cb()
     return errorCode;
 }
 #endif
+
+void autodrafting::SetTypeUI()
+{
+    char attriValue2[133]="";
+    std::vector<NXString> typestrs = enumType->GetEnumMembers();
+    int sel = 0;
+    UI_EnumGetCurrentSel(enumType, sel);
+    NXString typeStr = typestrs[sel];
+    sprintf(attriValue2,"%s加工图",typeStr.GetLocaleText());
+    drawingName->GetProperties()->SetString("Value",attriValue2);
+}
 //------------------------------------------------------------------------------
 //Callback Name: update_cb
 //------------------------------------------------------------------------------
@@ -1146,7 +1169,19 @@ int autodrafting::update_cb(NXOpen::BlockStyler::UIBlock* block)
     {
         if(block == enumType)
         {
+            //---------Enter your code here-----------
+            SetTypeUI();
+        }
+        else if(block == bodySelect0)
+        {
         //---------Enter your code here-----------
+            char attriValue2[133] = "";
+            std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+            if(objects.size() > 0 )
+            {
+                USER_ask_obj_string_attr( objects[0]->Tag() , "材料编号" , attriValue2 );
+                drawingNO->GetProperties()->SetString("Value",attriValue2);
+            }
         }
         else if(block == multiline_string0)
         {
@@ -1792,15 +1827,109 @@ void RY_DWG_create_demention(tag_t partTag, tag_t viewTag ,double bound[4])
 //    return errorCode;
 //}
 
+static void EditLableNote(  tag_t orgNote, StlNXStringVector text )
+{
+    Session *theSession = Session::GetSession();
+    Part *workPart(theSession->Parts()->Work());
+    int type = 0;
+    int subType = 0;
+    NXString noteStr;
+    UF_OBJ_ask_type_and_subtype( orgNote, &type, &subType );
+    if( UF_draft_note_subtype == subType )
+    {
+        Annotations::Note *note1 = (NXOpen::Annotations::Note *)NXOpen::NXObjectManager::Get(orgNote);
+        Annotations::DraftingNoteBuilder *draftingNoteBuilder1;
+        draftingNoteBuilder1 = workPart->Annotations()->CreateDraftingNoteBuilder((Annotations::SimpleDraftingAid *)note1);
+        draftingNoteBuilder1->Text()->TextBlock()->SetText(text);
+        NXObject *nXObject1;
+        nXObject1 = draftingNoteBuilder1->Commit();
+        draftingNoteBuilder1->Destroy();
+    }
+}
+
+int autodrafting::GZ_SetDrawingNoteInformation( tag_t part, tag_t group, double scale )
+{
+	int n = 0;
+	tag_t *members = NULL;
+	UF_GROUP_ask_group_data(group, &members, &n);
+	for( int idx = 0; idx < n; ++idx )
+	{
+		int type = 0;
+        int subType = 0;
+        UF_OBJ_ask_type_and_subtype( members[idx], &type, &subType );
+        if( UF_draft_note_subtype == subType )//UF_tabular_note_type UF_draft_label_subtype == subType || 
+        {
+			char note_name[MAX_ENTITY_NAME_SIZE+1]="";
+            UF_OBJ_ask_name(members[idx],note_name);
+			if( 0 == strcmp("技术说明",note_name) )
+			{
+                StlNXStringVector tech;
+                tech = multiline_string0->GetValue();
+                /*tech.push_back("技术说明:");
+                tech.push_back("1.");
+                tech.push_back("2.");*/
+                EditLableNote(members[idx],tech);
+			}
+			else if( 0 == strcmp("日期",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = DesignDate->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("图名",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = drawingName->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("图号",note_name) )
+			{
+				StlNXStringVector tech;
+                NXString projName = drawingNO->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);;
+			}
+            else if( 0 == strcmp("工程名称",note_name) )
+			{
+                StlNXStringVector tech;
+                NXString projName = projectName->GetProperties()->GetString("Value");
+                tech.push_back(projName);
+                EditLableNote(members[idx],tech);
+            }
+            else if( 0 == strcmp("工程编号",note_name) )
+            {
+                StlNXStringVector tech;
+                NXString projNO = projectNO->GetProperties()->GetString("Value");
+                tech.push_back(projNO);
+                EditLableNote(members[idx],tech);
+			}
+            else if( 0 == strcmp("比例",note_name) )
+            {
+                StlNXStringVector tech;
+                char str[32]="";
+                sprintf(str,"1:%g",scale);
+                tech.push_back(str);
+                EditLableNote(members[idx],tech);
+			}
+        }
+	}
+	UF_free(members);
+	return 0;
+}
+
 int autodrafting::ok_cb()
 {
     int errorCode = 0;
     try
     {
         //errorCode = apply_cb();
+        NXString DrawingRefSet("DRAWING");
 		char inputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
 		char outputfile[UF_CFI_MAX_PATH_NAME_SIZE]="";
 		//std::vector<Node*> SelectedNodes;
+        tag_t disp = UF_PART_ask_display_part();
 		std::vector<NXString> typestrs = enumType->GetEnumMembers();
 		int sel = 0;
 		UI_EnumGetCurrentSel(enumType, sel);
@@ -1809,42 +1938,69 @@ int autodrafting::ok_cb()
         NXString frame = enumFrameType->GetProperties()->GetEnumAsString("Value");
 		NXString savepath = nativeFolderBrowser01->GetProperties()->GetString("Path");
         std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+        NXString projName = projectName->GetProperties()->GetString("Value");
+        NXString projNO = projectNO->GetProperties()->GetString("Value");
+        Royal_set_obj_attr(disp,"工程名称",projName.GetLocaleText());
+		Royal_set_obj_attr(disp,"工程编号",projNO.GetLocaleText());
         if(objects.size()<1)
             return 1;
-		tag_t disp = UF_PART_ask_display_part();
+
+        Point3d originPoint;
+        double org[3] = {0.0,0,0}, csys[6] = {1,0,0,0,1,0};
+        std::vector<NXOpen::TaggedObject* > csysObjects = coord_system0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+        if( csysObjects.size() > 0 )
+        {
+            tag_t csys_tag = csysObjects[0]->Tag();
+            NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+            originPoint =  coord_system->Origin(); 
+            NXOpen::NXMatrix *matrix = coord_system->Orientation();
+            Matrix3x3 matrix33 = matrix->Element();
+            csys[0] = matrix33.Xx;
+            csys[1] = matrix33.Xy;
+            csys[2] = matrix33.Xz;
+            csys[3] = matrix33.Zx;
+            csys[4] = matrix33.Zy;
+            csys[5] = matrix33.Zz;
+            //org[0] = originPoint.X; org[1] = originPoint.Y;org[2] = originPoint.Z;
+        }
         int num = objects.size();
+        StlTagVector bodies;
         for( int idx = 0; idx < num; ++idx )
         {
-            StlTagVector bodies;
             bodies.push_back(objects[idx]->Tag());
-            char str[133] = "";
-            sprintf(str,"零件%d",idx+1);
-            NXString name(str,NXString::Locale);
-            CreateReferenceSet(bodies,name);
+            char str[133]="";
+            tag_t body =objects[idx]->Tag();
+            sprintf(str,"%g",csys[0]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_X,str);
+            sprintf(str,"%g",csys[1]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Y,str);
+            sprintf(str,"%g",csys[2]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_X_DIR_Z,str);
+            sprintf(str,"%g",csys[3]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_X,str);
+            sprintf(str,"%g",csys[4]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Y,str);
+            sprintf(str,"%g",csys[5]);
+            Royal_set_obj_attr(body,ATTR_DRAFTING_NORMAL_DIR_Z,str);
         }
+        CreateReferenceSet(bodies,DrawingRefSet);
 		tag_t newpart = CreateDWGPart();
 		if( NULL_TAG != newpart )
 		{
 			UF_PART_ask_part_name(newpart,inputfile);
-            double startX = 0;
-            
-			for( int idx = 0; idx < num; ++idx )
-			{
-                char str[133] = "";
-                sprintf(str,"零件%d",idx+1);
-                NXString name(str,NXString::Locale);
-                tag_t view = NULL_TAG;
-                double viewbound[4] = {0};
-                double len = CreateDrawingViewDWG(disp,view,name,frame,typeStr,scale,startX,num,viewbound);
-                RY_DWG_create_demention(disp,view,viewbound);
-                startX += (len+20);
-                //UF_PART_save();
-                sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),name.GetLocaleText());
-                export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
-                char cmd[512]="";
-                sprintf_s(cmd,"start %s",savepath.GetLocaleText());
-                system(cmd);
-            }
+            //double startX = 0;
+            tag_t view = NULL_TAG;
+            double scale = 1;
+            double viewbound[4] = {0};
+            tag_t group = CreateDrawingViewDWG(disp,view,DrawingRefSet,frame,typeStr,viewbound,scale);
+            GZ_SetDrawingNoteInformation(newpart,group,scale);
+            RY_DWG_create_demention(disp,view,viewbound);
+            //UF_PART_save();
+            sprintf(outputfile,"%s\\temp.dwg",savepath.GetLocaleText());
+            //export_sheet_to_acad_dwg2d(inputfile,outputfile,NXString("NXDrawing"));
+            char cmd[512]="";
+            sprintf_s(cmd,"start %s",savepath.GetLocaleText());
+            system(cmd);
             //sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),name.GetLocaleText());
             //export_sheet_to_acad_dwg2d(inputfile,outputfile,name);
 
@@ -1911,25 +2067,25 @@ int autodrafting::cancel_cb()
 //{
 //}
 
-void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID, bool selected)
-{
-    NXOpen::DataContainer *nodeData = node->GetNodeData();
-    std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
-    if( objects.size() > 0 )
-    {
-        if( selected )
-        {
-            //UF_DISP_set_highlight(objects[0]->Tag(),1);
-            NXString type = node->GetColumnDisplayText(1);
-            NXString scale = node->GetColumnDisplayText(2);
-            enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetLocaleText());
-			double sc = atof(scale.GetText());
-			doubleDwgScale->GetProperties()->SetDouble("Value",sc);
-        }
-        //else
-            //UF_DISP_set_highlight(objects[0]->Tag(),0);
-    }
-}
+//void autodrafting::OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID, bool selected)
+//{
+//    NXOpen::DataContainer *nodeData = node->GetNodeData();
+//    std::vector<NXOpen::TaggedObject *>objects = nodeData->GetTaggedObjectVector("Data");
+//    if( objects.size() > 0 )
+//    {
+//        if( selected )
+//        {
+//            //UF_DISP_set_highlight(objects[0]->Tag(),1);
+//            NXString type = node->GetColumnDisplayText(1);
+//            NXString scale = node->GetColumnDisplayText(2);
+//            enumFrameType->GetProperties()->SetEnumAsString("Value",type.GetLocaleText());
+//			double sc = atof(scale.GetText());
+//			doubleDwgScale->GetProperties()->SetDouble("Value",sc);
+//        }
+//        //else
+//            //UF_DISP_set_highlight(objects[0]->Tag(),0);
+//    }
+//}
 
 //void autodrafting::OnStateChangeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int state)
 //{

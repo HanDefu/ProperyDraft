@@ -715,12 +715,16 @@ int Bom::apply_cb()
         //---- Enter your callback code here -----
 		std::vector<tag_t> bombodies;
         logical isAll = false;
-		
+		tag_t part = UF_ASSEM_ask_work_part();
         StlNXStringVector alltypes = enumType->GetEnumMembers();
 		std::vector<NXOpen::TaggedObject* > objects = bodySelect->GetProperties()->GetTaggedObjectVector("SelectedObjects");
 		//NXString typeStr = enumType->GetProperties()->GetEnumAsString("Value").GetText();
         int type = enumType->GetProperties()->GetEnum("Value");
         NXString typeStr= alltypes[type];
+        NXString projName = projectName->GetProperties()->GetString("Value");
+        NXString projNO = projectNumber->GetProperties()->GetString("Value");
+        Royal_set_obj_attr(part,"工程名称",projName.GetLocaleText());
+		Royal_set_obj_attr(part,"工程编号",projNO.GetLocaleText());
         /*if( 0 == strcmp("全部",typeStr.GetLocaleText()))
         {
             isAll = true;

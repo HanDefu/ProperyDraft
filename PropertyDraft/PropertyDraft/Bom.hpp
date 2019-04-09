@@ -24,6 +24,7 @@
 #include <uf.h>
 #include <uf_ui.h>
 #include <uf_part.h>
+#include <uf_assem.h>
 #include <iostream>
 #include <NXOpen/Session.hxx>
 #include <NXOpen/UI.hxx>
