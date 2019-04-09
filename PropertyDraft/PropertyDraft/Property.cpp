@@ -347,9 +347,6 @@ void Property::ReadExcelConfigData( )
 	xls.SetVisible(false);
 	int num = xls.GetSheetNum();
 
-
-
-
 	for( int idx = 0; idx < num; ++idx )
 	{
 		//xls.GetSheet();
@@ -448,7 +445,7 @@ void Property::SetUIConfigData( )
 		linear_bodyWidth->SetShow(true);
 		bodyarea->SetShow(false);
         face_select0->SetShow(false);
-
+		matSize->SetShow(true);
 		matDensity->SetShow(true);//密度显示
 		material->SetShow(true);
 	}
@@ -459,7 +456,7 @@ void Property::SetUIConfigData( )
 		bodyarea->SetShow(true);
         face_select0->SetShow(true);
 		
-		
+		matSize->SetShow(true);
 		matDensity->SetShow(false);//密度去掉
 		material->SetShow(true);
 	}
@@ -470,18 +467,32 @@ void Property::SetUIConfigData( )
 		bodyarea->SetShow(true);
 		face_select0->SetShow(true);
 		
-		
+		matSize->SetShow(true);
 		matDensity->SetShow(false);//密度去掉
 		material->SetShow(false);
 	}
-	else if (type==7 || type==10)//木雕 辅材
+	else if (type==7)//木雕
 	{
 		linear_bodyLen->SetShow(true);
 		linear_bodyWidth->SetShow(true);
 		bodyarea->SetShow(false);
 		face_select0->SetShow(false);
-		material->SetShow(false);
-		matDensity->SetShow(true);//密度去掉
+
+		matSize->SetShow(false);
+		material->SetShow(true);
+		matDensity->SetShow(false);//密度去掉
+	}
+	else if (type==10)//辅材
+	{
+		linear_bodyLen->SetShow(true);
+		linear_bodyWidth->SetShow(true);
+		bodyarea->SetShow(false);
+		face_select0->SetShow(false);
+
+
+		matSize->SetShow(true);
+		material->SetShow(true);
+		matDensity->SetShow(false);//密度去掉
 	}
 	else//6五金件
 	{
@@ -491,8 +502,9 @@ void Property::SetUIConfigData( )
 		bodyarea->SetShow(false);
 		face_select0->SetShow(false);
 
+		matSize->SetShow(true);
 		matDensity->SetShow(false);//密度显示
-		material->SetShow(false);
+		material->SetShow(true);
 	}
 }
 //------------------------------------------------------------------------------
@@ -603,17 +615,30 @@ int Property::apply_cb()
 				//总价计算
 				double topr = 0;
 				if (strcmp(type.getLocaleText() , "钢材" ) == 0||
-					strcmp(type.getLocaleText() , "铝材") == 0||
-					strcmp(type.getLocaleText() , "木雕") ==0)
+					strcmp(type.getLocaleText() , "铝材") == 0//按照重量算
+					)
 				{
 					NXString zongJia = StrMu(unpr, zhongLiang,2);
 					topr = atof(zongJia.getLocaleText());
 				}
-				else if (strcmp(type.getLocaleText() ,"五金件")==0)
+				else if (strcmp(type.getLocaleText() ,"五金件")==0||
+					strcmp(type.getLocaleText() , "木雕") ==0)//按照个数算
 				{
 					topr = atof(unpr.getLocaleText());
 				}
-				else
+				else if (strcmp(type.getLocaleText() ,"辅材")==0)//如果长度大于0 按照长度m算 如果长度==0按照个数算
+				{
+					if (len > 0)
+					{
+						topr = atof(StrMu(unpr, len/1000, 2).getLocaleText());
+						char cstr[16] = "";
+						sprintf(cstr, "%.3f", topr);
+						unpr = NXString(cstr);
+					}
+					else
+						topr = atof(unpr.getLocaleText());
+				}
+				else//其他按照面积算
 				{
 					NXString zongJia = StrMu(unpr, area);
 					topr = atof(zongJia.getLocaleText());
@@ -627,7 +652,7 @@ int Property::apply_cb()
 				Royal_set_obj_attr(body,"规格",size.GetLocaleText());
 				Royal_set_obj_attr(body,"材质",mate.GetLocaleText());
 				Royal_set_obj_attr2(body,"密度",atof(dens.GetLocaleText()));
-				Royal_set_obj_attr(body,"单价",atof(unpr.GetLocaleText()));
+				Royal_set_obj_attr2(body,"单价",atof(unpr.GetLocaleText()));
 				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
 				Royal_set_obj_attr2(body,"重量",atof(zhongLiang.getLocaleText()));
 				Royal_set_obj_attr2(body,"总价",topr);
