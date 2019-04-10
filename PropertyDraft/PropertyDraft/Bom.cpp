@@ -605,9 +605,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			}
 		}
 	}
-	else if (strcmp(type.GetLocaleText(), "玻璃")==0||
-		strcmp(type.GetLocaleText(), "屋面瓦")==0||
-		strcmp(type.GetLocaleText(), "铜饰")==0
+	else if (strcmp(type.GetLocaleText(), "玻璃")==0
 		)
 	{
 		//排除重复的
@@ -629,6 +627,38 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 				heJi[index][8] = zongmianji;
 
 				NXString zongJia = StrMu(zongmianji, heJi[index][9]);//总价计算
+				heJi[index][10] = zongJia;
+			}
+		}
+	}
+
+	else if (
+		strcmp(type.GetLocaleText(), "铜饰") == 0
+		)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][7] = "1";//数量
+								   //BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				BOMStr[i][8] = BOMStr[i][6];//总面积=面积
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				/*StrAdd1(heJi[index][7]);//数量+1
+
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				heJi[index][8] = zongmianji;
+
+				NXString zongJia = StrMu(zongmianji, heJi[index][9]);//总价计算
+				heJi[index][10] = zongJia;*/
+
+				StrAdd1(heJi[index][7]);//数量+1
+				NXString zongJia = StrMu(heJi[index][9], heJi[index][7], 2);//总价计算
 				heJi[index][10] = zongJia;
 			}
 		}

@@ -165,15 +165,15 @@ using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
 static int 
-	s_type = -1,
-	s_mingcheng = -1,
-	s_bianhao = -1,
-	s_guige = -1,
-	s_caizhi = -1,
-	s_midu = -1,
-	s_danjia = -1,
-	s_gongyingshang = -1,
-	s_beizhu = -1;
+	s_type = 0,
+	s_mingcheng = 0,
+	s_bianhao = 0,
+	s_guige = 0,
+	s_caizhi = 0,
+	s_midu = 0,
+	s_danjia = 0,
+	s_gongyingshang = 0,
+	s_beizhu = 0;
 
 //------------------------------------------------------------------------------
 // Initialize static variables
@@ -644,7 +644,8 @@ int Property::apply_cb()
 					else
 						topr = atof(unpr.getLocaleText());
 				}
-				else if (strcmp(type.getLocaleText() ,"屋面瓦")==0)//如果面积大于0 按照面积平方米算 如果面积==0按照个数算
+				else if (strcmp(type.getLocaleText() ,"屋面瓦")==0 ||
+					strcmp(type.getLocaleText(), "铜饰") == 0)//如果面积大于0 按照面积平方米算 如果面积==0按照个数算
 				{
 					if (area > 0)
 					{
