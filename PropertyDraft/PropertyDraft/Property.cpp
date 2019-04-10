@@ -165,15 +165,15 @@ using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
 static int 
-	s_type = 0,
-	s_mingcheng = 0,
-	s_bianhao = 0,
-	s_guige = 0,
-	s_caizhi = 0,
-	s_midu = 0,
-	s_danjia = 0,
-	s_gongyingshang = 0,
-	s_beizhu = 0;
+	s_type = -1,
+	s_mingcheng = -1,
+	s_bianhao = -1,
+	s_guige = -1,
+	s_caizhi = -1,
+	s_midu = -1,
+	s_danjia = -1,
+	s_gongyingshang = -1,
+	s_beizhu = -1;
 
 //------------------------------------------------------------------------------
 // Initialize static variables
@@ -433,7 +433,10 @@ void Property::SetUIConfigData( )
         matDensity->GetProperties()->SetEnumMembers("Value",temp[4]);
         unitPrice->GetProperties()->SetEnumMembers("Value",temp[5]);
         supplier->GetProperties()->SetEnumMembers("Value",temp[6]);
-        remark->GetProperties()->SetEnumMembers("Value",temp[7]);
+		if(temp[7].size() > 0)
+            remark->GetProperties()->SetEnumMembers("Value",temp[7]);
+		else
+			remark->SetShow(false);
     }
 
 	weight->SetShow(false);//重量一直不显示
@@ -526,31 +529,36 @@ void Property::dialogShown_cb()
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
 
-
-		UI_EnumSetCurrentSel(enumType, s_type);
-		UI_EnumSetCurrentSel(matName, s_mingcheng);
-		UI_EnumSetCurrentSel(matNO, s_bianhao);
-		UI_EnumSetCurrentSel(matSize, s_guige);
+		if (s_type>=0)
+		    UI_EnumSetCurrentSel(enumType, s_type);
+		if (s_mingcheng>=0)
+		    UI_EnumSetCurrentSel(matName, s_mingcheng);
+		if (s_bianhao>=0)
+		    UI_EnumSetCurrentSel(matNO, s_bianhao);
+		if (s_guige>=0)
+		    UI_EnumSetCurrentSel(matSize, s_guige);
 
 		std::vector<NXString> strs;
-		strs = material->GetProperties()->GetEnumMembers("Value");
-		if (strs.size() > 1)
+		strs = material->GetEnumMembers();
+		if (strs.size() > 1 && s_caizhi>=0)
+		{
 			UI_EnumSetCurrentSel(material, s_caizhi);
+		}
 
 		strs = matDensity->GetProperties()->GetEnumMembers("Value");
-		if (strs.size() > 1)
+		if (strs.size() > 1&& s_midu>=0)
 			UI_EnumSetCurrentSel(matDensity, s_midu);
 
 		strs = unitPrice->GetProperties()->GetEnumMembers("Value");
-		if (strs.size() > 1)
+		if (strs.size() > 1&& s_danjia>=0)
 			UI_EnumSetCurrentSel(unitPrice, s_danjia);
 
 		strs = supplier->GetProperties()->GetEnumMembers("Value");
-		if (strs.size() > 1)
+		if (strs.size() > 1&& s_gongyingshang>=0)
 			UI_EnumSetCurrentSel(supplier, s_gongyingshang);
 
 		strs = remark->GetProperties()->GetEnumMembers("Value");
-		if (strs.size() > 1)
+		if (strs.size() > 1&& s_beizhu>=0)
 			UI_EnumSetCurrentSel(remark, s_beizhu);
     }
     catch(exception& ex)
@@ -634,6 +642,16 @@ int Property::apply_cb()
 						char cstr[16] = "";
 						sprintf(cstr, "%.3f", topr);
 						unpr = NXString(cstr);
+					}
+					else
+						topr = atof(unpr.getLocaleText());
+				}
+				else if (strcmp(type.getLocaleText() ,"屋面瓦")==0)//如果面积大于0 按照面积平方米算 如果面积==0按照个数算
+				{
+					if (area > 0)
+					{
+						NXString zongJia = StrMu(unpr, area);
+						topr = atof(zongJia.getLocaleText());
 					}
 					else
 						topr = atof(unpr.getLocaleText());
