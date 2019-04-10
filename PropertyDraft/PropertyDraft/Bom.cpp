@@ -569,8 +569,8 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			{
 				StrAdd1(heJi[index][8]);//数量+1
 
-				NXString zongJia = StrMu(heJi[index][9], heJi[index][10]);//总价计算
-				zongJia = StrMu(zongJia, heJi[index][8]);
+				NXString zongJia = StrMu(heJi[index][9], heJi[index][10], 2);//总价计算
+				zongJia = StrMu(zongJia, heJi[index][8],2);
 
 				heJi[index][11] = zongJia;
 			}
@@ -578,8 +578,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 	}
 	//
 	else if (strcmp(type.GetLocaleText(), "铝板")==0||
-		strcmp(type.GetLocaleText(), "树脂板")==0||
-		strcmp(type.GetLocaleText(), "石材")==0
+		strcmp(type.GetLocaleText(), "树脂板")==0
 		)
 	{
 		//排除重复的
@@ -597,10 +596,10 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			{
 				StrAdd1(heJi[index][8]);//数量+1
 				
-				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8]);//总面积计算
+				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8],2);//总面积计算
 				heJi[index][9] = zongmianji;
 
-				NXString zongJia = StrMu(zongmianji, heJi[index][10]);//总价计算
+				NXString zongJia = StrMu(zongmianji, heJi[index][10],2);//总价计算
 				heJi[index][11] = zongJia;
 			}
 		}
@@ -623,17 +622,50 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			{
 				StrAdd1(heJi[index][7]);//数量+1
 
-				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7],2);//总面积计算
 				heJi[index][8] = zongmianji;
 
-				NXString zongJia = StrMu(zongmianji, heJi[index][9]);//总价计算
+				NXString zongJia = StrMu(zongmianji, heJi[index][9],2);//总价计算
 				heJi[index][10] = zongJia;
 			}
 		}
 	}
-
 	else if (
-		strcmp(type.GetLocaleText(), "铜饰") == 0
+		strcmp(type.GetLocaleText(), "石材") == 0//同屋面瓦
+		)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			int index = FindSame(type, heJi, BOMStr[i]);
+			if (index == -1)
+			{
+				BOMStr[i][8] = "1";//数量
+								   //BOMStr[i][10] = BOMStr[i][9];//总价=单价
+				BOMStr[i][9] = BOMStr[i][7];//总面积=面积
+				heJi.push_back(BOMStr[i]);
+			}
+			else
+			{
+				StrAdd1(heJi[index][8]);//数量+1
+				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8]);//总面积计算
+				heJi[index][9] = zongmianji;
+
+				if (atof(heJi[index][9].getLocaleText()) > 0)
+				{
+					NXString zongJia = StrMu(heJi[index][10], heJi[index][9], 2);//总价计算
+					heJi[index][11] = zongJia;
+				}
+				else
+				{
+					NXString zongJia = StrMu(heJi[index][10], heJi[index][8], 2);//总价计算
+					heJi[index][11] = zongJia;
+				}
+			}
+		}
+	}
+	else if (
+		strcmp(type.GetLocaleText(), "铜饰") == 0//同屋面瓦
 		)
 	{
 		//排除重复的
@@ -649,17 +681,20 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			}
 			else
 			{
-				/*StrAdd1(heJi[index][7]);//数量+1
-
+				StrAdd1(heJi[index][7]);//数量+1
 				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
 				heJi[index][8] = zongmianji;
 
-				NXString zongJia = StrMu(zongmianji, heJi[index][9]);//总价计算
-				heJi[index][10] = zongJia;*/
-
-				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][9], heJi[index][7], 2);//总价计算
-				heJi[index][10] = zongJia;
+				if (atof(heJi[index][8].getLocaleText()) > 0)
+				{
+					NXString zongJia = StrMu(heJi[index][9], heJi[index][8], 2);//总价计算
+					heJi[index][10] = zongJia;
+				}
+				else
+				{
+					NXString zongJia = StrMu(heJi[index][9], heJi[index][7], 2);//总价计算
+					heJi[index][10] = zongJia;
+				}
 			}
 		}
 	}
@@ -680,17 +715,28 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			}
 			else
 			{
-				/*StrAdd1(heJi[index][7]);//数量+1
+				/*
 
-				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
-				heJi[index][8] = zongmianji;
+				
 
 				NXString zongJia = StrMu(zongmianji, heJi[index][9]);//总价计算
 				heJi[index][10] = zongJia;*/
 
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][9], heJi[index][7],2);//总价计算
-				heJi[index][10] = zongJia;
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				heJi[index][8] = zongmianji;
+
+				if(atof(heJi[index][8].getLocaleText()) > 0)
+				{
+					NXString zongJia = StrMu(heJi[index][9], heJi[index][8], 2);//总价计算
+					heJi[index][10] = zongJia;
+				}
+				else
+				{
+					NXString zongJia = StrMu(heJi[index][9], heJi[index][7], 2);//总价计算
+					heJi[index][10] = zongJia;
+				}
+				
 			}
 		}
 	}
@@ -709,7 +755,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			else
 			{
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongJia = StrMu(heJi[index][8], heJi[index][7]);//总价计算
+				NXString zongJia = StrMu(heJi[index][8], heJi[index][7],2);//总价计算
 				heJi[index][9] = zongJia;
 			}
 		}
@@ -731,7 +777,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			else
 			{
 				StrAdd1(heJi[index][6]);//数量+1
-				NXString zongJia = StrMu(heJi[index][7], heJi[index][6]);//总价计算
+				NXString zongJia = StrMu(heJi[index][7], heJi[index][6],2);//总价计算
 				heJi[index][8] = zongJia;
 			}
 		}
@@ -753,8 +799,19 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			else
 			{
 				StrAdd1(heJi[index][8]);//数量+1
-				NXString zongJia = StrMu(heJi[index][10], heJi[index][8],2);//总价计算
-				heJi[index][11] = zongJia;
+				if (atof(heJi[index][5].getLocaleText()) > 0)
+				{
+					NXString zongJia = StrMu(heJi[index][5], heJi[index][8], 2);//总价计算
+					zongJia = StrMu(heJi[index][10], zongJia, 2);//总价计算
+					zongJia = StrMu(NXString("0.001"), zongJia, 2);//总价计算
+					heJi[index][11] = zongJia;
+				}
+				else
+				{
+					NXString zongJia = StrMu(heJi[index][10], heJi[index][8], 2);//总价计算
+					heJi[index][11] = zongJia;
+				}
+				
 			}
 		}
 	}
@@ -762,7 +819,12 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 
 	//////////////////////////////////////////////////////
     
-
+	for (int i = 0; i < heJi.size(); i++)
+	{
+		char cstr[16] = "";
+		sprintf(cstr, "%d", i+1);
+		heJi[i][0] = NXString(cstr);
+	}
 	BOMStr = heJi;
 	
 }

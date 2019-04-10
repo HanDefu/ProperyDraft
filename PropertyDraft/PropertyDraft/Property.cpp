@@ -432,9 +432,21 @@ void Property::SetUIConfigData( )
         unitPrice->GetProperties()->SetEnumMembers("Value",temp[5]);
         supplier->GetProperties()->SetEnumMembers("Value",temp[6]);
 		if(temp[7].size() > 0)
+		{ 
             remark->GetProperties()->SetEnumMembers("Value",temp[7]);
+			remark->SetShow(true);
+		}
 		else
 			remark->SetShow(false);
+
+
+		if (temp[6].size() > 0)
+		{
+			supplier->GetProperties()->SetEnumMembers("Value", temp[6]);
+			supplier->SetShow(true);
+		}
+		else
+			supplier->SetShow(false);
     }
 
 	weight->SetShow(false);//重量一直不显示
@@ -637,15 +649,16 @@ int Property::apply_cb()
 					if (len > 0)
 					{
 						topr = atof(StrMu(unpr, len/1000, 2).getLocaleText());
-						char cstr[16] = "";
+						/*char cstr[16] = "";
 						sprintf(cstr, "%.3f", topr);
-						unpr = NXString(cstr);
+						unpr = NXString(cstr);*/
 					}
 					else
 						topr = atof(unpr.getLocaleText());
 				}
 				else if (strcmp(type.getLocaleText() ,"屋面瓦")==0 ||
-					strcmp(type.getLocaleText(), "铜饰") == 0)//如果面积大于0 按照面积平方米算 如果面积==0按照个数算
+					strcmp(type.getLocaleText(), "铜饰") == 0||
+					strcmp(type.getLocaleText(), "石材") == 0)//如果面积大于0 按照面积平方米算 如果面积==0按照个数算
 				{
 					if (area > 0)
 					{
@@ -673,9 +686,9 @@ int Property::apply_cb()
 				Royal_set_obj_attr(body,"供应商",supp.GetLocaleText());
 				Royal_set_obj_attr2(body,"重量",atof(zhongLiang.getLocaleText()));
 				Royal_set_obj_attr2(body,"总价",topr);
-				Royal_set_obj_attr(body,"面积",area);
-				Royal_set_obj_attr(body,"长度",len);
-				Royal_set_obj_attr(body,"宽度",wid);
+				Royal_set_obj_attr2(body,"面积",area);
+				Royal_set_obj_attr2(body,"长度",len);
+				Royal_set_obj_attr2(body,"宽度",wid);
 				Royal_set_obj_attr(body,"备注",rema.GetLocaleText());
 				Royal_set_obj_attr(body,"已设零件标记","1");
 				logical is = toggleoutNO->GetProperties()->GetLogical("Value");
