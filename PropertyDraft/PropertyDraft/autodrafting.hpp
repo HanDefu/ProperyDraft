@@ -263,7 +263,7 @@ using namespace NXOpen::BlockStyler;
 typedef std::vector<tag_t> StlTagVector;
 typedef std::vector<double> StlDoubVector;
 typedef std::vector<NXString> StlNXStringVector;
-
+typedef std::vector<StlNXStringVector> VecNXStringVector;
 class DllExport autodrafting
 {
     // class members
@@ -288,6 +288,7 @@ public:
     int update_cb(NXOpen::BlockStyler::UIBlock* block);
     PropertyList* GetBlockProperties(const char *blockID);
     void SetTypeUI();
+    void ReadExcelTechData( );
     int GZ_SetDrawingNoteInformation( tag_t part, tag_t group,double scale);
     //void OnExpandCallback (NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnInsertColumnCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
