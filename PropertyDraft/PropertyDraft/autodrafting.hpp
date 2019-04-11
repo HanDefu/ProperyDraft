@@ -264,6 +264,25 @@ typedef std::vector<tag_t> StlTagVector;
 typedef std::vector<double> StlDoubVector;
 typedef std::vector<NXString> StlNXStringVector;
 typedef std::vector<StlNXStringVector> VecNXStringVector;
+
+class DrawingBody
+{
+    public:
+        NXString DrawingNO;
+        //StlTagVector bodies;
+        StlNXStringVector tech;
+        NXString type;
+        NXString DrawingName;
+        DrawingBody()
+        {
+        }
+        ~DrawingBody()
+        {
+        }
+        
+};
+typedef std::vector<DrawingBody> StlDrawingBodyVector;
+
 class DllExport autodrafting
 {
     // class members
@@ -289,13 +308,15 @@ public:
     PropertyList* GetBlockProperties(const char *blockID);
     void SetTypeUI();
     void ReadExcelTechData( );
+    void AddBodyInformation( );
+    int ValidateDrawingNO( );
     int GZ_SetDrawingNoteInformation( tag_t part, tag_t group,double scale);
     //void OnExpandCallback (NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnInsertColumnCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //void OnInsertNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnDeleteNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnPreSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int ID, bool selected);
-    //void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
+    void OnSelectCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *, int columnID, bool selected);
     //void OnStateChangeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int state);
     //NXString ToolTipTextCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //int ColumnSortCallback(NXOpen::BlockStyler::Tree *tree, int columnID, NXOpen::BlockStyler::Node *node1, NXOpen::BlockStyler::Node *node2);
@@ -334,6 +355,8 @@ private:
     int CreateUITree( StlTagVector& boies,logical insertCol );
     void ReadExcelConfigData( );
     StlNXStringVector sheetNames;
+    StlDrawingBodyVector BodiesDefined;
 };
+
 void GZ_PART_DRAFT_Main();
 #endif //AUTODRAFTING_H_INCLUDED
