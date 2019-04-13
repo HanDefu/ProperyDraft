@@ -47,6 +47,7 @@
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_Button.hxx>
+#include <NXOpen/BlockStyler_Toggle.hxx>
 #include <NXOpen/BlockStyler_SpecifyCSYS.hxx>
 #include <NXOpen/BlockStyler_DoubleBlock.hxx>
 #include <NXOpen/BlockStyler_FolderSelection.hxx>
@@ -304,13 +305,14 @@ public:
     //int apply_cb();
     int ok_cb();
     int cancel_cb();
+    bool enableOKButton_cb();
     int update_cb(NXOpen::BlockStyler::UIBlock* block);
     PropertyList* GetBlockProperties(const char *blockID);
     void SetTypeUI();
     void ReadExcelTechData( );
     void AddBodyInformation( );
     int ValidateDrawingNO( );
-    int GZ_SetDrawingNoteInformation( tag_t part, tag_t group,double scale);
+    int GZ_SetDrawingNoteInformation( tag_t part, tag_t group,double scale,NXString& DrawingNO);
     //void OnExpandCallback (NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
     //void OnInsertColumnCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node, int columnID);
     //void OnInsertNodeCallback(NXOpen::BlockStyler::Tree *tree, NXOpen::BlockStyler::Node *node);
@@ -347,9 +349,11 @@ private:
     NXOpen::BlockStyler::Tree* tree_control0;// Block type: Tree Control
     NXOpen::BlockStyler::SpecifyCSYS* coord_system0;// Block type: Specify Csys
     NXOpen::BlockStyler::Button* buttonApplyCSYS;// Block type: Button
+    NXOpen::BlockStyler::Button* buttonDelete;// Block type: Button
     NXOpen::BlockStyler::Group* group;// Block type: Group
     NXOpen::BlockStyler::BodyCollector* bodySelect0;// Block type: Body Collector
     NXOpen::BlockStyler::Enumeration* enumFrameType;// Block type: Enumeration
+    NXOpen::BlockStyler::Toggle* toggleHide;// Block type: Toggle
     NXOpen::BlockStyler::DoubleBlock* doubleDwgScale;// Block type: Double
     NXOpen::BlockStyler::FolderSelection* nativeFolderBrowser01;// Block type: NativeFolderBrowser
     int CreateUITree( StlTagVector& boies,logical insertCol );
