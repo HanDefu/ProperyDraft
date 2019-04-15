@@ -181,6 +181,22 @@ using namespace std;
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
+typedef struct MulBodies
+{
+	tag_t bodyId;
+	NXString projectName;
+	NXString projectNo;
+	NXString tuMing;
+	NXString tuHao;
+	NXString riQi;
+	NXString leiXing;
+	NXString jiShuYaoQiu;
+
+	int tuKuang;
+
+
+}SMulBodies;
+
 class DllExport Property
 {
     // class members

@@ -467,6 +467,9 @@ void autodrafting::dialogShown_cb()
 
         char attriValue2[133] = "";
         tag_t part = UF_ASSEM_ask_work_part();
+		USER_ask_obj_string_attr( part , "材料编号" , attriValue2 );
+		drawingNO->GetProperties()->SetString("Value",attriValue2);
+
         USER_ask_obj_string_attr( part , "工程名称" , attriValue2 );
         projectName->GetProperties()->SetString("Value",attriValue2);
         USER_ask_obj_string_attr( part , "工程编号" , attriValue2 );
@@ -2137,6 +2140,8 @@ int autodrafting::ok_cb()
         std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
         NXString projName = projectName->GetProperties()->GetString("Value");
         NXString projNO = projectNO->GetProperties()->GetString("Value");
+		NXString tuHao = drawingNO->GetProperties()->GetString("Value");
+
         Royal_set_obj_attr(disp,"工程名称",projName.GetLocaleText());
 		Royal_set_obj_attr(disp,"工程编号",projNO.GetLocaleText());
 
