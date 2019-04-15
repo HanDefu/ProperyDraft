@@ -4,7 +4,7 @@
     <LocalDebuggerCommandArguments>
     </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommand>$(UGII_BASE_DIR)\nxbin\ugraf.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(UGII_BASE_DIR)\ugii\ugraf.exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>C:\Program Files\Siemens\NX 12.0\NXBIN\ugraf.exe</LocalDebuggerCommand>

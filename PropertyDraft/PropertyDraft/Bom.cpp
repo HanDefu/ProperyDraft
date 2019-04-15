@@ -648,7 +648,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			else
 			{
 				StrAdd1(heJi[index][8]);//数量+1
-				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8]);//总面积计算
+				NXString zongmianji = StrMu(heJi[index][7], heJi[index][8],2);//总面积计算
 				heJi[index][9] = zongmianji;
 
 				if (atof(heJi[index][9].getLocaleText()) > 0)
@@ -682,7 +682,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 			else
 			{
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7],2);//总面积计算
 				heJi[index][8] = zongmianji;
 
 				if (atof(heJi[index][8].getLocaleText()) > 0)
@@ -723,7 +723,7 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 				heJi[index][10] = zongJia;*/
 
 				StrAdd1(heJi[index][7]);//数量+1
-				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7]);//总面积计算
+				NXString zongmianji = StrMu(heJi[index][6], heJi[index][7],2);//总面积计算
 				heJi[index][8] = zongmianji;
 
 				if(atof(heJi[index][8].getLocaleText()) > 0)
@@ -826,7 +826,6 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 		heJi[i][0] = NXString(cstr);
 	}
 	BOMStr = heJi;
-	
 }
 
 

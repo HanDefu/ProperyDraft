@@ -1215,6 +1215,7 @@ static void print_error_msg(char msg[])
 	UF_UI_write_listing_window(msg);
 	UF_UI_write_listing_window("\n");
 }
+
 int Royal_STD_parametrize_part(vNXString all_express, tag_t part_tag)
 {
     int i;
