@@ -899,6 +899,7 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
     double sheetHei = point1.Y*2;
 	tag_t projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
     tag_t projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
+    tag_t IsometricView = CreateBaseView(partTag,"Isometric", refset,point1,stdscale,sheetlen,sheethei);
 	double xy_boud1[4] = {0,0,0,0};
 	double xy_boud2[4] = {0,0,0,0};
 	double xy_boud3[4] = {0,0,0,0};
@@ -906,21 +907,24 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 	ROY_UF_VIEW_ask_xy_clip(baseView,stdscale,xy_boud1);
 	ROY_UF_VIEW_ask_xy_clip(projectViewl,stdscale,xy_boud2);
     ROY_UF_VIEW_ask_xy_clip(projectViewr,stdscale,xy_boud3);
+    ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale,xy_boud4);
     double viewHei = xy_boud1[3]-xy_boud1[2] + xy_boud2[3]-xy_boud2[2];
     double viewLen = xy_boud1[1]-xy_boud1[0] + xy_boud3[1]-xy_boud3[0];
     double drawingareaHei = 0;
     double drawingareaLen = 0;
+    double vlen2 = xy_boud1[1]-xy_boud1[0] + xy_boud4[1]-xy_boud4[0];
+    double vhei2 = xy_boud3[3]-xy_boud3[2] + xy_boud4[3]-xy_boud4[2];
     if(sheetLen > sheetHei) //h
     {
-        drawingareaLen = sheetLen-15-20;
+        drawingareaLen = sheetLen-25-20;
         drawingareaHei = sheetHei-45-20;
     }
     else //v 
     {
-        drawingareaLen = sheetLen-15-20;
+        drawingareaLen = sheetLen-25-20;
         drawingareaHei = sheetHei-45-20;
     }
-	if( (viewHei >= drawingareaHei || viewLen >= drawingareaLen) &&  stdscale < 19.9 ) //adjust scale
+	if( viewHei >= drawingareaHei || viewLen >= drawingareaLen || vhei2 >= drawingareaHei || vlen2 >= drawingareaLen ) //adjust scale &&  stdscale < 19.9 
     {
 		int err = 0;//-->A3 UF_DRAW_set_drawing_info
         double sug1 = (viewLen-25.4)/(drawingareaLen-25.4);
@@ -929,13 +933,22 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
             sug = sug1;
         else
             sug = sug2;
+        double sug11 = (vlen2-25.4)/(drawingareaLen-25.4);
+        double sug22 = (vhei2-25.4)/(drawingareaHei-25.4);
+        if( sug11 > sug )
+            sug = sug11;
+        if( sug22 > sug )
+            sug = sug22;
 		UF_VIEW_delete(projectViewl,&err);
 		UF_VIEW_delete(projectViewr,&err);
 		UF_VIEW_delete(baseView,&err);
+		UF_VIEW_delete(IsometricView,&err);
         return 1;
     }
     else
     {
+        int err = 0;
+        UF_VIEW_delete(IsometricView,&err);
         Drawings::DrawingSheet *drawingSheet1= workPart->DrawingSheets()->CurrentDrawingSheet();
         Drawings::DrawingSheetBuilder *drawingSheetBuilder1;
         drawingSheetBuilder1 = workPart->DrawingSheets()->DrawingSheetBuilder(drawingSheet1);
@@ -965,7 +978,7 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 		MoveProjectView(projectViewr,projecRview_x,projecRview_y);
 
 		NXOpen::Point3d point2(projecRview_x, projeclview_y, 0.0);
-		tag_t IsometricView = CreateBaseView(partTag,"Isometric", refset,point2,stdscale*1.42,sheetlen,sheethei);
+		tag_t IsometricView = CreateBaseView(partTag,"Isometric", refset,point2,stdscale,sheetlen,sheethei);
 		NXOpen::Session *theSession = NXOpen::Session::GetSession();
 		NXOpen::Part *workPart(theSession->Parts()->Work());
 		std::vector<NXOpen::Drawings::DraftingView *> views1(2);
@@ -974,19 +987,29 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 		views1[0] = projectedView1;
 		views1[1] = projectedView2;
 		workPart->DraftingViews()->UpdateViews(views1);
-		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale*1.42,xy_boud1);
-		if(stdscale<20)
-		{
-			if(projecRview_x+xy_boud1[1]>sheetLen || projecRview_x-xy_boud1[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
-			{
-				int err = 0;
-				UF_VIEW_delete(projectViewl,&err);
-				UF_VIEW_delete(projectViewr,&err);
-				UF_VIEW_delete(baseView,&err);
-				UF_VIEW_delete(IsometricView,&err);
-				return 1;
-			}
-		}
+		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale,xy_boud4);
+		//if(stdscale<20)
+        //if(projecRview_x+xy_boud4[1]>sheetLen || projecRview_x-xy_boud4[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
+        double vlen2 = xy_boud1[1]-xy_boud1[0] + xy_boud4[1]-xy_boud4[0];
+        double vhei2 = xy_boud3[3]-xy_boud3[2] + xy_boud4[3]-xy_boud4[2];
+        if(vhei2 >= drawingareaHei || vlen2 >= drawingareaLen || projecRview_x+xy_boud4[1]>sheetLen || projecRview_x-xy_boud4[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2 )
+        {
+            int err = 0;
+            double sug1 = (vlen2-25.4)/(drawingareaLen-25.4);
+            double sug2 = (vhei2-25.4)/(drawingareaHei-25.4);
+            double tempsug = 0;
+            if( sug1 > sug2 )
+                tempsug = sug1;
+            else
+                tempsug = sug2;
+            if( tempsug > sug )
+                sug = tempsug;
+            UF_VIEW_delete(projectViewl,&err);
+            UF_VIEW_delete(projectViewr,&err);
+            UF_VIEW_delete(baseView,&err);
+            UF_VIEW_delete(IsometricView,&err);
+            return 1;
+        }
 	}
     symbolView = baseView;
 	return 0;
@@ -1081,7 +1104,10 @@ static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStri
     //double stdscale[] = {1.5,2,2.5,3,5,10};
     while( 0 != irc )
     {
-        stdscale+=0.5; 
+        if(stdscale < 10.0)
+            stdscale+=0.5;
+        else
+            stdscale+=5.0; 
         while(stdscale<sug-0.1)
         {
             if(stdscale < 10.0)
@@ -2181,14 +2207,14 @@ int autodrafting::ok_cb()
             RY_DWG_create_demention(disp,view,viewbound);
             UF_PART_save();
             sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),refname.GetLocaleText());
-            export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
+            //export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
         }
-        UF_PART_close(newpart,0,1);
+        /*UF_PART_close(newpart,0,1);
         UF_PART_set_display_part(disp);
         theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
         char cmd[512]="";
         sprintf_s(cmd,"start %s",savepath.GetLocaleText());
-        system(cmd);      
+        system(cmd); */     
     }
     catch(exception& ex)
     {
