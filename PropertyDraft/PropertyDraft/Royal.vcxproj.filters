@@ -72,6 +72,9 @@
     <ClCompile Include="CaoLiaoBianHao.cpp">
       <Filter>Command</Filter>
     </ClCompile>
+    <ClCompile Include="DlgRegister.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entry.hpp">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="CaoLiaoBianHao.hpp">
       <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgRegister.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

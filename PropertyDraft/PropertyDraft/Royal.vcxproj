@@ -165,6 +165,7 @@
     <ClCompile Include="Common_Function.cpp" />
     <ClCompile Include="Common_Function_UG.cpp" />
     <ClCompile Include="Common_UI.cpp" />
+    <ClCompile Include="DlgRegister.cxx" />
     <ClCompile Include="Entry.cpp" />
     <ClCompile Include="Excel\BasicExcel.cpp" />
     <ClCompile Include="Excel\Excel.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="Common_Function.h" />
     <ClInclude Include="Common_Function_UG.h" />
     <ClInclude Include="Common_UI.h" />
+    <ClInclude Include="DlgRegister.h" />
     <ClInclude Include="Entry.hpp" />
     <ClInclude Include="Excel\BasicExcel.hpp" />
     <ClInclude Include="Excel\CApplication.h" />
