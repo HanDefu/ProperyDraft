@@ -453,22 +453,22 @@ void autodrafting::dialogShown_cb()
 		char dspec[MAX_FSPEC_BUFSIZE]="";
 		char fname[UF_CFI_MAX_FILE_NAME_BUFSIZE]="";
 		StlTagVector solidboies;
-        StlDoubVector scalelist;
+        /*StlDoubVector scalelist;
         scalelist.push_back(1);
         scalelist.push_back(2);
         scalelist.push_back(3);
         scalelist.push_back(4);
-        scalelist.push_back(5);
+        scalelist.push_back(5);*/
         //ReadExcelConfigData();
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
 		//CF_GetCurrentPartSolidBodies(solidboies);
 		CreateUITree(solidboies,true);
-        doubleDwgScale->GetProperties()->SetDoubleVector("ComboOptions",scalelist);
+        //doubleDwgScale->GetProperties()->SetDoubleVector("ComboOptions",scalelist);
 
         char attriValue2[133] = "";
         tag_t part = UF_ASSEM_ask_work_part();
-		USER_ask_obj_string_attr( part , "材料编号" , attriValue2 );
-		drawingNO->GetProperties()->SetString("Value",attriValue2);
+		/*USER_ask_obj_string_attr( part , "材料编号" , attriValue2 );
+		drawingNO->GetProperties()->SetString("Value",attriValue2);*/
 
         USER_ask_obj_string_attr( part , "工程名称" , attriValue2 );
         projectName->GetProperties()->SetString("Value",attriValue2);
@@ -916,15 +916,19 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
     double vhei2 = xy_boud3[3]-xy_boud3[2] + xy_boud4[3]-xy_boud4[2];
     if(sheetLen > sheetHei) //h
     {
-        drawingareaLen = sheetLen-25-20;
-        drawingareaHei = sheetHei-45-20;
+        drawingareaLen = sheetLen-20-20;
+        drawingareaHei = sheetHei-40-20;
     }
     else //v 
     {
-        drawingareaLen = sheetLen-25-20;
-        drawingareaHei = sheetHei-45-20;
+        drawingareaLen = sheetLen-20-20;
+        drawingareaHei = sheetHei-40-20;
     }
-	if( viewHei >= drawingareaHei || viewLen >= drawingareaLen || vhei2 >= drawingareaHei || vlen2 >= drawingareaLen ) //adjust scale &&  stdscale < 19.9 
+	if( vhei2 > viewHei )
+		viewHei = vhei2;
+	if( vlen2 > viewLen )
+		viewLen = vlen2;
+	if( viewHei >= drawingareaHei || viewLen >= drawingareaLen ) //adjust scale &&  stdscale < 19.9 || vhei2 >= drawingareaHei || vlen2 >= drawingareaLen 
     {
 		int err = 0;//-->A3 UF_DRAW_set_drawing_info
         double sug1 = (viewLen-25.4)/(drawingareaLen-25.4);
@@ -933,12 +937,6 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
             sug = sug1;
         else
             sug = sug2;
-        double sug11 = (vlen2-25.4)/(drawingareaLen-25.4);
-        double sug22 = (vhei2-25.4)/(drawingareaHei-25.4);
-        if( sug11 > sug )
-            sug = sug11;
-        if( sug22 > sug )
-            sug = sug22;
 		UF_VIEW_delete(projectViewl,&err);
 		UF_VIEW_delete(projectViewr,&err);
 		UF_VIEW_delete(baseView,&err);
@@ -959,15 +957,25 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
         nXObject1 = drawingSheetBuilder1->Commit();
         drawingSheetBuilder1->Destroy();
     }
+	
 	if( drawingareaHei > viewHei && drawingareaLen > viewLen )
 	{
 		double gaph = (drawingareaHei - viewHei)/3;
 		double gapl = (drawingareaLen - viewLen)/3;
-		double baseview_x = 6+gapl+(xy_boud1[1]-xy_boud1[0])/2;
-		double baseview_y = 45+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud2[3]-xy_boud2[2];
+		double baseview_x = 20+gapl+(xy_boud1[1]-xy_boud1[0])/2;
+		double baseview_y = 40+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud2[3]-xy_boud2[2];
+		double baseview_y2 = 40+gaph*2+(xy_boud1[3]-xy_boud1[2])/2+xy_boud4[3]-xy_boud4[2];
+		if( baseview_y2 > baseview_y )
+			baseview_y = baseview_y2;
 		double projeclview_x = baseview_x;
-		double projeclview_y = 45+gaph+(xy_boud2[3]-xy_boud2[2])/2;
-		double projecRview_x = 6+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud3[1]-xy_boud3[0])/2;
+		double projeclview_y = 40+gaph+(xy_boud2[3]-xy_boud2[2])/2;
+		double projeclview_y2 = 40+gaph+(xy_boud4[3]-xy_boud4[2])/2;
+		if( projeclview_y2 > projeclview_y )
+			projeclview_y = projeclview_y2;
+		double projecRview_x = 20+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud3[1]-xy_boud3[0])/2;
+		double projecRview_x2 = 20+gapl*2+xy_boud1[1]-xy_boud1[0]+(xy_boud4[1]-xy_boud4[0])/2;
+		if( projecRview_x2 > projecRview_x )
+			projecRview_x = projecRview_x2;
 		double projecRview_y = baseview_y;
 		MoveBaseView(baseView,baseview_x,baseview_y );
         viewxbound[0] = baseview_x-(xy_boud1[1]-xy_boud1[0])/2;
@@ -987,29 +995,29 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 		views1[0] = projectedView1;
 		views1[1] = projectedView2;
 		workPart->DraftingViews()->UpdateViews(views1);
-		ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale,xy_boud4);
+		//ROY_UF_VIEW_ask_xy_clip(IsometricView,stdscale,xy_boud4);
 		//if(stdscale<20)
         //if(projecRview_x+xy_boud4[1]>sheetLen || projecRview_x-xy_boud4[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2)
-        double vlen2 = xy_boud1[1]-xy_boud1[0] + xy_boud4[1]-xy_boud4[0];
-        double vhei2 = xy_boud3[3]-xy_boud3[2] + xy_boud4[3]-xy_boud4[2];
-        if(vhei2 >= drawingareaHei || vlen2 >= drawingareaLen || projecRview_x+xy_boud4[1]>sheetLen || projecRview_x-xy_boud4[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2 )
-        {
-            int err = 0;
-            double sug1 = (vlen2-25.4)/(drawingareaLen-25.4);
-            double sug2 = (vhei2-25.4)/(drawingareaHei-25.4);
-            double tempsug = 0;
-            if( sug1 > sug2 )
-                tempsug = sug1;
-            else
-                tempsug = sug2;
-            if( tempsug > sug )
-                sug = tempsug;
-            UF_VIEW_delete(projectViewl,&err);
-            UF_VIEW_delete(projectViewr,&err);
-            UF_VIEW_delete(baseView,&err);
-            UF_VIEW_delete(IsometricView,&err);
-            return 1;
-        }
+        //double vlen2 = xy_boud1[1]-xy_boud1[0] + xy_boud4[1]-xy_boud4[0];
+        //double vhei2 = xy_boud3[3]-xy_boud3[2] + xy_boud4[3]-xy_boud4[2];
+        //if(vhei2 >= drawingareaHei || vlen2 >= drawingareaLen  ) //|| projecRview_x+xy_boud4[1]>sheetLen || projecRview_x-xy_boud4[1] <  projeclview_x+(xy_boud2[1]-xy_boud2[0])/2
+        //{
+        //    int err = 0;
+        //    double sug1 = (vlen2-25.4)/(drawingareaLen-25.4);
+        //    double sug2 = (vhei2-25.4)/(drawingareaHei-25.4);
+        //    double tempsug = 0;
+        //    if( sug1 > sug2 )
+        //        tempsug = sug1;
+        //    else
+        //        tempsug = sug2;
+        //    if( tempsug > sug )
+        //        sug = tempsug;
+        //    UF_VIEW_delete(projectViewl,&err);
+        //    UF_VIEW_delete(projectViewr,&err);
+        //    UF_VIEW_delete(baseView,&err);
+        //    UF_VIEW_delete(IsometricView,&err);
+        //    return 1;
+        //}
 	}
     symbolView = baseView;
 	return 0;
@@ -1223,8 +1231,10 @@ void autodrafting::SetTypeUI()
     NXString typeStr = typestrs[sel];
     sprintf(attriValue2,"%s加工图",typeStr.GetLocaleText());
     drawingName->GetProperties()->SetString("Value",attriValue2);
-    ReadExcelTechData();
-    StlNXStringVector tech = techData[sel];
+    //ReadExcelTechData();
+    //StlNXStringVector tech = techData[sel];
+    StlNXStringVector tech;
+	tech.push_back("get test");
     multiline_string0->SetValue(tech);
 }
 
