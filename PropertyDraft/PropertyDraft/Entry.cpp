@@ -48,9 +48,10 @@
 //#include "UpdateFile.h"
 #include "Excel/Excel.h"
 #include "CaoLiaoBianHao.hpp"
+#include "DlgRegister.h"
 
 using namespace NXOpen;
-
+bool g_regOK = false;
 //------------------------------- DIALOG LAUNCHING ---------------------------------
 //
 //    Before invoking this application one needs to open any part/empty part in NX
@@ -136,6 +137,16 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 	{
 		if (!checkuse())
 			return;
+
+		EnterDlgRegister();//×¢²á»úÏà¹Ø
+
+		if (g_regOK == 0)
+		{
+			UF_terminate();
+			return;
+		}
+
+
 
 		UF_initialize();
 

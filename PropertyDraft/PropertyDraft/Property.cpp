@@ -539,12 +539,14 @@ void Property::dialogShown_cb()
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
 
-		if (s_type>=0)
+		if (s_bianhao >= 0)
+			UI_EnumSetCurrentSel(matNO, s_bianhao);
+
+		/*if (s_type>=0)
 		    UI_EnumSetCurrentSel(enumType, s_type);
 		if (s_mingcheng>=0)
 		    UI_EnumSetCurrentSel(matName, s_mingcheng);
-		if (s_bianhao>=0)
-		    UI_EnumSetCurrentSel(matNO, s_bianhao);
+		
 		if (s_guige>=0)
 		    UI_EnumSetCurrentSel(matSize, s_guige);
 
@@ -569,7 +571,7 @@ void Property::dialogShown_cb()
 
 		strs = remark->GetProperties()->GetEnumMembers("Value");
 		if (strs.size() > 1&& s_beizhu>=0)
-			UI_EnumSetCurrentSel(remark, s_beizhu);
+			UI_EnumSetCurrentSel(remark, s_beizhu);*/
     }
     catch(exception& ex)
     {

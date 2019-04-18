@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 #include "autodrafting.hpp"
 #include "Common_UI.h"
+#include <uf_disp.h>
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
