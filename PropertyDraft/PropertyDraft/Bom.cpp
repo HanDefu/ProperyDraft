@@ -828,6 +828,19 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 	BOMStr = heJi;
 }
 
+bool comp(StlNXStringVector &strs1, StlNXStringVector &strs2)
+{
+     if (strcmp(strs1[2].getLocaleText(), strs2[2].getLocaleText()) > 0)
+     {
+		 return true;
+     }
+	 return false;
+}
+
+void SortStrss(StlNXStringVectorVector &strss)
+{
+   std::sort(strss.begin(), strss.end(), comp);
+}
 
 int Bom::apply_cb()
 {
@@ -919,6 +932,7 @@ int Bom::apply_cb()
                         }
                         GetBOMInformation(tempbodies,type,BOMStr );
 						PostProcess(GetBodyType(tempbodies[0]), BOMStr);
+						SortStrss(BOMStr);
                         WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
                     }
                 }
@@ -941,6 +955,7 @@ int Bom::apply_cb()
                 }
                 GetBOMInformation(bombodies,type,BOMStr );
 				PostProcess(GetBodyType(bombodies[0]), BOMStr);
+				SortStrss(BOMStr);
                 WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
             }
             char cmd[512]="";
