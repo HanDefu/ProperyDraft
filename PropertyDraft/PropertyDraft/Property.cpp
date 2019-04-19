@@ -424,16 +424,16 @@ void Property::SetUIConfigData( )
     if( configData.size() > 0 )
     {
         VecNXStringVector temp = configData[type];
-        matName->GetProperties()->SetEnumMembers("Value",temp[0]);
-        matNO->GetProperties()->SetEnumMembers("Value",temp[1]);
-        matSize->GetProperties()->SetEnumMembers("Value",temp[2]);
-        material->GetProperties()->SetEnumMembers("Value",temp[3]);
-        matDensity->GetProperties()->SetEnumMembers("Value",temp[4]);
-        unitPrice->GetProperties()->SetEnumMembers("Value",temp[5]);
-        supplier->GetProperties()->SetEnumMembers("Value",temp[6]);
+        matName->SetEnumMembers(temp[0]);
+        matNO->SetEnumMembers(temp[1]);
+        matSize->SetEnumMembers(temp[2]);
+        material->SetEnumMembers(temp[3]);
+        matDensity->SetEnumMembers(temp[4]);
+        unitPrice->SetEnumMembers(temp[5]);
+        supplier->SetEnumMembers(temp[6]);
 		if(temp[7].size() > 0)
 		{ 
-            remark->GetProperties()->SetEnumMembers("Value",temp[7]);
+            remark->SetEnumMembers(temp[7]);
 			remark->SetShow(true);
 		}
 		else
@@ -442,7 +442,7 @@ void Property::SetUIConfigData( )
 
 		if (temp[6].size() > 0)
 		{
-			supplier->GetProperties()->SetEnumMembers("Value", temp[6]);
+			supplier->SetEnumMembers( temp[6]);
 			supplier->SetShow(true);
 		}
 		else
