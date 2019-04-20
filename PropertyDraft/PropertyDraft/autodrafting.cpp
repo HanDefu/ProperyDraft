@@ -648,7 +648,65 @@ tag_t GetReferencesetBody(tag_t part,NXString& refsetName)
 	return body;
 }
 
-
+void GetTopViewProjectDirection( tag_t partTag, NXString& refset,double dir[3][3] )
+{
+	tag_t part = partTag;
+	dir[0][0] = 1;
+	dir[0][1] = 0;
+	dir[0][2] = 0;
+	dir[1][0] = 0;
+	dir[1][1] = 1;
+	dir[1][2] = 0;
+	dir[2][0] = 0;
+	dir[2][1] = 0;
+	dir[2][2] = 1;
+	if(UF_ASSEM_is_occurrence(partTag))
+	{
+		part = UF_ASSEM_ask_prototype_of_occ(partTag);
+	}
+	tag_t body = GetReferencesetBody(part,refset);
+	if( NULL_TAG != body )
+	{
+		char VZx[133]="",VZy[133]="",VZz[133]="";
+		char VXx[133]="",VXy[133]="",VXz[133]="";
+		int irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_X,VZx);
+		if( 0 == irc )
+		{
+			irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_Y,VZy);
+		}
+		if( 0 == irc )
+		{
+			irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_NORMAL_DIR_Z,VZz);
+		}
+		if( 0 == irc )
+		{
+			irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_X,VXx);
+		}
+		if( 0 == irc )
+		{
+			irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_Y,VXy);
+		}
+		if( 0 == irc )
+		{
+			irc = Roy_ask_obj_string_attr(body,ATTR_DRAFTING_X_DIR_Z,VXz);
+		}
+		if( 0 == irc )
+		{
+			dir[0][0] = atof(VXx);
+			dir[0][1] = atof(VXy);
+			dir[0][2] = atof(VXz);
+			dir[2][0] = atof(VZx);
+			dir[2][1] = atof(VZy);
+			dir[2][2] = atof(VZz);
+			double tol = 0;
+			UF_MODL_ask_distance_tolerance(&tol);
+			UF_VEC3_cross(dir[2], dir[0], dir[1]);
+			/*UF_CALL(UF_VEC3_unitize(dir[0], tol, &mag, &csys[0]));
+			UF_CALL(UF_VEC3_unitize(dir[1], tol, &mag, &csys[3]));
+			UF_CALL(UF_VEC3_unitize(dir[2], tol, &mag, &csys[6]));*/
+		}
+	}
+}
 
 static tag_t CreateBaseView(tag_t partTag, NXString viewType, NXString& refset,Point3d& viewRefPoint, double stdscale,double sheetlen,double sheethei  )
 {
@@ -705,8 +763,15 @@ static tag_t CreateBaseView(tag_t partTag, NXString viewType, NXString& refset,P
 		NXOpen::Point3d origin1(0.0, 0.0, 0.0);
 		NXOpen::Vector3d vector1(0.0, 0.0, 1.0);
 		NXOpen::Vector3d vector2(1.0, 0.0, 0.0);
-
-		tag_t body = GetReferencesetBody(part,refset);
+		double dir[3][3]={0};
+		GetTopViewProjectDirection(partTag,refset,dir);
+		vector1.X = dir[2][0];
+		vector1.Y = dir[2][1];
+		vector1.Z = dir[2][2];
+		vector2.X = dir[0][0];
+		vector2.Y = dir[0][1];
+		vector2.Z = dir[0][2];
+		/*tag_t body = GetReferencesetBody(part,refset);
 		if( NULL_TAG != body )
 		{
 			char VZx[133]="",VZy[133]="",VZz[133]="";
@@ -741,7 +806,7 @@ static tag_t CreateBaseView(tag_t partTag, NXString viewType, NXString& refset,P
 				vector2.Y = atof(VXy);
 				vector2.Z = atof(VXz);
 			}
-		}
+		}*/
 		
 		direction1 = workPart->Directions()->CreateDirection(origin1, vector1, NXOpen::SmartObject::UpdateOptionAfterModeling);
 		baseViewBuilder1->Style()->ViewStyleOrientation()->Ovt()->SetNormalDirection(direction1);
@@ -864,7 +929,7 @@ static void MoveProjectView( tag_t projectview ,double x, double y)
     projectedViewBuilder1->Destroy();
 }
 
-static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double stdscale, tag_t &symbolView, double viewxbound[4],double& sug,double sheetlen,double sheethei)//6,75, x-6, y-36 v // 6,75, x-59, y-6 h
+static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double stdscale, tag_t &symbolView, tag_t &projectViewl,tag_t &projectViewr, double viewxbound[4],double& sug,double sheetlen,double sheethei)//6,75, x-6, y-36 v // 6,75, x-59, y-6 h
 {
 	Session *theSession = Session::GetSession();
     Part *workPart(theSession->Parts()->Work());
@@ -898,8 +963,8 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
              //UF_DRAW_update_one_view
     double sheetLen = point1.X*2;
     double sheetHei = point1.Y*2;
-	tag_t projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
-    tag_t projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
+	projectViewl = CreateProjectView(baseView,point1.X, point1.Y-50);
+    projectViewr = CreateProjectView(baseView,point1.X+50, point1.Y);
     tag_t IsometricView = CreateBaseView(partTag,"Isometric", refset,point1,stdscale,sheetlen,sheethei);
 	double xy_boud1[4] = {0,0,0,0};
 	double xy_boud2[4] = {0,0,0,0};
@@ -980,8 +1045,8 @@ static int CreateBaseAndProjectViews( tag_t partTag, NXString& refset, double st
 		double projecRview_y = baseview_y;
 		MoveBaseView(baseView,baseview_x,baseview_y );
         viewxbound[0] = baseview_x-(xy_boud1[1]-xy_boud1[0])/2;
-        viewxbound[1] = baseview_y-(xy_boud1[3]-xy_boud1[2])/2;
-		viewxbound[2] = baseview_x+(xy_boud1[1]-xy_boud1[0])/2;
+        viewxbound[2] = baseview_y-(xy_boud1[3]-xy_boud1[2])/2;
+		viewxbound[1] = baseview_x+(xy_boud1[1]-xy_boud1[0])/2;
         viewxbound[3] = baseview_y+(xy_boud1[3]-xy_boud1[2])/2;
 		MoveProjectView(projectViewl,projeclview_x,projeclview_y);
 		MoveProjectView(projectViewr,projecRview_x,projecRview_y);
@@ -1039,7 +1104,7 @@ static void CreateDrawingSheet(NXString& name, double len, double hei )
 	UF_DRAW_open_drawing( new_drawing_tag );
 }
 
-static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXString& frame,NXString& typeStr,double viewbound[4],double &stdscale )
+static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, tag_t &projectViewl,tag_t &projectViewr,NXString& name,NXString& frame,NXString& typeStr,double viewbound[4],double &stdscale )
 {
 	UF_import_part_modes_t modes;
 	tag_t group = NULL_TAG;
@@ -1109,7 +1174,7 @@ static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStri
     double sug = 0;
     //double viewbound[4]={0,0,0,0};
     /*int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug);*/
-    int irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
+    int irc = CreateBaseAndProjectViews(part,name,stdscale,view,projectViewl,projectViewr,viewbound,sug,sheetlen,sheethei);
     //double stdscale[] = {1.5,2,2.5,3,5,10};
     while( 0 != irc )
     {
@@ -1124,7 +1189,7 @@ static tag_t CreateDrawingViewDWG(tag_t part, tag_t& view, NXString& name,NXStri
             else
                 stdscale+=1.0;
         }
-        irc = CreateBaseAndProjectViews(part,name,stdscale,view,viewbound,sug,sheetlen,sheethei);
+        irc = CreateBaseAndProjectViews(part,name,stdscale,view,projectViewl,projectViewr,viewbound,sug,sheetlen,sheethei);
     }
     //UF_PART_save();
     return group;
@@ -1538,10 +1603,10 @@ void CreateDemension2(tag_t partTag, tag_t viewTag, StlTagVector& objects, int f
 	NXOpen::Part *dispPart(theSession->Parts()->Display());
 	double offset = 1000;
 	tag_t firstTag = NULL_TAG, secondTag = NULL_TAG;
-	double leftpt2d[2]={bound[0]-offset,(bound[1]+bound[3])/2};
-	double rightpt2d[2]={bound[2]+offset,(bound[1]+bound[3])/2};
-	double bottompt2d[2]={(bound[0]+bound[2])/2,bound[1]-offset};
-	double toppt2d[2]={(bound[0]+bound[2])/2,bound[3]+offset};
+	double leftpt2d[2]={bound[0]-offset,(bound[2]+bound[3])/2};
+	double rightpt2d[2]={bound[1]+offset,(bound[2]+bound[3])/2};
+	double bottompt2d[2]={(bound[0]+bound[1])/2,bound[2]-offset};
+	double toppt2d[2]={(bound[0]+bound[1])/2,bound[3]+offset};
 	double firstPoint[3], secondPoint[3];
 	//UF_ASSEM_set_work_part(partTag);
 	//UF_PART_set_display_part(partTag);
@@ -1643,6 +1708,131 @@ void CreateDemension2(tag_t partTag, tag_t viewTag, StlTagVector& objects, int f
 	{
 		point1.X = (bound[2]+bound[0])/2;
 		point1.Y = bound[3]+5;
+		rapidDimensionBuilder1->Style()->LineArrowStyle()->SetLeaderOrientation(NXOpen::Annotations::LeaderSideRight);
+		rapidDimensionBuilder1->Measurement()->SetMethod(NXOpen::Annotations::DimensionMeasurementBuilder::MeasurementMethodHorizontal);
+	}
+	else
+	{
+		//rapidDimensionBuilder1->Measurement()->SetMethod(NXOpen::Annotations::DimensionMeasurementBuilder::MeasurementMethodVertical);
+	}
+    
+    rapidDimensionBuilder1->Origin()->Origin()->SetValue(NULL, nullNXOpen_View, point1);
+    
+    rapidDimensionBuilder1->Origin()->SetInferRelativeToGeometry(true);
+
+    NXOpen::NXObject *nXObject1;
+    nXObject1 = rapidDimensionBuilder1->Commit();
+    
+    rapidDimensionBuilder1->Destroy(); 
+
+}
+
+void CreateDemension3(tag_t partTag, tag_t viewTag, StlTagVector& objects, int flag, double firstPoint[3], double secondPoint[3],double scale )
+{
+	NXOpen::Session *theSession = NXOpen::Session::GetSession();
+    NXOpen::Part *workPart(theSession->Parts()->Work());
+	NXOpen::Part *dispPart(theSession->Parts()->Display());
+	double offset = 1000;
+	tag_t firstTag = NULL_TAG, secondTag = NULL_TAG;
+
+	firstTag = GetMinDistanceObject(firstPoint,objects);
+	secondTag = GetMinDistanceObject(secondPoint,objects);
+	//UF_ASSEM_set_work_part(workPart->Tag());
+	//UF_PART_set_display_part(dispPart->Tag());
+    NXOpen::Annotations::Dimension *nullNXOpen_Annotations_Dimension(NULL);
+    NXOpen::Annotations::RapidDimensionBuilder *rapidDimensionBuilder1;
+    rapidDimensionBuilder1 = workPart->Dimensions()->CreateRapidDimensionBuilder(nullNXOpen_Annotations_Dimension);
+    
+    rapidDimensionBuilder1->Origin()->SetInferRelativeToGeometry(true);
+  
+    rapidDimensionBuilder1->Origin()->Plane()->SetPlaneMethod(NXOpen::Annotations::PlaneBuilder::PlaneMethodTypeXyPlane);
+    
+    NXOpen::Direction *nullNXOpen_Direction(NULL);
+    rapidDimensionBuilder1->Measurement()->SetDirection(nullNXOpen_Direction);
+    
+    NXOpen::View *nullNXOpen_View(NULL);
+    rapidDimensionBuilder1->Measurement()->SetDirectionView(nullNXOpen_View);
+    
+    rapidDimensionBuilder1->Style()->DimensionStyle()->SetNarrowDisplayType(NXOpen::Annotations::NarrowDisplayOptionNone);
+
+	//NXOpen::Drawings::BaseView *baseView1(dynamic_cast<Drawings::BaseView *>(NXOpen::NXObjectManager::Get(viewTag)));
+	NXOpen::View *baseView1(dynamic_cast<NXOpen::View *>(NXOpen::NXObjectManager::Get(viewTag)));
+	//NXOpen::Drawings::ProjectedView *projectedView1(dynamic_cast<NXOpen::Drawings::ProjectedView *>(workPart->DraftingViews()->FindObject("ORTHO@8")));
+	
+    NXOpen::Drawings::DraftingCurve *draftingCurve1(dynamic_cast<NXOpen::Drawings::DraftingCurve *>(NXOpen::NXObjectManager::Get(firstTag)));
+	int type = 0, subtype = 0;
+	int type2 = 0, subtype2 = 0;
+	double ref[3]={0,0,0};
+	double pt2d[2],pt3d[3];
+	UF_OBJ_ask_type_and_subtype(firstTag, &type, &subtype);
+	UF_OBJ_ask_type_and_subtype(secondTag, &type2, &subtype2);
+    //NXOpen::Point3d point1_1(-0.490001264002843, 100, 0.0);
+    //NXOpen::Point3d point1_1(boundbox1[3], boundbox1[4], boundbox1[5]);
+    NXOpen::Point3d point1_1(firstPoint[0], firstPoint[1], firstPoint[2]);
+    NXOpen::Point3d point2_1(0.0, 0.0, 0.0);
+    //rapidDimensionBuilder1->FirstAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeDrfTangent, draftingCurve1, baseView1, point1_1, NULL, nullNXOpen_View, point2_1);
+    if(type == UF_circle_type|| type == UF_conic_type)
+	{
+		rapidDimensionBuilder1->FirstAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeDrfTangent, draftingCurve1, baseView1, point1_1, NULL, nullNXOpen_View, point2_1);
+	}
+	else //if(type == UF_line_type)
+	{
+		rapidDimensionBuilder1->FirstAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeEnd, draftingCurve1, baseView1, point1_1, NULL, nullNXOpen_View, point2_1);
+	}
+    NXOpen::Drawings::DraftingCurve *draftingCurve2(dynamic_cast<NXOpen::Drawings::DraftingCurve *>(NXOpen::NXObjectManager::Get(secondTag)));
+    //NXOpen::Point3d point1_2(-22.0000000000002, -26.9999999999995, -129.357884749828);
+	
+	//NXOpen::Point3d point1_2(-0.490001264002843, 100, 0.0);
+    NXOpen::Point3d point2_2(0.0, 0.0, 0.0);
+	
+
+	NXOpen::Point3d point1_2(secondPoint[0], secondPoint[1], secondPoint[2]);
+    //rapidDimensionBuilder1->SecondAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeEnd, draftingCurve2, baseView1, point1_2, NULL, nullNXOpen_View, point2_2);
+    if(type2 == UF_circle_type|| type2 == UF_conic_type)
+	{
+		rapidDimensionBuilder1->SecondAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeDrfTangent, draftingCurve2, baseView1, point1_2, NULL, nullNXOpen_View, point2_2);
+	}
+	else //if(type == UF_line_type)
+	{
+		rapidDimensionBuilder1->SecondAssociativity()->SetValue(NXOpen::InferSnapType::SnapTypeStart, draftingCurve2, baseView1, point1_2, NULL, nullNXOpen_View, point2_2);
+	}
+
+    NXOpen::Annotations::Annotation::AssociativeOriginData assocOrigin1;
+    assocOrigin1.OriginType = NXOpen::Annotations::AssociativeOriginTypeDrag;
+    assocOrigin1.View = nullNXOpen_View;
+    assocOrigin1.ViewOfGeometry = nullNXOpen_View;
+    NXOpen::Point *nullNXOpen_Point(NULL);
+    assocOrigin1.PointOnGeometry = nullNXOpen_Point;
+    NXOpen::Annotations::Annotation *nullNXOpen_Annotations_Annotation(NULL);
+    assocOrigin1.VertAnnotation = nullNXOpen_Annotations_Annotation;
+    assocOrigin1.VertAlignmentPosition = NXOpen::Annotations::AlignmentPositionTopLeft;
+    assocOrigin1.HorizAnnotation = nullNXOpen_Annotations_Annotation;
+    assocOrigin1.HorizAlignmentPosition = NXOpen::Annotations::AlignmentPositionTopLeft;
+    assocOrigin1.AlignedAnnotation = nullNXOpen_Annotations_Annotation;
+    assocOrigin1.DimensionLine = 0;
+    assocOrigin1.AssociatedView = nullNXOpen_View;
+    assocOrigin1.AssociatedPoint = nullNXOpen_Point;
+    assocOrigin1.OffsetAnnotation = nullNXOpen_Annotations_Annotation;
+    assocOrigin1.OffsetAlignmentPosition = NXOpen::Annotations::AlignmentPositionTopLeft;
+    assocOrigin1.XOffsetFactor = 0.0;
+    assocOrigin1.YOffsetFactor = 0.0;
+    assocOrigin1.StackAlignmentPosition = NXOpen::Annotations::StackAlignmentPositionAbove;
+    rapidDimensionBuilder1->Origin()->SetAssociativeOrigin(assocOrigin1);
+	double viewbound[4] = {0};
+	double viewcenter[3] = {0};
+	ROY_UF_VIEW_ask_xy_clip(viewTag,scale,viewbound);
+	UF_VIEW_ask_center(viewTag,viewcenter);
+	UF_VIEW_map_model_to_drawing(viewTag,viewcenter,pt2d);
+	viewbound[0] += pt2d[0];
+	viewbound[1] += pt2d[0];
+	viewbound[2] += pt2d[1];
+	viewbound[3] += pt2d[1];
+	NXOpen::Point3d point1(viewbound[0]-5, (viewbound[3]+viewbound[2])/2, 0.0);
+	rapidDimensionBuilder1->Style()->LineArrowStyle()->SetLeaderOrientation(NXOpen::Annotations::LeaderSideLeft);
+	if( 1 == flag )
+	{
+		point1.X = (viewbound[1]+viewbound[0])/2;
+		point1.Y = viewbound[3]+5;
 		rapidDimensionBuilder1->Style()->LineArrowStyle()->SetLeaderOrientation(NXOpen::Annotations::LeaderSideRight);
 		rapidDimensionBuilder1->Measurement()->SetMethod(NXOpen::Annotations::DimensionMeasurementBuilder::MeasurementMethodHorizontal);
 	}
@@ -1822,7 +2012,7 @@ static tag_t Create_wcs_by_view(tag_t viewTag)
         junk, junk, junk, z_dir, junk));*/
 	if( viewTag != NULL_TAG )
 	{
-		NXOpen::Session *theSession = NXOpen::Session::GetSession();
+		/*NXOpen::Session *theSession = NXOpen::Session::GetSession();
 		NXOpen::Part *workPart(theSession->Parts()->Work());
 
 		NXOpen::Drawings::BaseViewBuilder *baseViewBuilder1;
@@ -1842,9 +2032,18 @@ static tag_t Create_wcs_by_view(tag_t viewTag)
 		UF_CALL(UF_VEC3_unitize(x_dir, tol, &mag, &csys[0]));
 		UF_CALL(UF_VEC3_unitize(y_dir, tol, &mag, &csys[3]));
 		UF_CALL(UF_VEC3_unitize(z_dir, tol, &mag, &csys[6]));
-		baseViewBuilder1->Destroy();
+		baseViewBuilder1->Destroy();*/
 	}
-
+	x_dir[0]= 1;
+	x_dir[1]= 0;
+	x_dir[2]= 0;
+	z_dir[0]= 0;
+	z_dir[1]= 0;
+	z_dir[2]= 1;
+	UF_VEC3_cross(z_dir, x_dir, y_dir);
+	UF_CALL(UF_VEC3_unitize(x_dir, tol, &mag, &csys[0]));
+	UF_CALL(UF_VEC3_unitize(y_dir, tol, &mag, &csys[3]));
+	UF_CALL(UF_VEC3_unitize(z_dir, tol, &mag, &csys[6]));
     //UF_MTX3_ortho_normalize(csys);
 
     UF_CALL(UF_CSYS_create_matrix(csys, &mx));
@@ -1853,11 +2052,13 @@ static tag_t Create_wcs_by_view(tag_t viewTag)
     return wcs;
 }
 
-void RY_DWG_create_demention(tag_t partTag, tag_t viewTag ,double bound[4])
+
+void RY_DWG_create_demention(tag_t partTag, tag_t viewTag ,double scale, double directions[3][3])
 {
     int n_vis = 0, n_cli = 0;
     tag_t *visobj = NULL;
     tag_t *cliobj = NULL;
+	double offset = 90000;
     double pt1[2]={0,0}, pt2[2]={0,0};
     UF_VIEW_ask_visible_objects(viewTag,&n_vis,&visobj,&n_cli,&cliobj);
     StlTagVector objects;
@@ -1875,115 +2076,32 @@ void RY_DWG_create_demention(tag_t partTag, tag_t viewTag ,double bound[4])
             objects.push_back(visobj[idx]);
         }
     }
-	CreateDemension2(partTag,viewTag,objects,0,bound);
-	CreateDemension2(partTag,viewTag,objects,1,bound);
+	//tag_t csysTag = Create_wcs_by_view(viewTag);
+	//double min_corner[3]={0.0},max_corner[3]={0.0},directions[3][3]={0.0},distances[3] = {0.0};
+	double leftPoint[3]={0.0},rightPoint[3]={0.0},topPoint[3]={0.0},bottomPoint[3]={0.0};
+	/*UF_MODL_ask_bounding_box_exact( objects[0], csysTag, min_corner, directions, distances );
+	for( int i = 0; i< 3; i++ )
+	{
+		for( int j = 0; j< 3; j++ )
+		{
+			max_corner[i] = min_corner[i]+directions[j][i] * distances[j];
+		}
+		center[i] = (min_corner[i]+max_corner[i])/2;
+	}*/
+	double center[3]={0.0};
+	UF_VIEW_ask_center(viewTag,center);
+	for( int i = 0; i< 3; i++ )
+	{
+		leftPoint[i] = center[i]-directions[0][i] * offset;
+		rightPoint[i] = center[i]+directions[0][i] * offset;
+		topPoint[i] = center[i]+directions[1][i] * offset;
+		bottomPoint[i] = center[i]-directions[1][i] * offset;
+	}
+	CreateDemension3(partTag,viewTag,objects,0,topPoint,bottomPoint,scale);
+	CreateDemension3(partTag,viewTag,objects,1,leftPoint,rightPoint,scale);
 	UF_free(visobj);
     UF_free(cliobj);
 	return;
-    tag_t left = NULL_TAG;
-    tag_t right = NULL_TAG;
-    tag_t top = NULL_TAG;
-    tag_t bottom = NULL_TAG;
-    if( objects.size() > 0 )
-    {
-        double bounding_box[6] = {0};
-        left = right = top = bottom = objects[0];
-        /*UF_MODL_ask_bounding_box(objects[0],bounding_box );
-		UF_VIEW_map_model_to_drawing(viewTag,bounding_box,pt1);
-        UF_VIEW_map_model_to_drawing(viewTag,bounding_box+3,pt2);*/
-		/*UF_CALL(UF_CSYS_create_matrix(abs, &mx));
-        UF_CALL(UF_CSYS_create_temp_csys(zero, mx, &csys));*/
-		tag_t csysTag = Create_wcs_by_view(viewTag);
-		double min_corner[3]={0.0},max_corner[3]={0.0},directions[3][3]={0.0},distances[3] = {0.0},startPoint[3]={0.0},endPoint[3]={0.0};
-		UF_MODL_ask_bounding_box_exact( objects[0], csysTag, min_corner, directions, distances );
-		for( int i = 0; i< 3; i++ )
-		{
-			for( int j = 0; j< 3; j++ )
-			{
-				max_corner[i] = min_corner[i]+directions[j][i] * distances[j];
-			}
-		}	
-        UF_VIEW_map_model_to_drawing(viewTag,min_corner,pt1);
-        UF_VIEW_map_model_to_drawing(viewTag,max_corner,pt2);
-        for( int idx = 1; idx < objects.size(); ++idx )
-        {
-            double temp_box[6] = {0};
-            double pt1_t[2]={0,0}, pt2_t[2]={0,0};
-            /*UF_MODL_ask_bounding_box(objects[idx],temp_box );
-            UF_VIEW_map_model_to_drawing(viewTag,temp_box,pt1_t);
-            UF_VIEW_map_model_to_drawing(viewTag,temp_box+3,pt2_t);*/
-			UF_MODL_ask_bounding_box_exact( objects[idx], csysTag, min_corner, directions, distances );
-			for( int i = 0; i< 3; i++ )
-			{
-				for( int j = 0; j< 3; j++ )
-				{
-					max_corner[i] = min_corner[i]+directions[j][i] * distances[j];
-				}
-			}
-			UF_VIEW_map_model_to_drawing(viewTag,min_corner,pt1_t);
-            UF_VIEW_map_model_to_drawing(viewTag,max_corner,pt2_t);
-            if( MATH_is_zero(pt1_t[0]-pt1[0],DOUBLE_TOL))
-            {
-				if( MATH_is_less2(pt2_t[0],pt2[0],DOUBLE_TOL) )
-				{
-					left = objects[idx];
-				}
-            }
-			else if( MATH_is_less2(pt1_t[0],pt1[0],DOUBLE_TOL) )
-            {
-                pt1[0] = pt1_t[0];
-                left = objects[idx];
-            }
-            
-			if( MATH_is_zero(pt1_t[1]-pt1[1],DOUBLE_TOL))
-            {
-				if( MATH_is_less2(pt2_t[1],pt2[1],DOUBLE_TOL) )
-				{
-					bottom = objects[idx];
-				}
-            }
-			else if( MATH_is_less2(pt1_t[1] , pt1[1],DOUBLE_TOL) )
-            {
-                pt1[1] = pt1_t[1];
-                bottom = objects[idx];
-            }
-
-			if( MATH_is_zero(pt2_t[0]-pt2[0],DOUBLE_TOL))
-            {
-				if( MATH_is_geater(pt1_t[0],pt1[0],DOUBLE_TOL) )
-				{
-					right = objects[idx];
-				}
-            }
-            else if( MATH_is_geater(pt2_t[0] , pt2[0],DOUBLE_TOL) )
-            {
-                pt2[0] = pt2_t[0];
-                right = objects[idx];
-            }
-
-			if( MATH_is_zero(pt2_t[1]-pt2[1],DOUBLE_TOL))
-            {
-				if( MATH_is_geater(pt1_t[1],pt1[1],DOUBLE_TOL) )
-				{
-					top = objects[idx];
-				}
-            }
-			else if( MATH_is_geater(pt2_t[1] , pt2[1],DOUBLE_TOL) )
-            {
-                pt2[1] = pt2_t[1];
-                top = objects[idx];
-            }
-            /*for( int jdx = 0; jdx < 3; jdx ++)
-            {
-                bounding_box[jdx] = bounding_box[jdx] < temp_box[jdx]?bounding_box[jdx]:temp_box[jdx];
-                bounding_box[jdx+3] = bounding_box[jdx+3] > temp_box[jdx+3]?bounding_box[jdx+3]:temp_box[jdx+3];
-            }*/
-        }
-    }
-	CreateDemension(viewTag,top,bottom,0,bound);
-	CreateDemension(viewTag,right,left,1,bound);
-    UF_free(visobj);
-    UF_free(cliobj);
 }
 
 //------------------------------------------------------------------------------
@@ -2211,21 +2329,42 @@ int autodrafting::ok_cb()
             NXString refname = SelectedNodes[idx]->GetColumnDisplayText(0);
             NXString frame = SelectedNodes[idx]->GetColumnDisplayText(1);
             tag_t view = NULL_TAG;
+            tag_t viewl = NULL_TAG;
+            tag_t viewr = NULL_TAG;
             double scale = 1;
+			double direction[3][3]={0};
+			double viewldir[3][3]={0};
+			double viewrdir[3][3]={0};
             double viewbound[4] = {0};
-            tag_t group = CreateDrawingViewDWG(disp,view,refname,frame,typeStr,viewbound,scale);
+            /*double viewboundl[4] = {0};
+            double viewboundr[4] = {0};
+			double viewcenter[3]={0};
+			double pt2d[2] = {0};
+			char viewName[133]="";*/
+			GetTopViewProjectDirection( disp, refname, direction );
+            tag_t group = CreateDrawingViewDWG(disp,view,viewl,viewr,refname,frame,typeStr,viewbound,scale);
             GZ_SetDrawingNoteInformation(newpart,group,scale,refname);
-            RY_DWG_create_demention(disp,view,viewbound);
+            RY_DWG_create_demention(disp,view,scale,direction);
+			for( int i = 0; i< 3; i++)
+				viewldir[0][i] = direction[0][i];
+			for( int i = 0; i< 3; i++)
+				viewldir[1][i] = direction[2][i];
+            RY_DWG_create_demention(disp,viewl,scale,viewldir);
+			for( int i = 0; i< 3; i++)
+				viewrdir[0][i] = direction[2][i];
+			for( int i = 0; i< 3; i++)
+				viewrdir[1][i] = direction[1][i];
+            RY_DWG_create_demention(disp,viewr,scale,viewrdir);
             UF_PART_save();
-            sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),refname.GetLocaleText());
-            export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
+            //sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),refname.GetLocaleText());
+            //export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
         }
-        UF_PART_close(newpart,0,1);
+        /*UF_PART_close(newpart,0,1);
         UF_PART_set_display_part(disp);
         theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
         char cmd[512]="";
         sprintf_s(cmd,"start %s",savepath.GetLocaleText());
-        system(cmd);      
+        system(cmd);      */
     }
     catch(exception& ex)
     {
