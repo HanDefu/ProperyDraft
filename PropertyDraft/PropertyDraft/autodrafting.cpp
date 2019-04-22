@@ -2356,15 +2356,15 @@ int autodrafting::ok_cb()
 				viewrdir[1][i] = direction[1][i];
             RY_DWG_create_demention(disp,viewr,scale,viewrdir);
             UF_PART_save();
-            //sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),refname.GetLocaleText());
-            //export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
+            sprintf(outputfile,"%s\\%s.dwg",savepath.GetLocaleText(),refname.GetLocaleText());
+            export_sheet_to_acad_dwg2d(inputfile,outputfile,refname);
         }
-        /*UF_PART_close(newpart,0,1);
+        UF_PART_close(newpart,0,1);
         UF_PART_set_display_part(disp);
         theSession->ApplicationSwitchImmediate("UG_APP_MODELING");
         char cmd[512]="";
         sprintf_s(cmd,"start %s",savepath.GetLocaleText());
-        system(cmd);      */
+        system(cmd);      
     }
     catch(exception& ex)
     {
