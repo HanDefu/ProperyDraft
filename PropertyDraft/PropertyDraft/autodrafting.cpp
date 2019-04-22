@@ -1297,10 +1297,10 @@ void autodrafting::SetTypeUI()
     NXString typeStr = typestrs[sel];
     sprintf(attriValue2,"%s加工图",typeStr.GetLocaleText());
     drawingName->GetProperties()->SetString("Value",attriValue2);
-    //ReadExcelTechData();
-    //StlNXStringVector tech = techData[sel];
-    StlNXStringVector tech;
-	tech.push_back("get test");
+    ReadExcelTechData();
+    StlNXStringVector tech = techData[sel];
+    //StlNXStringVector tech;
+	//tech.push_back("get test");
     multiline_string0->SetValue(tech);
 }
 

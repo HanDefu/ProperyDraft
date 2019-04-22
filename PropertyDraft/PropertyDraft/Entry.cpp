@@ -131,12 +131,89 @@ bool g_regOK = false;
 //    
 //------------------------------------------------------------------------------
 
+UINT QueryValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double& mmnumber)
+{
+	int i = 1;//1为成功
+	HKEY hKey;
+	DWORD dwtype;
+	char content[256];
+	DWORD cbData = 256;
+	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(34, NULL, 1);
+		i = 0;
+	}
+	if (RegQueryValueEx(hKey, Name1, NULL, &dwtype, (unsigned char *)content, &cbData) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(35, Name1, 1); i = 0;
+	}
+	else
+	{
+		mmnumber = atof(content);
+	}
+	RegCloseKey(hKey);
+	return i;
+}
+
+UINT SetValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double mmnumber)
+{
+	int i = 1;//i=1为成功
+	HKEY hKey;
+	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+	{
+		if (ERROR_SUCCESS != RegCreateKey(rootkey, SubKey, &hKey))
+		{
+			//JHCOM_Print(32, NULL, 1);
+			i = 0;
+		}
+	}
+	char data[256] = "";
+	sprintf(data, "%f", mmnumber);
+	UINT cbLen = (UINT)strlen(data);
+	if (RegSetValueEx(hKey, Name1, 0, REG_SZ, (const unsigned char *)data, cbLen) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(33, Name1, 1);
+		i = 0;
+	}
+	RegCloseKey(hKey);
+	return i;
+}
+
+double GetDouble(CString name)
+{
+	double msb = 0;
+	int rcc = 0;
+	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
+
+	int ar = QueryValue(HKEY_USERS, SubKey, name.GetBuffer(), msb);
+	if (ar == 1)
+		return msb;
+	else
+		return 0;
+}
+
+
+void SetDouble(CString name, double value)
+{
+	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
+	SetValue(HKEY_USERS, SubKey, name.GetBuffer(), value);
+}
+
+
 extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 {
 	try
 	{
 		if (!checkuse())
 			return;
+
+		double time = GetDouble(L"BXHH");
+		long int curTime = CTime::GetCurrentTime().GetTime();
+		if (curTime > time)
+		{
+			uc1601("软件过期",1);
+			return;
+		}
 
 		EnterDlgRegister();//注册机相关
 
@@ -145,7 +222,6 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 			UF_terminate();
 			return;
 		}
-
 
 
 		UF_initialize();
