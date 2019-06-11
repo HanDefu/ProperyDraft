@@ -52,6 +52,124 @@
 
 using namespace NXOpen;
 bool g_regOK = false;
+
+UINT QueryValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double& mmnumber)
+{
+	int i = 1;//1为成功
+	HKEY hKey;
+	DWORD dwtype;
+	char content[256];
+	DWORD cbData = 256;
+	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(34, NULL, 1);
+		i = 0;
+	}
+	if (RegQueryValueEx(hKey, Name1, NULL, &dwtype, (unsigned char *)content, &cbData) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(35, Name1, 1); i = 0;
+	}
+	else
+	{
+		mmnumber = atof(content);
+	}
+	RegCloseKey(hKey);
+	return i;
+}
+
+UINT QueryValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, int& mmnumber)
+{
+	int i = 1;//1为成功
+	HKEY hKey;
+	DWORD dwtype;
+	char content[256];
+	DWORD cbData = 256;
+	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+	{
+		i = 0;
+	}
+	if (RegQueryValueEx(hKey, Name1, NULL, &dwtype, (unsigned char *)content, &cbData) != ERROR_SUCCESS)
+	{
+	}
+	else
+	{
+		mmnumber = atoi(content);
+	}
+	RegCloseKey(hKey);
+	return i;
+}
+
+UINT SetValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double mmnumber)
+{
+	int i = 1;//i=1为成功
+	HKEY hKey;
+	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+	{
+		if (ERROR_SUCCESS != RegCreateKey(rootkey, SubKey, &hKey))
+		{
+			//JHCOM_Print(32, NULL, 1);
+			i = 0;
+		}
+	}
+	char data[256] = "";
+	sprintf(data, "%f", mmnumber);
+	UINT cbLen = (UINT)strlen(data);
+	if (RegSetValueEx(hKey, Name1, 0, REG_SZ, (const unsigned char *)data, cbLen) != ERROR_SUCCESS)
+	{
+		//JHCOM_Print(33, Name1, 1);
+		i = 0;
+	}
+	RegCloseKey(hKey);
+	return i;
+}
+
+double GetDouble(wchar_t* name)
+{
+	double msb = 0;
+	int rcc = 0;
+	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
+
+	int ar = QueryValue(HKEY_USERS, SubKey, name, msb);
+	if (ar == 1)
+		return msb;
+	else
+		return 0;
+}
+
+
+void SetDouble(wchar_t* name, double value)
+{
+	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
+	SetValue(HKEY_USERS, SubKey, name, value);
+}
+
+int GetInt(wchar_t* name)
+{
+	int msb = 0;
+	int rcc = 0;
+	LPCTSTR SubKey = L"S-1-5-18\\AutoPipe";
+
+	int ar = QueryValue(HKEY_USERS, SubKey, name, msb);
+	if (ar == 1)
+		return msb;
+	else
+		return 0;
+}
+
+/*-------------------------------------------------------------------------
+* Function Name   : SetDouble
+* Description     : Set the double value in the subkey SubKey=L"S-1-5-18\\AutoPipe" for the input name.
+* Note            : common function.
+* Input           : name - Key name to set the related double value.
+*                   value - New value for the key name.
+* Output          : NULL.
+* Return          : Double value for input name.
+--------------------------------------------------------------------------*/
+void SetInt(wchar_t* name, int value)
+{
+	LPCTSTR SubKey = L"S-1-5-18\\AutoPipe";
+	SetValue(HKEY_USERS, SubKey, name, value);
+}
 //------------------------------- DIALOG LAUNCHING ---------------------------------
 //
 //    Before invoking this application one needs to open any part/empty part in NX
@@ -131,81 +249,13 @@ bool g_regOK = false;
 //    
 //------------------------------------------------------------------------------
 
-UINT QueryValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double& mmnumber)
-{
-	int i = 1;//1为成功
-	HKEY hKey;
-	DWORD dwtype;
-	char content[256];
-	DWORD cbData = 256;
-	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-	{
-		//JHCOM_Print(34, NULL, 1);
-		i = 0;
-	}
-	if (RegQueryValueEx(hKey, Name1, NULL, &dwtype, (unsigned char *)content, &cbData) != ERROR_SUCCESS)
-	{
-		//JHCOM_Print(35, Name1, 1); i = 0;
-	}
-	else
-	{
-		mmnumber = atof(content);
-	}
-	RegCloseKey(hKey);
-	return i;
-}
-
-UINT SetValue(HKEY rootkey, LPCTSTR SubKey, wchar_t *Name1, double mmnumber)
-{
-	int i = 1;//i=1为成功
-	HKEY hKey;
-	if (RegOpenKeyEx(rootkey, SubKey, 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-	{
-		if (ERROR_SUCCESS != RegCreateKey(rootkey, SubKey, &hKey))
-		{
-			//JHCOM_Print(32, NULL, 1);
-			i = 0;
-		}
-	}
-	char data[256] = "";
-	sprintf(data, "%f", mmnumber);
-	UINT cbLen = (UINT)strlen(data);
-	if (RegSetValueEx(hKey, Name1, 0, REG_SZ, (const unsigned char *)data, cbLen) != ERROR_SUCCESS)
-	{
-		//JHCOM_Print(33, Name1, 1);
-		i = 0;
-	}
-	RegCloseKey(hKey);
-	return i;
-}
-
-double GetDouble(CString name)
-{
-	double msb = 0;
-	int rcc = 0;
-	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
-
-	int ar = QueryValue(HKEY_USERS, SubKey, name.GetBuffer(), msb);
-	if (ar == 1)
-		return msb;
-	else
-		return 0;
-}
-
-
-void SetDouble(CString name, double value)
-{
-	LPCTSTR SubKey = L"S-1-5-19\\AutoPipe";
-	SetValue(HKEY_USERS, SubKey, name.GetBuffer(), value);
-}
-
 
 extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 {
 	try
 	{
-		/*if (!checkuse())
-			return;
+		//if (!checkuse())
+			//return;
 
 		double time = GetDouble(L"BXHH");
 		long int curTime = CTime::GetCurrentTime().GetTime();

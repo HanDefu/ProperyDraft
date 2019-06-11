@@ -17,4 +17,11 @@
 #define ENTRY_H_INCLUDED
 
 #include <uf_defs.h>
+
+void SetInt(wchar_t* name, int value);
+int GetInt(wchar_t* name);
+
+double GetDouble(wchar_t* name);
+void SetDouble(wchar_t* name, double value);
+
 #endif //GETPOINT_H_INCLUDED

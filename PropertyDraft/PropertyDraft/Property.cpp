@@ -58,6 +58,7 @@
 #include "Common_Function.h"
 #include "Common_Function_UG.h"
 #include "Excel/BasicExcel.hpp"
+#include "Entry.hpp"
 
 
 static tag_t CreateText(NXString& textStr, char* textHeight, Point3d coordinates2, Vector3d xDirection1, Vector3d yDirection1)
@@ -414,6 +415,32 @@ void Property::ReadExcelConfigData( )
 	return;
 }*/
 
+void SetEnumValue(NXOpen::BlockStyler::Enumeration* enum0, char* string)
+{
+	std::vector<NXString> strs = enum0->GetEnumMembers();
+	for (int i = 0; i < strs.size(); i++)
+	{
+		if (strcmp(strs[i].GetLocaleText(), string) == 0)
+		{
+			UI_EnumSetCurrentSel(enum0,i);
+			return;
+		}
+	}
+}
+
+void SetEnumValue(NXOpen::BlockStyler::Enumeration* enum0, double value)
+{
+	std::vector<NXString> strs = enum0->GetEnumMembers();
+	for (int i = 0; i < strs.size(); i++)
+	{
+		if (fabs(atof(strs[i].GetLocaleText())-value) < 0.1)
+		{
+			UI_EnumSetCurrentSel(enum0, i);
+			return;
+		}
+	}
+}
+
 void Property::SetUIConfigData( )
 {
     int type = enumType->GetProperties()->GetEnum("Value");
@@ -426,6 +453,10 @@ void Property::SetUIConfigData( )
         VecNXStringVector temp = configData[type];
         matName->SetEnumMembers(temp[0]);
         matNO->SetEnumMembers(temp[1]);
+		s_bianhao = GetInt(L"matNO");
+		if (s_bianhao >= temp[1].size())
+			s_bianhao = 0;
+
         matSize->SetEnumMembers(temp[2]);
         material->SetEnumMembers(temp[3]);
         matDensity->SetEnumMembers(temp[4]);
@@ -539,8 +570,11 @@ void Property::dialogShown_cb()
         //enumType->GetProperties()->SetEnumMembers("Value",sheetNames);
         SetUIConfigData();
 
+		
 		if (s_bianhao >= 0)
+		{ 
 			UI_EnumSetCurrentSel(matNO, s_bianhao);
+		}
 
 		/*if (s_type>=0)
 		    UI_EnumSetCurrentSel(enumType, s_type);
@@ -747,6 +781,7 @@ int Property::apply_cb()
 		UI_EnumGetCurrentSel(enumType, s_type);
 		UI_EnumGetCurrentSel(matName, s_mingcheng);
 		UI_EnumGetCurrentSel(matNO, s_bianhao);
+		SetInt(L"matNO", s_bianhao);
 		UI_EnumGetCurrentSel(matSize, s_guige);
 		UI_EnumGetCurrentSel(material, s_caizhi);
 		UI_EnumGetCurrentSel(matDensity, s_midu);
@@ -781,7 +816,58 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
         }
         else if(block == bodySelect0)
         {
-        //---------Enter your code here-----------
+			std::vector<NXOpen::TaggedObject* > objects = bodySelect0->GetProperties()->GetTaggedObjectVector("SelectedObjects");
+			if(objects.size() == 1)
+			{ 
+			    tag_t body = objects[0]->Tag();
+				char string[256] = "";
+				USER_ask_obj_string_attr(body, "材料类型", string);
+				SetEnumValue(enumType, string);
+				SetUIConfigData();
+
+				USER_ask_obj_string_attr(body, "材料名称", string);
+				SetEnumValue(matName, string);
+
+				USER_ask_obj_string_attr(body, "材料编号", string);
+				SetEnumValue(matNO, string);
+
+
+				USER_ask_obj_string_attr(body, "规格", string);
+				SetEnumValue(matSize, string);
+
+
+				USER_ask_obj_string_attr(body, "材质", string);
+				SetEnumValue(material, string);
+
+				USER_ask_obj_string_attr(body, "供应商", string);
+				SetEnumValue(supplier, string);
+
+				USER_ask_obj_string_attr(body, "备注", string);
+				SetEnumValue(remark, string);
+			   
+				USER_ask_obj_string_attr(body, "密度", string);
+				SetEnumValue(matDensity, atof(string));
+
+				USER_ask_obj_string_attr(body, "单价", string);
+				SetEnumValue(unitPrice, atof(string));
+
+				
+				
+				USER_ask_obj_string_attr(body, "重量", string);
+				weight->SetValue(atof(string));
+
+				USER_ask_obj_string_attr(body, "总价", string);
+				totalPrice->SetValue(atof(string));
+
+				USER_ask_obj_string_attr(body, "面积", string);
+				bodyarea->SetValue(atof(string)*10000);
+
+				USER_ask_obj_string_attr(body, "长度", string);
+				bodyLen->SetValue(atof(string));
+
+				USER_ask_obj_string_attr(body, "宽度", string);
+				bodyWidth->SetValue(atof(string));
+			}
         }
         else if(block == enum09)
         {
