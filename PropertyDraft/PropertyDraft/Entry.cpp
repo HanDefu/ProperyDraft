@@ -204,7 +204,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 {
 	try
 	{
-		if (!checkuse())
+		/*if (!checkuse())
 			return;
 
 		double time = GetDouble(L"BXHH");
@@ -221,7 +221,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		{
 			UF_terminate();
 			return;
-		}
+		}*/
 
 
 		UF_initialize();

@@ -832,14 +832,21 @@ bool comp(StlNXStringVector &strs1, StlNXStringVector &strs2)
 {
      if (strcmp(strs1[2].getLocaleText(), strs2[2].getLocaleText()) > 0)
      {
-		 return true;
+		 return false;
      }
-	 return false;
+	 return true;
 }
 
 void SortStrss(StlNXStringVectorVector &strss)
 {
    std::sort(strss.begin(), strss.end(), comp);
+
+   char cstr[32] = "";
+   for (int i = 0; i < strss.size(); i++)
+   {
+	   sprintf(cstr,"%d",i+1);
+	   strss[i][0] = NXString(cstr);
+   }
 }
 
 int Bom::apply_cb()
