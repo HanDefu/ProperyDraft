@@ -257,6 +257,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		//if (!checkuse())
 			//return;
 
+
 		double time = GetDouble(L"BXHH");
 		long int curTime = CTime::GetCurrentTime().GetTime();
 		if (curTime > time)
@@ -271,7 +272,7 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 		{
 			UF_terminate();
 			return;
-		}*/
+		}
 
 
 		UF_initialize();
