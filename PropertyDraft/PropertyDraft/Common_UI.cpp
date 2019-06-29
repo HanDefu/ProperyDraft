@@ -5,6 +5,7 @@
 #include <NXOpen/BlockStyler_BodyCollector.hxx>
 #include <NXOpen/BlockStyler_FaceCollector.hxx>
 #include <NXOpen/BlockStyler_CurveCollector.hxx>
+#include <NXOpen/BlockStyler_Enumeration.hxx>
 
 //This function set the max and min value of input double block.
 void UI_DoubleSetMaxMinValue(NXOpen::BlockStyler::UIBlock* block, double max, double min)
@@ -40,6 +41,15 @@ void UI_BlockSetSensitivity(NXOpen::BlockStyler::UIBlock* block, bool sensitivit
 //This function set the enum current selection.
 void UI_EnumSetCurrentSel(NXOpen::BlockStyler::UIBlock* block, int cursel)
 {
+	NXOpen::BlockStyler::Enumeration* enumThis = dynamic_cast<NXOpen::BlockStyler::Enumeration*>(block);
+	if (enumThis == 0)
+		return;
+
+	std::vector<NXString> strs;
+	strs = enumThis->GetEnumMembers();
+	if (cursel >= strs.size())
+		return;
+
 	NXOpen::BlockStyler::PropertyList *  pAttr = NULL;
 	pAttr = block->GetProperties();
 	pAttr->SetEnum("Value", cursel);

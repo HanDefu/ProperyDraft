@@ -576,7 +576,10 @@ void Property::dialogShown_cb()
 			UI_EnumSetCurrentSel(matNO, s_bianhao);
 		}
 
-		/*if (s_type>=0)
+		
+		
+		//----------20190630-----------//
+		if (s_type>=0)
 		    UI_EnumSetCurrentSel(enumType, s_type);
 		if (s_mingcheng>=0)
 		    UI_EnumSetCurrentSel(matName, s_mingcheng);
@@ -605,7 +608,9 @@ void Property::dialogShown_cb()
 
 		strs = remark->GetProperties()->GetEnumMembers("Value");
 		if (strs.size() > 1&& s_beizhu>=0)
-			UI_EnumSetCurrentSel(remark, s_beizhu);*/
+			UI_EnumSetCurrentSel(remark, s_beizhu);
+
+		//----------20190630-----------//
     }
     catch(exception& ex)
     {
@@ -822,6 +827,8 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
 			    tag_t body = objects[0]->Tag();
 				char string[256] = "";
 				USER_ask_obj_string_attr(body, "材料类型", string);
+				if(strlen(string) > 0)
+				{
 				SetEnumValue(enumType, string);
 				SetUIConfigData();
 
@@ -867,6 +874,7 @@ int Property::update_cb(NXOpen::BlockStyler::UIBlock* block)
 
 				USER_ask_obj_string_attr(body, "宽度", string);
 				bodyWidth->SetValue(atof(string));
+				}
 			}
         }
         else if(block == enum09)

@@ -258,13 +258,13 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 			//return;
 
 
-		double time = GetDouble(L"BXHH");
+		/*double time = GetDouble(L"BXHH");
 		long int curTime = CTime::GetCurrentTime().GetTime();
 		if (curTime > time)
 		{
 			uc1601("软件过期",1);
 			return;
-		}
+		}*/
 
 		EnterDlgRegister();//注册机相关
 
