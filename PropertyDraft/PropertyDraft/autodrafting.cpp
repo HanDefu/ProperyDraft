@@ -1378,6 +1378,22 @@ int autodrafting::update_cb(NXOpen::BlockStyler::UIBlock* block)
             {
                 USER_ask_obj_string_attr( objects[0]->Tag() , "材料编号" , attriValue2 );
                 drawingNO->GetProperties()->SetString("Value",attriValue2);
+
+				//------处理材料类型-----
+				USER_ask_obj_string_attr(objects[0]->Tag(), "材料类型", attriValue2);
+				std::vector<NXString> typestrs = enumType->GetEnumMembers();
+				for (int kk = 0; kk < typestrs.size(); kk++)
+				{
+					if (strcmp(typestrs[kk].getLocaleText(),attriValue2) == 0)
+					{
+						UI_EnumSetCurrentSel(enumType, kk);
+						SetTypeUI(); 
+						break;
+					}
+				}
+				
+				//-----材料类型处理结束-----
+
                 buttonApplyCSYS->GetProperties()->SetLogical("Enable",true);
             }
             else
