@@ -349,6 +349,41 @@ int CaoLiaoBianHao::apply_cb()
 		Royal_set_obj_attr(body, ATTR_RY_TEXT_SPLINE_BODY_HANDLE, handle);
 		UF_free(handle);
 
+
+		//记录csys属性
+		double csys[6] = { 0 };
+		if (csysObjects.size() > 0)
+		{
+			tag_t csys_tag = csysObjects[0]->Tag();
+			NXOpen::CoordinateSystem *coord_system = (NXOpen::CoordinateSystem *)NXOpen::NXObjectManager::Get(csys_tag);
+			NXOpen::Point3d originPoint = coord_system->Origin();
+			NXOpen::NXMatrix *matrix = coord_system->Orientation();
+			Matrix3x3 matrix33 = matrix->Element();
+			csys[0] = matrix33.Xx;
+			csys[1] = matrix33.Xy;
+			csys[2] = matrix33.Xz;
+			csys[3] = matrix33.Zx;
+			csys[4] = matrix33.Zy;
+			csys[5] = matrix33.Zz;
+			for (int idx = 0; idx < objects.size(); ++idx)
+			{
+				char str[133] = "";
+				tag_t body = objects[idx]->Tag();
+				sprintf(str, "%g", csys[0]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_X_DIR_X, str);
+				sprintf(str, "%g", csys[1]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_X_DIR_Y, str);
+				sprintf(str, "%g", csys[2]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_X_DIR_Z, str);
+				sprintf(str, "%g", csys[3]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_NORMAL_DIR_X, str);
+				sprintf(str, "%g", csys[4]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_NORMAL_DIR_Y, str);
+				sprintf(str, "%g", csys[5]);
+				Royal_set_obj_attr(body, ATTR_DRAFTING_NORMAL_DIR_Z, str);
+			}
+		}
+
     }
     catch(exception& ex)
     {

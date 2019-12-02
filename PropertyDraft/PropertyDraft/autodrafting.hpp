@@ -253,14 +253,6 @@ using namespace std;
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
-#define ATTR_DRAFTING_NORMAL_DIR_X "ATTR_DRAFTING_NORMAL_DIR_X"
-#define ATTR_DRAFTING_NORMAL_DIR_Y "ATTR_DRAFTING_NORMAL_DIR_Y"
-#define ATTR_DRAFTING_NORMAL_DIR_Z "ATTR_DRAFTING_NORMAL_DIR_Z"
-
-#define ATTR_DRAFTING_X_DIR_X "ATTR_DRAFTING_X_DIR_X"
-#define ATTR_DRAFTING_X_DIR_Y "ATTR_DRAFTING_X_DIR_Y"
-#define ATTR_DRAFTING_X_DIR_Z "ATTR_DRAFTING_X_DIR_Z"
-
 typedef std::vector<tag_t> StlTagVector;
 typedef std::vector<double> StlDoubVector;
 typedef std::vector<NXString> StlNXStringVector;

@@ -3,6 +3,16 @@
 #include <Vector>
 #include <NXOpen/NXString.hxx>
 using namespace NXOpen;
+
+#define ATTR_DRAFTING_NORMAL_DIR_X "ATTR_DRAFTING_NORMAL_DIR_X"
+#define ATTR_DRAFTING_NORMAL_DIR_Y "ATTR_DRAFTING_NORMAL_DIR_Y"
+#define ATTR_DRAFTING_NORMAL_DIR_Z "ATTR_DRAFTING_NORMAL_DIR_Z"
+
+#define ATTR_DRAFTING_X_DIR_X "ATTR_DRAFTING_X_DIR_X"
+#define ATTR_DRAFTING_X_DIR_Y "ATTR_DRAFTING_X_DIR_Y"
+#define ATTR_DRAFTING_X_DIR_Z "ATTR_DRAFTING_X_DIR_Z"
+
+
 typedef std::vector<NXOpen::NXString> StlNXStringVector;
 typedef std::vector<StlNXStringVector> StlNXStringVectorVector;
 void WriteBOM( char *srcspc, char* desspc, StlNXStringVectorVector bomStrs, NXString pName, NXString pNumber);
