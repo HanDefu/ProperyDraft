@@ -352,7 +352,7 @@ void Property::ReadExcelConfigData( )
 
 		xls.SetActiveSheet(idx+1);
 
-		size_t maxRows = 256;
+		size_t maxRows = 2000;
 		size_t maxCols = 9;
 
 		VecNXStringVector sheetData;
@@ -366,6 +366,8 @@ void Property::ReadExcelConfigData( )
 				{
 					matNameEtc.push_back(WCHARTOCHAR(str.GetBuffer()));
 				}
+				else
+					break;
 			}
 			sheetData.push_back(matNameEtc);
 		}

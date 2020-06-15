@@ -290,6 +290,7 @@ std::vector<NXOpen::TaggedObject *> UI_GetSelectObjects(NXOpen::BlockStyler::UIB
 	return objs;
 }
 
+
 tag_t UI_GetPlaneTag(NXOpen::BlockStyler::UIBlock* block)
 {
 	NXOpen::BlockStyler::PropertyList *  pAttr = NULL;
