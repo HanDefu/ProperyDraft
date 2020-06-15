@@ -388,6 +388,7 @@ void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& B
 	if( type == 11 )//辅材
 	{
 		attriName.insert(attriName.begin() + 3, NXString("材质"));
+		attriName[8] = NXString("面积");//辅材的总面积当做面积计算--20200615
 		//attriName[4] = NXString("空");
 		//attriName[5] = NXString("空");
 		//attriName[6] = NXString("空");

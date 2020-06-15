@@ -532,8 +532,8 @@ void Property::SetUIConfigData( )
 	{
 		linear_bodyLen->SetShow(true);
 		linear_bodyWidth->SetShow(true);
-		bodyarea->SetShow(false);
-		face_select0->SetShow(false);
+		bodyarea->SetShow(true);
+		face_select0->SetShow(true);
 
 
 		matSize->SetShow(true);
