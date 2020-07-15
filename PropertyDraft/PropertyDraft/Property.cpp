@@ -352,7 +352,7 @@ void Property::ReadExcelConfigData( )
 
 		xls.SetActiveSheet(idx+1);
 
-		size_t maxRows = 2000;
+		size_t maxRows = 10000;
 		size_t maxCols = 9;
 
 		VecNXStringVector sheetData;
