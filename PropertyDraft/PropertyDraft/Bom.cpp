@@ -40,7 +40,7 @@
 using namespace NXOpen;
 using namespace NXOpen::BlockStyler;
 
-static NXString s_projectName, s_projectNumber;
+static NXString s_projectName, s_projectNumber, s_caiLiaoDanHao;
 
 
 void ReadExcelConfigData( StlNXStringVector& types )
@@ -192,6 +192,7 @@ void Bom::initialize_cb()
 		group1 = dynamic_cast<NXOpen::BlockStyler::Group*>(theDialog->TopBlock()->FindBlock("group1"));
 		projectName = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectName"));
 		projectNumber = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("projectNumber"));
+		stringCaiLiaoDanHao = dynamic_cast<NXOpen::BlockStyler::StringBlock*>(theDialog->TopBlock()->FindBlock("stringCaiLiaoDanHao"));
     }
     catch(exception& ex)
     {
@@ -216,6 +217,7 @@ void Bom::dialogShown_cb()
         //enumType->GetProperties()->SetEnumMembers("Value",types);
 		UI_StringSetValue(projectName, s_projectName);
 		UI_StringSetValue(projectNumber, s_projectNumber);
+		UI_StringSetValue(stringCaiLiaoDanHao, s_caiLiaoDanHao);
     }
     catch(exception& ex)
     {
@@ -245,21 +247,21 @@ NXString GetBodyType(tag_t body)
 }
 	
 
-//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                钢材1
-//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	数量	重量	单价	总价	供应商	备注                铝材5
+//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	      数量	单重   总重量	单价	总价	供应商	备注                钢材1//20201031插入单
+//序号	材料名称	材料编号	规格	材质	密度	长度（mm)	宽度（mm)	      数量	重量   总重量   单价	总价	供应商	备注                铝材5//20201031插入单
 
-//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	 总价	供应商	备注	        铝板2
-//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            树脂板3
-//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注            石材4
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	      数量	总面积	单价	 总价	供应商	备注	        铝板2
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	      数量	总面积	单价	总价	供应商	备注            树脂板3
+//序号	材料名称	材料编号	规格	材质	长度（mm)	宽度（mm)	面积	      数量	总面积	单价	总价	供应商	备注            石材4
 
-//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                玻璃6
-//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注                屋面瓦9
-//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	面积	数量	总面积	单价	总价	供应商	备注	            铜饰10
+//序号	材料名称	材料编号	规格	        长度（mm)	宽度（mm)	面积	      数量	总面积	单价	总价	供应商	备注                玻璃6
+//序号	材料名称	材料编号	规格	        长度（mm)	宽度（mm)	面积	      数量	总面积	单价	总价	供应商	备注                屋面瓦9
+//序号	材料名称	材料编号	规格	        长度（mm)	宽度（mm)	面积	      数量	总面积	单价	总价	供应商	备注	            铜饰10
 
-//序号	材料名称	材料编号	规格  	    长度（mm)	宽度（mm)	密度	数量	        单价	总价	供应商	备注                木雕8
-//序号	材料名称	材料编号	规格	    长度（mm)	宽度（mm)	密度	数量	总面积	单价	总价	供应商	备注                辅材11
+//序号	材料名称	材料编号	规格  	        长度（mm)	宽度（mm)	密度	      数量	        单价	总价	供应商	备注                木雕8
+//序号	材料名称	材料编号	规格   材质     长度（mm)	宽度（mm)	密度	面积  数量	总面积	单价	总价	供应商	备注                辅材11  //20201031插入面积
 
-//序号	材料名称	材料编号	规格        材质	长度	数量	单价	总价	供应商	备注                                                五金件7
+//序号	材料名称	材料编号	规格   材质	    长度	数量	单价	总价	供应商	备注                                                五金件7
 
 void Bom::GetBOMInformation(vtag_t bombodies,int type,StlNXStringVectorVector& BOMStr )
 {
@@ -829,6 +831,42 @@ void PostProcess(NXString type, StlNXStringVectorVector &BOMStr)
 	BOMStr = heJi;
 }
 
+void PostProcess2(NXString type, StlNXStringVectorVector &BOMStr)
+{
+	if (strcmp(type.GetLocaleText(), "钢材") == 0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			NXString zongZhongLiang = StrMu(BOMStr[i][8], BOMStr[i][9], 2);//总重量计算
+			BOMStr[i].insert(BOMStr[i].begin()+10,zongZhongLiang);
+		}
+	}
+	if (strcmp(type.GetLocaleText(), "铝材") == 0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			NXString zongZhongLiang = StrMu(BOMStr[i][8], BOMStr[i][9], 2);//总重量计算
+			BOMStr[i].insert(BOMStr[i].begin() + 10, zongZhongLiang);
+		}
+	}
+
+	if (strcmp(type.GetLocaleText(), "辅材") == 0)
+	{
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			NXString mianJi = BOMStr[i][10];
+			BOMStr[i].insert(BOMStr[i].begin() + 8, mianJi);
+			BOMStr[i][10] = StrMu(BOMStr[i][8], BOMStr[i][9], 2);//总重量计算
+		}
+	}
+}
+
 bool comp(StlNXStringVector &strs1, StlNXStringVector &strs2)
 {
      if (strcmp(strs1[2].getLocaleText(), strs2[2].getLocaleText()) > 0)
@@ -890,6 +928,7 @@ int Bom::apply_cb()
 
 		UI_StringGetValue(projectName, s_projectName);
 		UI_StringGetValue(projectNumber, s_projectNumber);
+		UI_StringGetValue(stringCaiLiaoDanHao, s_caiLiaoDanHao);
 
 		if(bombodies.size()>0)
 		{
@@ -931,7 +970,7 @@ int Bom::apply_cb()
                             //return 1;
                             continue;
                         }
-                        sprintf_s(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+                        sprintf_s(desspc,"%s_%s_%s.xls",file_name,typeStr.GetLocaleText(), s_caiLiaoDanHao.GetLocaleText());
                         //sprintf_s(desspc,"%s_BOM.xls",file_name);
                         UF_CFI_ask_file_exist(desspc,&status);
                         if( 0 == status )
@@ -939,22 +978,27 @@ int Bom::apply_cb()
                             uc4561(desspc,-1); 
                         }
                         GetBOMInformation(tempbodies,type,BOMStr );
+
+						//同样的东西数量合并
 						PostProcess(GetBodyType(tempbodies[0]), BOMStr);
+
+						//主要处理单面积和总面积，单重量和总重量的关系---20201031
+						PostProcess2(GetBodyType(tempbodies[0]), BOMStr);
 						SortStrss(BOMStr);
-                        WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
+                        WriteBOM(GetBodyType(tempbodies[0]), srcspc,desspc,BOMStr,s_projectName,s_projectNumber,s_caiLiaoDanHao);
                     }
                 }
             }
             else
             {
-                sprintf_s(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText());
+                sprintf_s(srcspc,"%s\\templates\\%s.xls",p_env,typeStr.GetLocaleText(), s_caiLiaoDanHao.GetLocaleText());
                 UF_CFI_ask_file_exist(srcspc,&status);
                 if( 0 != status )
                 {
                     uc1601("没有找到模板文件",1);
                     return 1;
                 }
-                sprintf_s(desspc,"%s_%s_BOM.xls",file_name,typeStr.GetLocaleText());
+                sprintf_s(desspc,"%s_%s_%s.xls",file_name,typeStr.GetLocaleText(), s_caiLiaoDanHao.GetLocaleText());
                 //sprintf_s(desspc,"%s_BOM.xls",file_name);
                 UF_CFI_ask_file_exist(desspc,&status);
                 if( 0 == status )
@@ -962,9 +1006,14 @@ int Bom::apply_cb()
                     uc4561(desspc,-1); 
                 }
                 GetBOMInformation(bombodies,type,BOMStr );
+
+				//同样的东西数量合并
 				PostProcess(GetBodyType(bombodies[0]), BOMStr);
+
+				//主要处理单面积和总面积，单重量和总重量的关系---20201031
+				PostProcess2(GetBodyType(bombodies[0]), BOMStr);
 				SortStrss(BOMStr);
-                WriteBOM(srcspc,desspc,BOMStr,s_projectName,s_projectNumber);
+                WriteBOM(GetBodyType(bombodies[0]), srcspc,desspc,BOMStr,s_projectName,s_projectNumber, s_caiLiaoDanHao);
             }
             char cmd[512]="";
 			sprintf_s(cmd,"start %s",sFilePath);

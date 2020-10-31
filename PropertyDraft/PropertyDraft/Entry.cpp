@@ -267,13 +267,13 @@ extern "C" DllExport void  ufusr(char *param, int *retcod, int param_len)
 			return;
 		}*/
 
-		EnterDlgRegister();//注册机相关
+		/*EnterDlgRegister();//注册机相关
 
 		if (g_regOK == 0)
 		{
 			UF_terminate();
 			return;
-		}
+		}*/
 
 
 		UF_initialize();
