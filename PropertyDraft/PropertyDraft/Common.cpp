@@ -3,7 +3,8 @@
 
 int WriteBomPost(NXString bodyType, Excel::CExcelUtil &xls, int row, StlNXStringVectorVector &BOMStr)
 {
-	if (strcmp(bodyType.GetLocaleText(), "钢材") == 0)
+	if (strcmp(bodyType.GetLocaleText(), "钢材") == 0||
+		strcmp(bodyType.GetLocaleText(), "铝材") == 0)
 	{
 		NXString shuLiang("0.0"),zongMianJi("0.0");
 
@@ -17,6 +18,83 @@ int WriteBomPost(NXString bodyType, Excel::CExcelUtil &xls, int row, StlNXString
 
 		xls.SetCellValue(row, 9, shuLiang.getLocaleText());
 		xls.SetCellValue(row, 11, zongMianJi.getLocaleText());
+	}
+
+	if (strcmp(bodyType.GetLocaleText(), "玻璃") == 0||
+		strcmp(bodyType.GetLocaleText(), "铜饰") == 0||
+		strcmp(bodyType.GetLocaleText(), "屋面瓦") == 0)
+	{
+		NXString shuLiang("0.0"), zongMianJi("0.0");
+
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			shuLiang = StrAdd(shuLiang, BOMStr[i][7], 0);
+			zongMianJi = StrAdd(zongMianJi, BOMStr[i][8], 2);
+		}
+
+		xls.SetCellValue(row, 8, shuLiang.getLocaleText());
+		xls.SetCellValue(row, 9, zongMianJi.getLocaleText());
+	}
+
+	if (strcmp(bodyType.GetLocaleText(), "辅材") == 0)
+	{
+		NXString shuLiang("0.0"), zongMianJi("0.0");
+
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			shuLiang = StrAdd(shuLiang, BOMStr[i][9], 0);
+			zongMianJi = StrAdd(zongMianJi, BOMStr[i][10], 2);
+		}
+
+		xls.SetCellValue(row, 10, shuLiang.getLocaleText());
+		xls.SetCellValue(row, 11, zongMianJi.getLocaleText());
+	}
+	if (strcmp(bodyType.GetLocaleText(), "铝板") == 0||
+		strcmp(bodyType.GetLocaleText(), "树脂板") == 0)
+	{
+		NXString shuLiang("0.0"), zongMianJi("0.0");
+
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			shuLiang = StrAdd(shuLiang, BOMStr[i][8], 0);
+			zongMianJi = StrAdd(zongMianJi, BOMStr[i][9], 2);
+		}
+
+		xls.SetCellValue(row, 9, shuLiang.getLocaleText());
+		xls.SetCellValue(row, 10, zongMianJi.getLocaleText());
+	}
+	if (strcmp(bodyType.GetLocaleText(), "木雕") == 0)
+	{
+		NXString shuLiang("0.0"), zongMianJi("0.0");
+
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			shuLiang = StrAdd(shuLiang, BOMStr[i][7], 0);
+		}
+
+		xls.SetCellValue(row, 8, shuLiang.getLocaleText());
+	}
+
+	if (strcmp(bodyType.GetLocaleText(), "五金件") == 0)
+	{
+		NXString shuLiang("0.0"), zongMianJi("0.0");
+
+		//排除重复的
+		for (int i = 0; i < BOMStr.size(); i++)
+		{
+			//插入总重
+			shuLiang = StrAdd(shuLiang, BOMStr[i][6], 0);
+		}
+
+		xls.SetCellValue(row, 7, shuLiang.getLocaleText());
 	}
 
 	return 0;
@@ -49,7 +127,7 @@ void WriteBOM(NXString bodyType, char *srcspc, char* desspc, StlNXStringVectorVe
     }
 
 	//处理最后一行的合计
-	WriteBomPost(bodyType, xls, bomStrs.size() + 5, bomStrs);
+	//WriteBomPost(bodyType, xls, bomStrs.size() + 5, bomStrs);
 
     xls.SaveAs(desspc);
     xls.CloseExcel();
