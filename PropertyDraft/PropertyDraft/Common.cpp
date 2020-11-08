@@ -109,8 +109,20 @@ void WriteBOM(NXString bodyType, char *srcspc, char* desspc, StlNXStringVectorVe
     xls.SetActiveSheet(1);
 
 	xls.SetCellValue(2,3,pName.getLocaleText());
-	xls.SetCellValue(2,6,pNumber.getLocaleText());
-	xls.SetCellValue(3,7, caiLiaoDanHao.getLocaleText());
+
+	int secondIndex = 6;
+	if (strcmp(bodyType.GetLocaleText(), "树脂板") == 0 ||
+		strcmp(bodyType.GetLocaleText(), "石材") == 0 ||
+		strcmp(bodyType.GetLocaleText(), "铝材") == 0 ||
+		strcmp(bodyType.GetLocaleText(), "铝板") == 0 ||
+		strcmp(bodyType.GetLocaleText(), "钢材") == 0)
+		secondIndex = 7;
+
+	if (strcmp(bodyType.GetLocaleText(), "辅材") == 0)
+		secondIndex = 9;
+
+	xls.SetCellValue(2, secondIndex,pNumber.getLocaleText());
+	xls.SetCellValue(3, secondIndex, caiLiaoDanHao.getLocaleText());
 
 
     //CString str;
@@ -127,7 +139,7 @@ void WriteBOM(NXString bodyType, char *srcspc, char* desspc, StlNXStringVectorVe
     }
 
 	//处理最后一行的合计
-	//WriteBomPost(bodyType, xls, bomStrs.size() + 5, bomStrs);
+	WriteBomPost(bodyType, xls, bomStrs.size() + 5, bomStrs);
 
     xls.SaveAs(desspc);
     xls.CloseExcel();
@@ -159,14 +171,14 @@ NXString StrAdd(NXString &str1, NXString &str2, int xiaoShuDian)//字符串相加
 	value1 += value2;
 	char cstr[32] = "";
 	if (xiaoShuDian == 0)
-		sprintf(cstr, "d%", (int)value1);
+		sprintf(cstr, "%d", (int)value1);
 	if (xiaoShuDian == 1)
 		sprintf(cstr, "%.1f", value1);
 	else if (xiaoShuDian == 2)
 		sprintf(cstr, "%.2f", value1);
 	else if (xiaoShuDian == 3)
 		sprintf(cstr, "%.3f", value1);
-	else
+	else if (xiaoShuDian == 4)
 		sprintf(cstr, "%.4f", value1);
 	NXString str = cstr;
 	return str;
