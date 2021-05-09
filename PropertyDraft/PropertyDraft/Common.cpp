@@ -54,7 +54,8 @@ int WriteBomPost(NXString bodyType, Excel::CExcelUtil &xls, int row, StlNXString
 		xls.SetCellValue(row, 11, zongMianJi.getLocaleText());
 	}
 	if (strcmp(bodyType.GetLocaleText(), "ÂÁ°å") == 0||
-		strcmp(bodyType.GetLocaleText(), "Ê÷Ö¬°å") == 0)
+		strcmp(bodyType.GetLocaleText(), "Ê÷Ö¬°å") == 0||
+		strcmp(bodyType.GetLocaleText(), "Ê¯²Ä") == 0)
 	{
 		NXString shuLiang("0.0"), zongMianJi("0.0");
 

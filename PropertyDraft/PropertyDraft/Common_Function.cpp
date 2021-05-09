@@ -1360,7 +1360,7 @@ int CF_TXT_SplitToStrs(char *instr, char* key, char **strs, int &numStr)
 	return 0;
 }
 
-#define  CHECK_USE_NUM_1 1300
+#define  CHECK_USE_NUM_1 1600
 static bool CHECKUSE1()
 {
 	char filename[256] = "";
@@ -1405,7 +1405,7 @@ static bool CHECKUSE1()
 bool checkuse()
 {
 	CTime tm = CTime::GetCurrentTime();
-	CTime tm1(2019,10,1,0,0,0,-1);
+	CTime tm1(2021,5,1,0,0,0,-1);
 	if (tm > tm1)
 	{
 		return FALSE;
